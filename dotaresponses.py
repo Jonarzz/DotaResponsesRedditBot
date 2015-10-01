@@ -1,8 +1,8 @@
-__author__ = "Jonarzz"
-
 import praw
 import dota_responses_account as account
 import dota_responses_properties as properties
+
+__author__ = "Jonarzz"
 
 r = account.get_account()
 for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=5):
