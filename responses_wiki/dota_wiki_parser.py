@@ -1,3 +1,4 @@
+# coding=UTF-8
 from urllib.request import Request
 from urllib.request import urlopen
 import json
@@ -11,14 +12,6 @@ URL_API = "api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&fo
 CATEGORY = "Lists of responses"
 
 
-#TODO dictionary checker (keys)
-# delete things like:
-# "<i><span id="tooltip" style="cursor:help; border-bottom:1px dotted;" title="Unused response">u</span></i> "
-# "<i>(5% chance of occuring)</i"
-# "-- <i>Not used</i"
-# "(<i>Unused Response</i>"
-# "<i>(unused)</i"
-
 def generate_json_with_responses_mapping(filename):
     dict = dictionary_of_responses(pages_for_category(CATEGORY))
     json.dump(dict, open(filename, "w"))
@@ -26,7 +19,6 @@ def generate_json_with_responses_mapping(filename):
 
 def dictionary_from_file(filename):
     dict = json.load(open(filename))
-    pprint.pprint(dict)
     return dict
 
 
@@ -76,10 +68,37 @@ def pages_for_category(category_name):
 
 def key_from_element(element):
     start_index = element.rfind("</a>") + 4
-    end_index = element.find("</li>") - 2
+    end_index = element.find("</li>") - 1
     key = element[start_index:end_index]
-    key.replace(" ", "")
+    key = clean_key(key)
+    return key
+
+
+def clean_key(key):
+    if "<i>" in key:
+        start_index = key.find("<i>")
+        end_index = key.rfind("</i>") + 4
+        key = key.replace(key[start_index:end_index], "")
+
+    if "(" in key and ")" in key:
+        start_index = key.find("(")
+        end_index = key.rfind(")") + 1
+        key = key.replace(key[start_index:end_index], "")
+
     key = key.strip()
+
+    try:
+        if key[-1] in [".", "!"]:
+            key = key[:-1]
+    except IndexError:
+        print("IndexError in: " + key)
+
+    if key[-2:] == "--":
+        key = key[:-2]
+
+    key = key.strip()
+    key = key.lower()
+
     return key
 
 
@@ -90,6 +109,17 @@ def value_from_element(element):
     return value
 
 
-# create_json_with_responses_mapping("dota_responses.txt")
-dictionary_from_file("dota_responses.txt")
+def ellipsis_to_three_dots(dict):
+    newdict = {}
 
+    for key in dict:
+        newdict[key] = dict[key]
+        if "…" in key:
+            new = key.replace("…", "...")
+            newdict[new] = newdict.pop(key)
+
+    return newdict
+
+
+# generate_json_with_responses_mapping("dota_responses.txt")
+dictionary = dictionary_from_file("dota_responses_1.1.txt")
