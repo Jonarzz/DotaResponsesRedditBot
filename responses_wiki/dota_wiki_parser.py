@@ -18,8 +18,9 @@ def generate_json_with_responses_mapping(filename):
 
 
 def dictionary_from_file(filename):
-    dict = json.load(open(filename))
-    return dict
+    with open(filename) as file:
+        dict = json.load(file)
+        return dict
 
 
 def dictionary_of_responses(pages_endings):
@@ -122,4 +123,4 @@ def ellipsis_to_three_dots(dict):
 
 
 # generate_json_with_responses_mapping("dota_responses.txt")
-dictionary = dictionary_from_file("dota_responses_1.1.txt")
+# dictionary = dictionary_from_file("dota_responses_1.1.txt")

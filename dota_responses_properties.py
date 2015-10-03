@@ -8,3 +8,4 @@ USER_AGENT = """A bot that finds a Dota 2-related comments with the game heroes\
              audio sample from http://dota2.gamepedia.com/Category:Lists_of_responses (author: /u/Jonarz)"""
 SUBREDDIT = "dota2"
 SCOPES = "identity read save submit"
+COMMENT_ENDING = "\n\n---\n*I am a bot. Question/problem? Ask my master: /u/Jonarz*\n\n[GitHub](https://github.com/Jonarzz/DotaResponsesRedditBot)"
