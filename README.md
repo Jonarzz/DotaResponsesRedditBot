@@ -19,9 +19,12 @@ All the responses are in lowercase in the dictionary, before comparision the com
 #####1.2:
 * accept comments with extra letters added for emphasis
 
+#####1.3:
+* remove responses such as "thank you" and item names (anti-spam)
+
 ---
 # TODO:
 * add dictionaries for all heroes (see example with colon)
 * keywords that trigger the bot
-* remove responses such as "thank you" and item names (anti-spam)
+
 
