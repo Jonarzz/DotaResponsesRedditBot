@@ -31,7 +31,7 @@ def execute():
     # DELETE
 
     comment_new(r, already_done_comments, responses_dict)
-    comment_hot(r, already_done_submissions, already_done_comments, responses_dict)
+    comment_hot(r, already_done_comments, already_done_submissions, responses_dict)
 
 
 def comment_new(r, already_done_comments, responses_dict):
@@ -46,10 +46,11 @@ def comment_new(r, already_done_comments, responses_dict):
             comment_text = prepare_comment(comment.body)
             for key in responses_dict:
                 if comment_text == key:
-                    comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
-                    print("Added: " + comment.id)
+                    if comment_text not in properties.EXCLUDED_RESPONSES:
+                        comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
+                        print("Added: " + comment.id)
 
-                    break
+                        break
 
     save_already_done_comments(already_done_comments)
 
@@ -68,9 +69,9 @@ def load_already_done_comments():
 
 def comment_hot(r, already_done_comments, already_done_submissions, responses_dict):
     for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=10):
-        if submission.id in already_done_submissions:
-                continue
-        already_done_submissions.append(submission.id)
+        # if submission.id in already_done_submissions:
+        #         continue
+        # already_done_submissions.append(submission.id)
 
         submission.replace_more_comments(limit=None, threshold=0)
 
@@ -82,12 +83,13 @@ def comment_hot(r, already_done_comments, already_done_submissions, responses_di
             comment_text = prepare_comment(comment.body)
             for key in responses_dict:
                 if comment_text == key:
-                    comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
-                    print("Added: " + comment.id)
+                    if comment_text not in properties.EXCLUDED_RESPONSES:
+                        comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
+                        print("Added: " + comment.id)
 
-                    break
+                        break
 
-    save_already_done_submissions(already_done_submissions)
+    # save_already_done_submissions(already_done_submissions)
     save_already_done_comments(already_done_comments)
 
 
