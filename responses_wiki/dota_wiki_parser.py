@@ -38,6 +38,8 @@ def dictionary_of_responses(pages_endings):
 
         for element in list_of_responses:
             key = key_from_element(element)
+            if " " not in key:
+                continue
             value = value_from_element(element)
             if key not in output:
                 output[key] = value
@@ -97,6 +99,8 @@ def clean_key(key):
     if key[-2:] == "--":
         key = key[:-2]
 
+    key = key.replace("  ", " ")
+
     key = key.strip()
     key = key.lower()
 
@@ -122,5 +126,5 @@ def ellipsis_to_three_dots(dict):
     return newdict
 
 
-# generate_json_with_responses_mapping("dota_responses.txt")
-# dictionary = dictionary_from_file("dota_responses_1.1.txt")
+# generate_json_with_responses_mapping("dota_responses_1.2.txt")
+# dictionary = dictionary_from_file("dota_responses_1.2.txt")

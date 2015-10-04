@@ -8,37 +8,99 @@ __author__ = "Jonarzz"
 
 def execute():
     r = account.get_account()
-    responses_dict = parser.dictionary_from_file("dota_responses_1.1.txt")
-    already_done = load_already_done()
-    for submission in r.get_subreddit(properties.SUBREDDIT).get_new(limit=10):
-        if submission.id in already_done:
-            continue
+    responses_dict = parser.dictionary_from_file("dota_responses_1.2.txt")
+    already_done_comments = load_already_done_comments()
+    already_done_submissions = load_already_done_submissions()
 
+    # DELETE
+    submission = r.get_submission(submission_id="3ncgea")
+    submission.replace_more_comments(limit=None, threshold=0)
+
+    for comment in praw.helpers.flatten_tree(submission.comments):
+        if comment.id in already_done_comments:
+            continue
+        already_done_comments.append(comment.id)
+
+        comment_text = prepare_comment(comment.body)
+        for key in responses_dict:
+            if comment_text == key:
+                comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
+                print("Added: " + comment.id)
+
+                break
+    # DELETE
+
+    comment_new(r, already_done_comments, responses_dict)
+    comment_hot(r, already_done_submissions, already_done_comments, responses_dict)
+
+
+def comment_new(r, already_done_comments, responses_dict):
+    for submission in r.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
         submission.replace_more_comments(limit=None, threshold=0)
 
         for comment in praw.helpers.flatten_tree(submission.comments):
+            if comment.id in already_done_comments:
+                continue
+            already_done_comments.append(comment.id)
+
             comment_text = prepare_comment(comment.body)
             for key in responses_dict:
                 if comment_text == key:
                     comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
-                    print("DODANO: " + comment.id)
+                    print("Added: " + comment.id)
+
                     break
 
-        already_done.append(submission.id)
-
-    save_already_done(already_done)
+    save_already_done_comments(already_done_comments)
 
 
-def save_already_done(already_done):
-    with open("already_done.txt", "w") as file:
-        for item in already_done:
+def save_already_done_comments(already_done_comments):
+    with open("already_done_comments.txt", "w") as file:
+        for item in already_done_comments:
             file.write("%s " % item)
 
 
-def load_already_done():
-    with open("already_done.txt") as file:
-        already_done = [i for i in file.read().split()]
-        return already_done
+def load_already_done_comments():
+    with open("already_done_comments.txt") as file:
+        already_done_comments = [i for i in file.read().split()]
+        return already_done_comments
+
+
+def comment_hot(r, already_done_comments, already_done_submissions, responses_dict):
+    for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=10):
+        if submission.id in already_done_submissions:
+                continue
+        already_done_submissions.append(submission.id)
+
+        submission.replace_more_comments(limit=None, threshold=0)
+
+        for comment in praw.helpers.flatten_tree(submission.comments):
+            if comment.id in already_done_comments:
+                continue
+            already_done_comments.append(comment.id)
+
+            comment_text = prepare_comment(comment.body)
+            for key in responses_dict:
+                if comment_text == key:
+                    comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
+                    print("Added: " + comment.id)
+
+                    break
+
+    save_already_done_submissions(already_done_submissions)
+    save_already_done_comments(already_done_comments)
+
+
+def save_already_done_submissions(already_done_submissions):
+    with open("already_done_submissions.txt", "w") as file:
+        for item in already_done_submissions:
+            file.write("%s " % item)
+
+
+def load_already_done_submissions():
+    with open("already_done_submissions.txt") as file:
+        already_done_submissions = [i for i in file.read().split()]
+        return already_done_submissions
 
 
 def prepare_comment(comment):
@@ -48,7 +110,18 @@ def prepare_comment(comment):
     comment.strip()
     comment = comment.lower()
 
-    return comment
+    i = 1
+    new_comment = comment
+    while comment[-1] == comment [-1 - i]:
+        new_comment = new_comment[:-1]
+
+    if new_comment == comment
+        return comment
+    else
+        return new_comment
 
 
-execute()
+while True:
+    execute()
+
+
