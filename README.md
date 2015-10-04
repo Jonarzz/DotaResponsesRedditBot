@@ -3,7 +3,7 @@ Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
 ![Example](http://i.imgur.com/loqqDXk.png)
 
-The bot replies only for the comments that **are** responses or for the comments starting with hero name and having the response after a colon. 
+The bot replies only for the comments that **are** responses ~~or for the comments starting with hero name and having the response after a colon~~ (TODO). 
 
 For example:
 "Ho ho ha ha" will return an Axe response, but "Sniper: ho ho ha ha" will return a Sniper response. 
