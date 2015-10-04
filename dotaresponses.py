@@ -115,9 +115,9 @@ def prepare_comment(comment):
     while comment[-1] == comment [-1 - i]:
         new_comment = new_comment[:-1]
 
-    if new_comment == comment
+    if new_comment == comment:
         return comment
-    else
+    else:
         return new_comment
 
 
