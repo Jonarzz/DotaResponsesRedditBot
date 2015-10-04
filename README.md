@@ -20,7 +20,12 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * accept comments with extra letters added for emphasis
 
 #####1.3:
-* remove responses such as "thank you" and item names (anti-spam)
+* removed responses such as "thank you", hero names and item names (anti-spam)
+
+#####1.4:
+* fixed a bug created by 1.2 changes
+* changed submissions number in hot to 25
+* added more excluded responses
 
 ---
 # TODO:
