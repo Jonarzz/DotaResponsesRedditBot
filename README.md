@@ -15,9 +15,10 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * one word responses are no longer in the dictionary
 * replaced double spaces with single space
 * bot is now working with hot submissions
+* accept comments with extra letters added for emphasis
 
 ---
 # TODO:
 * add dictionaries for all heroes (see example with colon)
 * keywords that trigger the bot
-* accept comments with extra letters added for emphasis
+
