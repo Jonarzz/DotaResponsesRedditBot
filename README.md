@@ -6,7 +6,7 @@ Bot adding reply comments with links to appropriate responses found on /r/dota2.
 The bot replies only for the comments that **are** responses ~~or for the comments starting with hero name and having the response after a colon~~ (TODO). 
 
 For example:
-"Ho ho ha ha" will return an Axe response, but "Sniper: ho ho ha ha" will return a Sniper response. 
+"Ho ho ha ha" will return an Axe response, ~~but "Sniper: ho ho ha ha" will return a Sniper response~~. 
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the comment is ignored.
 
 ---
