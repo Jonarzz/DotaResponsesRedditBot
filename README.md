@@ -32,6 +32,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * added keywords that trigger the bot: "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
 * code refactoring
 
+#####1.6:
+* removed keyword triggering as /r/dota2 community did not like it
+
 ---
 # TODO:
 * add dictionaries for all heroes (if needed)
