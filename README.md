@@ -27,9 +27,13 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * changed submissions number in hot to 25
 * added more excluded responses
 
+#####1.5:
+* added keywords that trigger the bot: "dank", "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
+* code refactoring
+
 ---
 # TODO:
 * add dictionaries for all heroes (if needed)
-* keywords that trigger the bot
+* 
 
 
