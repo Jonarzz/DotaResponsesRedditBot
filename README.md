@@ -29,7 +29,7 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * added more excluded responses
 
 #####1.5:
-* added keywords that trigger the bot: "dank", "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
+* added keywords that trigger the bot: "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
 * code refactoring
 
 ---
