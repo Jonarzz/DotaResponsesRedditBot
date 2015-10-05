@@ -21,13 +21,4 @@ EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance
                       "elder titan", "ember spirit", "faceless void", "keeper of the light", "legion commander", "lone druid", "naga siren", "nature's prophet", "natures prophet",
                       "night stalker", "nyx assassin", "ogre magi", "outworld destroyer", "phantom assassin", "phantom lancer", "queen of pain", "sand king", "shadow demon", "shadow fiend",
                       "skywrath mage", "skeleton king", "spirit breaker", "storm spirit", "templar assassin", "treant protector", "troll warlord", "vengeful spirit", "winter wyvern",
-                      "witch doctor", "wraith king", "i agree", "my bad", "ha ha", "why not", "fair enough", "no way", "you're welcome", "very nice", "of course", "well deserved", "try again"]
-
-KEYWORDS_DICT = {"just do it" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/c/c4/Sven_move_07.mp3",
-                 "beautiful": "http://hydra-media.cursecdn.com/dota2.gamepedia.com/c/c4/Luna_levelup_06.mp3",
-                 "from the ghastly eyrie" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/ac/Pain_lose_04.mp3",
-                 "sniper" : " http://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3",
-                 "ppd" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/4/47/Necr_death_10.mp3",
-                 "leafeator" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/e/e5/Necr_respawn_10.mp3",
-                 "ur brother" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/6/63/Ogmag_respawn_05.mp3",
-                 "your brother" : "http://hydra-media.cursecdn.com/dota2.gamepedia.com/6/63/Ogmag_respawn_05.mp3"}
+                      "witch doctor", "wraith king", "i agree", "my bad", "ha ha", "why not", "fair enough", "no way", "you're welcome", "very nice", "of course", "well deserved", "try again", "it worked"]

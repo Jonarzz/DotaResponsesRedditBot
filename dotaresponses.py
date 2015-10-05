@@ -35,12 +35,6 @@ def add_comments(submission, already_done_comments, responses_dict):
                     print("Added: " + comment.id)
                     break
 
-        for word in properties.KEYWORDS_DICT:
-            if word in comment_text:
-                comment.reply(properties.KEYWORDS_DICT[word] + properties.COMMENT_ENDING)
-                print("Added: " + comment.id)
-                break
-
     save_already_done_comments(already_done_comments)
 
 
