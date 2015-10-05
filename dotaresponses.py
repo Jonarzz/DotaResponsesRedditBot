@@ -34,7 +34,7 @@ def add_comments(submission, already_done_comments, responses_dict):
                     comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
                     print("Added: " + comment.id)
                     break
-                    
+
         for word in properties.KEYWORDS_DICT:
             if word in comment_text:
                 comment.reply(properties.KEYWORDS_DICT[word] + properties.COMMENT_ENDING)
