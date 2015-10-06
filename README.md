@@ -40,3 +40,4 @@ All the responses are in lowercase in the dictionary, before comparision the com
 ---
 # TODO:
 * add dictionaries for all heroes (if needed)
+* change "contact information" and the link formatting
