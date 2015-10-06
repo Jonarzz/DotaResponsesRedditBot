@@ -3,6 +3,7 @@ import praw
 import dota_responses_account as account
 import dota_responses_properties as properties
 from responses_wiki import dota_wiki_parser as parser
+import re
 
 __author__ = "Jonarzz"
 
@@ -31,11 +32,24 @@ def add_comments(submission, already_done_comments, responses_dict):
         for key in responses_dict:
             if comment_text == key:
                 if comment_text not in properties.EXCLUDED_RESPONSES:
-                    comment.reply(responses_dict[key] + properties.COMMENT_ENDING)
+                    comment.reply(create_reply(responses_dict, key))
                     print("Added: " + comment.id)
                     break
 
     save_already_done_comments(already_done_comments)
+
+
+def create_reply(responses_dict, key):
+    upper_key = capitalize(key)
+    return "[" + upper_key + "](" + responses_dict[key] + ")" + properties.COMMENT_ENDING
+
+
+def uppercase(matchobj):
+    return matchobj.group(0).upper()
+
+
+def capitalize(s):
+    return re.sub('^([a-z])|[\.|\?|\!]\s*([a-z])|\s+([a-z])(?=\.)', uppercase, s)
 
 
 def save_already_done_comments(already_done_comments):
@@ -71,5 +85,4 @@ def prepare_comment(comment):
 
 while True:
     execute()
-
 
