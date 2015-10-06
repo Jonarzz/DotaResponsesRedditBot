@@ -14,6 +14,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####1.7:
+* changed reply comment formatting
+
 #####1.6:
 * removed keyword triggering as /r/dota2 community did not like it
 
