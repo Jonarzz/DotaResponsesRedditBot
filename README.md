@@ -43,3 +43,4 @@ All the responses are in lowercase in the dictionary, before comparision the com
 ---
 # TODO:
 * add dictionaries for all heroes
+* searching with spelling mistakes
