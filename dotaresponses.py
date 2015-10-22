@@ -29,9 +29,9 @@ def add_comments(submission, already_done_comments, responses_dict):
 
         comment_text = prepare_comment(comment.body)
 
-        for key in responses_dict:
-            if comment_text == key:
-                if comment_text not in properties.EXCLUDED_RESPONSES:
+        if comment_text not in properties.EXCLUDED_RESPONSES:
+            for key in responses_dict:
+                if comment_text == key:
                     comment.reply(create_reply(responses_dict, key))
                     print("Added: " + comment.id)
                     break
@@ -41,7 +41,7 @@ def add_comments(submission, already_done_comments, responses_dict):
 
 def create_reply(responses_dict, key):
     upper_key = capitalize(key)
-    return "[" + upper_key + "](" + responses_dict[key] + ")" + properties.COMMENT_ENDING
+    return "[" + upper_key + "](" + responses_dict[key] + ") (sound warning)" + properties.COMMENT_ENDING
 
 
 def uppercase(matchobj):
@@ -53,9 +53,14 @@ def capitalize(s):
 
 
 def save_already_done_comments(already_done_comments):
-    with open("already_done_comments.txt", "w") as file:
-        for item in already_done_comments:
-            file.write("%s " % item)
+    try:
+        with open("already_done_comments.txt", "w") as file:
+            for item in already_done_comments:
+                file.write("%s " % item)
+    except OSError:
+        with open("F:\Python\DotaResponses\already_done_comments.txt", "w") as file:
+            for item in already_done_comments:
+                file.write("%s " % item)
 
 
 def load_already_done_comments():
@@ -65,11 +70,7 @@ def load_already_done_comments():
 
 
 def prepare_comment(comment):
-    if comment[-1] in [".", "!"]:
-        comment = comment[:-1]
-
-    comment.strip()
-    comment = comment.lower()
+    comment = comment.strip(" .!").lower()
 
     i = 1
     new_comment = comment
