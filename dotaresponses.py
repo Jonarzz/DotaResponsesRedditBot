@@ -30,11 +30,9 @@ def add_comments(submission, already_done_comments, responses_dict):
         comment_text = prepare_comment(comment.body)
 
         if comment_text not in properties.EXCLUDED_RESPONSES:
-            for key in responses_dict:
-                if comment_text == key:
-                    comment.reply(create_reply(responses_dict, key))
-                    print("Added: " + comment.id)
-                    break
+            if comment_text in responses_dict:
+                comment.reply(create_reply(responses_dict, comment_text))
+                print("Added: " + comment.id)
 
     save_already_done_comments(already_done_comments)
 
