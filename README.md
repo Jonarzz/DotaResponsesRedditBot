@@ -14,6 +14,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####1.8:
+* change in the main loop of the script - much better efficiency (time)
+
 #####1.7:
 * changed reply comment formatting
 
