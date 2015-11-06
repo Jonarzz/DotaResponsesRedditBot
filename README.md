@@ -42,8 +42,3 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * one word responses are no longer in the dictionary
 * replaced double spaces with single space
 * bot is now working with hot submissions
-
----
-# TODO:
-* ~~add dictionaries for all heroes~~ (won't be used)
-* ~~searching with spelling mistakes~~ (may generate too many comments)
