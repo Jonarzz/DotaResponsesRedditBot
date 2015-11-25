@@ -1,6 +1,8 @@
 # Dota Responses Reddit Bot
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
+*Please note that the bot is not running 24/7, because I run it locally on my computer.*
+
 ![Example](http://i.imgur.com/loqqDXk.png)
 
 The bot replies only for the comments that **are** responses. 
@@ -9,8 +11,6 @@ For example:
 "Selemene commands" will return a Luna response (like on the screenshot above). 
 
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the comment is ignored.
-
-*Please note that the bot is not running 24/7, because I run it locally on my computer.*
 
 ---
 # Changelog:
