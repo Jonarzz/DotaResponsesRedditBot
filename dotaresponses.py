@@ -13,6 +13,7 @@ def execute():
     responses_dict = parser.dictionary_from_file("dota_responses_1.2.txt")
     already_done_comments = load_already_done_comments()
 
+    print("START")
     for submission in r.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
         add_comments(submission, already_done_comments, responses_dict)
     for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=25):
@@ -64,6 +65,8 @@ def save_already_done_comments(already_done_comments):
 def load_already_done_comments():
     with open("already_done_comments.txt") as file:
         already_done_comments = [i for i in file.read().split()]
+        if len(already_done_comments) > 25000:
+            already_done_comments = already_done_comments[-25000:]
         return already_done_comments
 
 
@@ -82,6 +85,10 @@ def prepare_comment(comment):
     return new_comment
 
 
-while True:
-    execute()
+if __name__ == "__main__":
+    while True:
+        try:
+            execute()
+        except:
+            pass
 
