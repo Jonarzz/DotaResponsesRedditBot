@@ -1,7 +1,7 @@
 # Dota Responses Reddit Bot
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
-*The bot is running on Heroku server - 18 hours a day in the free plan.*
+*The bot is not replying 24/7, because it is running on my personal computer.*
 
 ![Example](http://i.imgur.com/loqqDXk.png)
 
