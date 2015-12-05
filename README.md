@@ -1,7 +1,7 @@
 # Dota Responses Reddit Bot
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
-*The bot is not replying 24/7, because it is running on my personal computer.*
+*Thanks to /u/iggys_reddit_account the bot is running 24/7.*
 
 ![Example](http://i.imgur.com/loqqDXk.png)
 
