@@ -14,6 +14,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####2.0:
+* added Arc Warden responses
+
 #####1.9:
 * file paths are now relative to the script file location (using os)
 * added dates to logging
