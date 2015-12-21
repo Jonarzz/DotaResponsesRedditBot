@@ -14,6 +14,12 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####1.9:
+* file paths are now relative to the script file location (using os)
+* added dates to logging
+* logs are saved in respective files on the server
+* fixed a bug with adding same comment a few times in sticky threads that are on the subreddit for a long time (time-saving workaround)
+
 #####1.8:
 * change in the main loop of the script - much better efficiency (time)
 
