@@ -16,7 +16,7 @@ script_dir = os.path.dirname(__file__)
 
 def execute():
     r = account.get_account()
-    responses_dict = parser.dictionary_from_file("dota_responses_1.2.txt")
+    responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
     already_done_comments = load_already_done_comments()
     try:
         sticky = r.get_subreddit(properties.SUBREDDIT).get_sticky()
