@@ -4,6 +4,7 @@ from urllib.request import urlopen
 import json
 from bs4 import BeautifulSoup
 import pprint
+import os
 
 __author__ = "Jonarzz"
 
@@ -12,13 +13,16 @@ URL_API = "api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&fo
 CATEGORY = "Lists of responses"
 
 
+script_dir = os.path.dirname(__file__)
+
+
 def generate_json_with_responses_mapping(filename):
     dict = dictionary_of_responses(pages_for_category(CATEGORY))
-    json.dump(dict, open(filename, "w"))
+    json.dump(dict, open(os.path.join(script_dir, filename), "w"))
 
 
 def dictionary_from_file(filename):
-    with open(filename) as file:
+    with open(os.path.join(script_dir, filename)) as file:
         dict = json.load(file)
         return dict
 

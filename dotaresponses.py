@@ -4,20 +4,47 @@ import dota_responses_account as account
 import dota_responses_properties as properties
 from responses_wiki import dota_wiki_parser as parser
 import re
+import traceback
+import os
+from datetime import datetime
 
 __author__ = "Jonarzz"
+
+
+script_dir = os.path.dirname(__file__)
 
 
 def execute():
     r = account.get_account()
     responses_dict = parser.dictionary_from_file("dota_responses_1.2.txt")
     already_done_comments = load_already_done_comments()
+    try:
+        sticky = r.get_subreddit(properties.SUBREDDIT).get_sticky()
+    except praw.errors.NotFound:
+        sticky = None
 
-    print("START")
+    print(str(datetime.now()) + ': ' + 'START')
     for submission in r.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
+        if submission == sticky:
+            continue
         add_comments(submission, already_done_comments, responses_dict)
     for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=25):
+        if submission == sticky:
+            continue
         add_comments(submission, already_done_comments, responses_dict)
+
+
+
+def log_error(e):
+    with open("error.log", 'a') as f:
+        f.write(str(datetime.now()) + '\n' + e + '\n')
+    return
+
+
+def log_stuffz(e):
+    with open("stuffz.log", 'a') as f:
+        f.write(str(datetime.now()) + '\n' + e + '\n')
+    return
 
 
 def add_comments(submission, already_done_comments, responses_dict):
@@ -33,7 +60,7 @@ def add_comments(submission, already_done_comments, responses_dict):
         if comment_text not in properties.EXCLUDED_RESPONSES:
             if comment_text in responses_dict:
                 comment.reply(create_reply(responses_dict, comment_text))
-                print("Added: " + comment.id)
+                log_stuffz("Added: " + comment.id)
 
     save_already_done_comments(already_done_comments)
 
@@ -52,18 +79,13 @@ def capitalize(s):
 
 
 def save_already_done_comments(already_done_comments):
-    try:
-        with open("already_done_comments.txt", "w") as file:
-            for item in already_done_comments:
-                file.write("%s " % item)
-    except OSError:
-        with open("F:\Python\DotaResponses\already_done_comments.txt", "w") as file:
-            for item in already_done_comments:
-                file.write("%s " % item)
+    with open(os.path.join(script_dir, "already_done_comments.txt"), "w") as file:
+        for item in already_done_comments:
+            file.write("%s " % item)
 
 
 def load_already_done_comments():
-    with open("already_done_comments.txt") as file:
+    with open(os.path.join(script_dir, "already_done_comments.txt")) as file:
         already_done_comments = [i for i in file.read().split()]
         if len(already_done_comments) > 25000:
             already_done_comments = already_done_comments[-25000:]
@@ -80,15 +102,18 @@ def prepare_comment(comment):
             new_comment = new_comment[:-1]
             i += 1
     except IndexError:
-        print("IndexError")
+        log_error("IndexError")
 
     return new_comment
 
 
-if __name__ == "__main__":
+    
+
+if __name__ == '__main__':
     while True:
         try:
             execute()
         except:
+            log_error(traceback.format_exc())
             pass
 
