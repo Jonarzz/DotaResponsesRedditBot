@@ -17,22 +17,25 @@ script_dir = os.path.dirname(__file__)
 def execute():
     r = account.get_account()
     responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
+    heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
     already_done_comments = load_already_done_comments()
+    
     try:
         sticky = r.get_subreddit(properties.SUBREDDIT).get_sticky()
     except praw.errors.NotFound:
         sticky = None
 
-    print(str(datetime.now()) + ': ' + 'START')
+    log_stuffz('START')
+    
     for submission in r.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
         if submission == sticky:
             continue
-        add_comments(submission, already_done_comments, responses_dict)
+        add_comments(submission, already_done_comments, responses_dict, heroes_dict)
+        
     for submission in r.get_subreddit(properties.SUBREDDIT).get_hot(limit=25):
         if submission == sticky:
             continue
-        add_comments(submission, already_done_comments, responses_dict)
-
+        add_comments(submission, already_done_comments, responses_dict, heroes_dict)
 
 
 def log_error(e):
@@ -47,7 +50,7 @@ def log_stuffz(e):
     return
 
 
-def add_comments(submission, already_done_comments, responses_dict):
+def add_comments(submission, already_done_comments, responses_dict, heroes_dict):
     submission.replace_more_comments(limit=None, threshold=0)
 
     for comment in praw.helpers.flatten_tree(submission.comments):
@@ -59,15 +62,19 @@ def add_comments(submission, already_done_comments, responses_dict):
 
         if comment_text not in properties.EXCLUDED_RESPONSES:
             if comment_text in responses_dict:
-                comment.reply(create_reply(responses_dict, comment_text))
+                comment.reply(create_reply(responses_dict, heroes_dict, comment_text))
                 log_stuffz("Added: " + comment.id)
 
     save_already_done_comments(already_done_comments)
 
 
-def create_reply(responses_dict, key):
+def create_reply(responses_dict, heroes_dict, key):
     upper_key = capitalize(key)
-    return "[" + upper_key + "](" + responses_dict[key] + ") (sound warning)" + properties.COMMENT_ENDING
+    response_url = responses_dict[key]
+    short_hero_name = parser.short_hero_name_from_url(response_url)
+    hero_name = heroes_dict[short_hero_name]
+    
+    return "[" + upper_key + "](" + response_url + ") (sound warning: " + hero_name + ")" + properties.COMMENT_ENDING
 
 
 def uppercase(matchobj):

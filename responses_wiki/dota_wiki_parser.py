@@ -5,6 +5,7 @@ import json
 from bs4 import BeautifulSoup
 import pprint
 import os
+import re
 
 __author__ = "Jonarzz"
 
@@ -16,9 +17,10 @@ CATEGORY = "Lists of responses"
 script_dir = os.path.dirname(__file__)
 
 
-def generate_json_with_responses_mapping(filename):
-    dict = dictionary_of_responses(pages_for_category(CATEGORY))
-    json.dump(dict, open(os.path.join(script_dir, filename), "w"))
+def generate_jsons(responses_filename, heroes_filename):
+    responses, heroes = dictionary_of_responses(pages_for_category(CATEGORY))
+    json.dump(responses, open(os.path.join(script_dir, responses_filename), "w"))
+    json.dump(heroes, open(os.path.join(script_dir, heroes_filename), "w"))
 
 
 def dictionary_from_file(filename):
@@ -28,7 +30,8 @@ def dictionary_from_file(filename):
 
 
 def dictionary_of_responses(pages_endings):
-    output = {}
+    responses = {}
+    heroes = {}
 
     for ending in pages_endings:
         print(ending)
@@ -45,10 +48,19 @@ def dictionary_of_responses(pages_endings):
             if " " not in key:
                 continue
             value = value_from_element(element)
-            if key not in output:
-                output[key] = value
+            
+            short_hero = short_hero_name_from_url(value)
+            hero = ending.replace('_', ' ')
+            hero = hero.replace(' Pack', '')
+            hero = hero.replace(' responses', '')
+            
+            if short_hero not in heroes:
+                heroes[short_hero] = hero
+            
+            if key not in responses:
+                responses[key] = value
 
-    return output
+    return responses, heroes
 
 
 def page_to_parse(url):
@@ -116,8 +128,18 @@ def value_from_element(element):
     end_index = element.find("\" title")
     value = element[start_index:end_index]
     return value
+    
 
+def short_hero_name_from_url(value):
+    search = re.search('\/(\w+?)_.+?\.mp3', value)
+    if search:
+        if search.group(1) == 'Dlc':
+            search = re.search('\/(Dlc_\w+?)_.+?\.mp3', value)
+            if search.group(1) == 'tech':
+                return 'Dlc_tech_ann'
+        return search.group(1)
 
+            
 def ellipsis_to_three_dots(dict):
     newdict = {}
 
@@ -130,5 +152,5 @@ def ellipsis_to_three_dots(dict):
     return newdict
 
 
-# generate_json_with_responses_mapping("dota_responses_1.2.txt")
+# generate_jsons("dota_responses_1.3.txt", "heroes.txt")
 # dictionary = dictionary_from_file("dota_responses_1.2.txt")
