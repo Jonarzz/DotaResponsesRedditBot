@@ -14,6 +14,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####2.1:
+* bot is now adding the source of the response (e.g. hero name) to the comment *needs testing*
+
 #####2.0:
 * added Arc Warden responses
 
