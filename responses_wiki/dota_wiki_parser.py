@@ -1,35 +1,50 @@
 # coding=UTF-8
-from urllib.request import Request
-from urllib.request import urlopen
-import json
-from bs4 import BeautifulSoup
-import pprint
+
+"""Module used to create dictionaries requited for the script to work.
+
+Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota2.gamepedia.com/"""
+
 import os
 import re
+import json
+from urllib.request import Request, urlopen
 
-__author__ = "Jonarzz"
+from bs4 import BeautifulSoup
 
-URL_BEGINNING = "http://dota2.gamepedia.com/"
-URL_API = "api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:"
-CATEGORY = "Lists of responses"
-
-
-script_dir = os.path.dirname(__file__)
+__author__ = 'Jonarzz'
 
 
-def generate_jsons(responses_filename, heroes_filename):
+URL_BEGINNING = 'http://dota2.gamepedia.com/'
+URL_API = ('api.php?action=query&list=categorymembers&cmlimit=max'
+           '&cmprop=title&format=json&cmtitle=Category:')
+CATEGORY = 'Lists of responses'
+
+SCRIPT_DIR = os.path.dirname(__file__)
+
+
+def generate_dictionaries(responses_filename, heroes_filename):
+    """Method used to generate dictionaries for responses and hero names
+    (short, used in urls matched with full names)."""
     responses, heroes = dictionary_of_responses(pages_for_category(CATEGORY))
-    json.dump(responses, open(os.path.join(script_dir, responses_filename), "w"))
-    json.dump(heroes, open(os.path.join(script_dir, heroes_filename), "w"))
+    json.dump(responses, open(os.path.join(SCRIPT_DIR, responses_filename), "w"))
+    json.dump(heroes, open(os.path.join(SCRIPT_DIR, heroes_filename), "w"))
 
 
 def dictionary_from_file(filename):
-    with open(os.path.join(script_dir, filename)) as file:
-        dict = json.load(file)
-        return dict
+    """Method used to load a dictionary from text file with given name
+    (file contains JSON structure)."""
+    with open(os.path.join(SCRIPT_DIR, filename)) as file:
+        dictionary = json.load(file)
+        return dictionary
 
 
 def dictionary_of_responses(pages_endings):
+    """Method that creates two dictionaries - with the responses (response text - link to the file)
+    and with hero names (short hero name used in Wiki files - long hero names).
+
+    The dictionaries are created based on html body of a Wiki page related to the hero's responses.
+    Each response and hero name is prepared to be saved: stripped (unnecesary words/characters) and
+    turned to lowercase (only response text)."""
     responses = {}
     heroes = {}
 
@@ -48,15 +63,15 @@ def dictionary_of_responses(pages_endings):
             if " " not in key:
                 continue
             value = value_from_element(element)
-            
+
             short_hero = short_hero_name_from_url(value)
             hero = ending.replace('_', ' ')
             hero = hero.replace(' Pack', '')
             hero = hero.replace(' responses', '')
-            
+
             if short_hero not in heroes:
                 heroes[short_hero] = hero
-            
+
             if key not in responses:
                 responses[key] = value
 
@@ -64,6 +79,7 @@ def dictionary_of_responses(pages_endings):
 
 
 def page_to_parse(url):
+    """Method used to open given url and return the received body (UTF-8 encoding)."""
     request = Request(url)
     request.add_header("User-Agent", "Mozilla/5.0")
     response = urlopen(request)
@@ -71,21 +87,23 @@ def page_to_parse(url):
 
 
 def pages_for_category(category_name):
+    """Method that returns a list of page endings for a given Wiki category."""
     category_name = category_name.replace(" ", "_")
     json_response = page_to_parse(URL_BEGINNING + URL_API + category_name)
 
     output = []
 
     parsed_json = json.loads(json_response)
-    for a in parsed_json["query"]["categorymembers"]:
-        for b in a.values():
-            if type(b) is str and '/' not in b:
-                output.append(b.replace(" ", "_"))
+    for categorymembers in parsed_json["query"]["categorymembers"]:
+        for value in categorymembers.values():
+            if isinstance(value, str) and '/' not in value:
+                output.append(value.replace(" ", "_"))
 
     return output
 
 
 def key_from_element(element):
+    """Method that returns a key for a given element taken from parsed html body."""
     start_index = element.rfind("</a>") + 4
     end_index = element.find("</li>") - 1
     key = element[start_index:end_index]
@@ -94,6 +112,8 @@ def key_from_element(element):
 
 
 def clean_key(key):
+    """Method that cleans the given key, so that it is a lowercase string with
+    no dots or exclamation marks ending the string. All html tags are removed as well."""
     if "<i>" in key:
         start_index = key.find("<i>")
         end_index = key.rfind("</i>") + 4
@@ -124,27 +144,32 @@ def clean_key(key):
 
 
 def value_from_element(element):
+    """Method that returns a value (url to the response) for a given element taken
+    from parsed html body."""
     start_index = element.find("href=\"") + 6
     end_index = element.find("\" title")
     value = element[start_index:end_index]
     return value
-    
 
-def short_hero_name_from_url(value):
-    search = re.search('\/(\w+?)_.+?\.mp3', value)
+
+def short_hero_name_from_url(url):
+    """Method that returns a short hero name for the given url
+    (taken from the filename on the Wiki server)."""
+    search = re.search(r'\/(\w+?)_.+?\.mp3', url)
     if search:
         if search.group(1) == 'Dlc':
-            search = re.search('\/(Dlc_\w+?)_.+?\.mp3', value)
+            search = re.search(r'\/(Dlc_\w+?)_.+?\.mp3', url)
             if search.group(1) == 'tech':
                 return 'Dlc_tech_ann'
         return search.group(1)
 
-            
-def ellipsis_to_three_dots(dict):
+
+def ellipsis_to_three_dots(dictionary):
+    """Method that replaces all ellipsis (…) with three dots (...) in the dictionary ketys."""
     newdict = {}
 
-    for key in dict:
-        newdict[key] = dict[key]
+    for key in dictionary:
+        newdict[key] = dictionary[key]
         if "…" in key:
             new = key.replace("…", "...")
             newdict[new] = newdict.pop(key)
@@ -152,5 +177,5 @@ def ellipsis_to_three_dots(dict):
     return newdict
 
 
-# generate_jsons("dota_responses_1.3.txt", "heroes.txt")
+# generate_dictionaries("dota_responses_1.3.txt", "heroes.txt")
 # dictionary = dictionary_from_file("dota_responses_1.2.txt")
