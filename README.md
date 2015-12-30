@@ -16,6 +16,7 @@ All the responses are in lowercase in the dictionary, before comparision the com
 # Changelog:
 #####2.2:
 * code refactoring (renaming variables, deleting unnecessary methods, etc.)
+* response in the reply is now an exact quote of the original comment
 * added comments
 
 #####2.1:
