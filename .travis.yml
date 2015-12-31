@@ -10,5 +10,3 @@ python:
 install:
 - pip install praw
 - pip install beautifulsoup4
-# command to run tests
-script: nosetests
