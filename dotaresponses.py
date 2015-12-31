@@ -19,7 +19,7 @@ import dota_responses_account as account
 import dota_responses_properties as properties
 from responses_wiki import dota_wiki_parser as parser
 
-__author__ = "Jonarzz"
+__author__ = 'Jonarzz'
 
 
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -55,17 +55,15 @@ def execute():
 
 
 def log_error(error):
-    """Method used to save error messages to an error.log file."""
-    with open("error.log", 'a') as file:
+    """Method used to save error messages to an error log file."""
+    with open(properties.ERROR_FILENAME, 'a') as file:
         file.write(str(datetime.now()) + '\n' + error + '\n')
-    return
 
 
 def log_stuffz(info):
-    """Method used to save info messages to a stuffz.log file."""
-    with open("stuffz.log", 'a') as file:
+    """Method used to save info messages to an info log file."""
+    with open(properties.INFO_FILENAME, 'a') as file:
         file.write(str(datetime.now()) + '\n' + info + '\n')
-    return
 
 
 def add_comments(submission, already_done_comments, responses_dict, heroes_dict):

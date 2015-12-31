@@ -1,10 +1,15 @@
 """Module used to configure the connection to the Reddit API."""
 
+import webbrowser
+
 import praw
 
 import dota_responses_properties as properties
 
-__author__ = "Jonarzz"
+__author__ = 'Jonarzz'
+
+
+INVALID_CODE_ERR_MSG = 'Invalid access code'
 
 
 def get_reddit():
@@ -21,16 +26,30 @@ def get_account():
     return reddit
 
 
-def generate_access_code():
+def generate_access_code(test=False):
     """Method used to generate the access code to Reddit API."""
     reddit = get_reddit()
     url = reddit.get_authorize_url('uniqueKey', properties.SCOPES, True)
-    import webbrowser
-    webbrowser.open(url)
+    if test:
+        return url
+    else:
+        webbrowser.open(url)
 
 
-def print_access_information(access_code):
-    """Method that prints the account access information related to Reddit API."""
+def get_access_information(access_code):
+    """Method that prints the account access information related to Reddit API.
+
+    Requires the user to type in the access_code that can be retrieved by attaching the account
+    connected to the Reddit API to the user's Reddit account. The code is provided in a link after
+    accepting the requirements (provided in the script scope in the properties).
+    """
     reddit = get_reddit()
-    access_information = reddit.get_access_information(access_code)
-    print(access_information)
+    try:
+        access_information = reddit.get_access_information(access_code)
+    except praw.errors.OAuthInvalidGrant:
+        return INVALID_CODE_ERR_MSG
+    else:
+        return access_information
+ 
+
+# print(get_access_information)
