@@ -1,4 +1,6 @@
 # Dota Responses Reddit Bot
+[![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot) [![Code Climate](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/gpa.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot)
+
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
 *Thanks to /u/iggys_reddit_account the bot is running 24/7.*
@@ -14,6 +16,11 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####2.3:
+* added tests
+* code refactoring
+* added Travis CI and CodeClimate checking
+
 #####2.2:
 * code refactoring (renaming variables, deleting unnecessary methods, etc.)
 * response in the reply is now an exact quote of the original comment
@@ -59,3 +66,8 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * one word responses are no longer in the dictionary
 * replaced double spaces with single space
 * bot is now working with hot submissions
+
+---
+# TODO:
+* start with tests the next time (TDD)
+* fix CodeClimate issues
