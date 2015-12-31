@@ -10,3 +10,7 @@ python:
 install:
 - pip install praw
 - pip install beautifulsoup4
+# command to run tests
+script: 
+- python test_dotaresponses.py
+- python responses_wiki/test_dota_wiki_parser.py
