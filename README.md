@@ -68,6 +68,6 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * bot is now working with hot submissions
 
 ---
-# TODO:
+# Further plans:
 * start with tests the next time (TDD)
 * fix CodeClimate issues
