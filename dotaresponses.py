@@ -59,14 +59,18 @@ def add_comments_to_submission(submission, sticky):
     add_comments(submission, already_done_comments, responses_dict, heroes_dict)
 
 
+def add_message_to_file(message, filename):
+    """Method that appends given string message to a file with provided filename."""
+    with open(filename, 'a') as file:
+        file.write(str(datetime.now()) + '\n' + message + '\n')
+
+
 def log(message, error=False):
     """Method used to save messages to an proper (info/error) log file."""
     if error:
-        with open(properties.ERROR_FILENAME, 'a') as file:
-            file.write(str(datetime.now()) + '\n' + message + '\n')
+        add_message_to_file(properties.ERROR_FILENAME, message)
     else:
-        with open(properties.INFO_FILENAME, 'a') as file:
-            file.write(str(datetime.now()) + '\n' + message + '\n')
+        add_message_to_file(properties.INFO_FILENAME, message)
 
 
 def add_comments(submission, already_done_comments, responses_dict, heroes_dict):
