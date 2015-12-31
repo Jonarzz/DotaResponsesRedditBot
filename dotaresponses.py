@@ -68,9 +68,9 @@ def add_message_to_file(message, filename):
 def log(message, error=False):
     """Method used to save messages to an proper (info/error) log file."""
     if error:
-        add_message_to_file(properties.ERROR_FILENAME, message)
+        add_message_to_file(message, properties.ERROR_FILENAME)
     else:
-        add_message_to_file(properties.INFO_FILENAME, message)
+        add_message_to_file(message, properties.INFO_FILENAME)
 
 
 def add_comments(submission, already_done_comments, responses_dict, heroes_dict):

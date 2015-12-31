@@ -38,6 +38,17 @@ def dictionary_from_file(filename):
         return dictionary
 
 
+def create_responses_list(soup):
+    """Method that creates responses list for a given page payload in html."""
+    list_of_responses = []
+
+    for element in soup.find_all("li"):
+        if "sm2_button" in str(element):
+            list_of_responses.append(str(element))
+
+    return list_of_responses
+
+
 def dictionary_of_responses(pages_endings):
     """Method that creates two dictionaries - with the responses (response text - link to the file)
     and with hero names (short hero name used in Wiki files - long hero names).
@@ -52,11 +63,8 @@ def dictionary_of_responses(pages_endings):
         print(ending)
         page = page_to_parse(URL_BEGINNING + ending)
         soup = BeautifulSoup(page, "html.parser")
-        list_of_responses = []
 
-        for element in soup.find_all("li"):
-            if "sm2_button" in str(element):
-                list_of_responses.append(str(element))
+        list_of_responses = create_responses_list(soup)
 
         for element in list_of_responses:
             key = key_from_element(element)
@@ -128,21 +136,12 @@ def clean_key(key):
     if "(" in key and ")" in key:
         key = substring_from_key(key, "(", ")", 1)
 
-    key = key.strip()
-
-    try:
-        if key[-1] in [".", "!"]:
-            key = key[:-1]
-    except IndexError:
-        print("IndexError in: " + key)
+    key = key.strip(' .!')
 
     if key[-2:] == "--":
         key = key[:-2]
 
-    key = key.replace("  ", " ")
-
-    key = key.strip()
-    key = key.lower()
+    key = key.replace("  ", " ").strip().lower()
 
     return key
 
