@@ -50,6 +50,6 @@ def get_access_information(access_code):
         return INVALID_CODE_ERR_MSG
     else:
         return access_information
- 
+
 
 # print(get_access_information)

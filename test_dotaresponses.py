@@ -4,6 +4,7 @@ import unittest
 
 import dotaresponses
 import dota_responses_properties as properties
+from responses_wiki import dota_wiki_parser as parser
 
 __author__ = 'Jonarzz'
 
@@ -17,8 +18,8 @@ class DotaResponsesTest(unittest.TestCase):
 
         It checks whether the returned value is the same as the expected string.
         """
-        responses_dict = {'abc' : 'http://def.gh/Abad_a_.mp3', '123' : 'http://456.78/Noba_a_.mp3'}
-        heroes_dict = {'Abad' : 'Abaddon', 'Noba' : 'Techies'}
+        responses_dict = parser.dictionary_from_file('test_responses_dict.txt')
+        heroes_dict = parser.dictionary_from_file('test_heroes_dict.txt')
 
         expected_output = ("[{}]({}) (sound warning: {}){}"
                            .format('abc', 'http://def.gh/Abad_a_.mp3', 'Abaddon',

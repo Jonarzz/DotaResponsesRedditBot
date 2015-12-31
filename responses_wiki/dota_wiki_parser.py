@@ -111,18 +111,23 @@ def key_from_element(element):
     return key
 
 
+def substring_from_key(key, start_element, end_element, offset):
+    """Method that takes a string and returns a substring of it with the position of start_element
+    as start and the position of end_element + offset as end."""
+    start_index = key.find(start_element)
+    end_index = key.rfind(end_element) + offset
+    return key.replace(key[start_index:end_index], "")
+
+
 def clean_key(key):
     """Method that cleans the given key, so that it is a lowercase string with
     no dots or exclamation marks ending the string. All html tags are removed as well."""
-    if "<i>" in key:
-        start_index = key.find("<i>")
-        end_index = key.rfind("</i>") + 4
-        key = key.replace(key[start_index:end_index], "")
+
+    if "<i>" and "</i>" in key:
+        key = substring_from_key(key, "<i>", "</i>", 4)
 
     if "(" in key and ")" in key:
-        start_index = key.find("(")
-        end_index = key.rfind(")") + 1
-        key = key.replace(key[start_index:end_index], "")
+        key = substring_from_key(key, "(", ")", 1)
 
     key = key.strip()
 

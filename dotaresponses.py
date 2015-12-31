@@ -32,38 +32,41 @@ def execute():
     Afterwards it executes add_comments method with proper arguments passed.
     """
     reddit_account = account.get_account()
-    responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
-    heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
-    already_done_comments = load_already_done_comments()
 
     try:
         sticky = reddit_account.get_subreddit(properties.SUBREDDIT).get_sticky()
     except praw.errors.NotFound:
         sticky = None
 
-    log_stuffz('START')
+    log('START')
 
     for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
-        if submission == sticky:
-            continue
-        add_comments(submission, already_done_comments, responses_dict, heroes_dict)
+        add_comments_to_submission(submission, sticky)
 
     for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_hot(limit=25):
-        if submission == sticky:
-            continue
-        add_comments(submission, already_done_comments, responses_dict, heroes_dict)
+        add_comments_to_submission(submission, sticky)
 
 
-def log_error(error):
-    """Method used to save error messages to an error log file."""
-    with open(properties.ERROR_FILENAME, 'a') as file:
-        file.write(str(datetime.now()) + '\n' + error + '\n')
+def add_comments_to_submission(submission, sticky):
+    """Method that adds the bot replies to the comments in given submission."""
+    if submission == sticky:
+        return
+
+    responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
+    heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
+    already_done_comments = load_already_done_comments()
+
+    add_comments(submission, already_done_comments, responses_dict, heroes_dict)
 
 
-def log_stuffz(info):
-    """Method used to save info messages to an info log file."""
-    with open(properties.INFO_FILENAME, 'a') as file:
-        file.write(str(datetime.now()) + '\n' + info + '\n')
+def log(message, error=False):
+    """Method used to save messages to an proper (info/error) log file."""
+    if error:
+        with open(properties.ERROR_FILENAME, 'a') as file:
+            file.write(str(datetime.now()) + '\n' + message + '\n')
+    else:
+        with open(properties.INFO_FILENAME, 'a') as file:
+            file.write(str(datetime.now()) + '\n' + message + '\n')
 
 
 def add_comments(submission, already_done_comments, responses_dict, heroes_dict):
@@ -87,7 +90,7 @@ def add_comments(submission, already_done_comments, responses_dict, heroes_dict)
         if response not in properties.EXCLUDED_RESPONSES:
             if response in responses_dict:
                 comment.reply(create_reply(responses_dict, heroes_dict, response, comment.body))
-                log_stuffz("Added: " + comment.id)
+                log("Added: " + comment.id)
 
     save_already_done_comments(already_done_comments)
 
@@ -143,7 +146,7 @@ def prepare_response(response):
             new_response = new_response[:-1]
             i += 1
     except IndexError:
-        log_error("IndexError")
+        log("IndexError", True)
 
     return new_response
 
@@ -155,5 +158,5 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
-            log_error(traceback.format_exc())
+            log(traceback.format_exc(), True)
             
