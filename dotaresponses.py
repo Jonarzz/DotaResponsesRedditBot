@@ -40,10 +40,10 @@ def execute():
 
     log('START')
 
-    for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_new(limit=100):
+    for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_new(limit=150):
         add_comments_to_submission(submission, sticky)
 
-    for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_hot(limit=25):
+    for submission in reddit_account.get_subreddit(properties.SUBREDDIT).get_hot(limit=35):
         add_comments_to_submission(submission, sticky)
 
 

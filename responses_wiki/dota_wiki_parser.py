@@ -17,7 +17,7 @@ __author__ = 'Jonarzz'
 URL_BEGINNING = 'http://dota2.gamepedia.com/'
 URL_API = ('api.php?action=query&list=categorymembers&cmlimit=max'
            '&cmprop=title&format=json&cmtitle=Category:')
-CATEGORY = 'Lists of responses'
+CATEGORY = 'Lists_of_responses'
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
@@ -88,7 +88,6 @@ def page_to_parse(url):
 
 def pages_for_category(category_name):
     """Method that returns a list of page endings for a given Wiki category."""
-    category_name = category_name.replace(" ", "_")
     json_response = page_to_parse(URL_BEGINNING + URL_API + category_name)
 
     output = []
@@ -121,8 +120,8 @@ def substring_from_key(key, start_element, end_element, offset):
 
 def clean_key(key):
     """Method that cleans the given key, so that it is a lowercase string with
-    no dots or exclamation marks ending the string. All html tags are removed as well."""
-
+    no dots or exclamation marks ending the string. Unnecessary spaces are removed. All html tags
+    are removed as well."""
     if "<i>" and "</i>" in key:
         key = substring_from_key(key, "<i>", "</i>", 4)
 
@@ -164,7 +163,7 @@ def short_hero_name_from_url(url):
     if search:
         if search.group(1) == 'Dlc':
             search = re.search(r'\/(Dlc_\w+?)_.+?\.mp3', url)
-            if search.group(1) == 'tech':
+            if search.group(1) == 'Dlc_tech':
                 return 'Dlc_tech_ann'
         return search.group(1)
 
