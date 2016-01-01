@@ -1,5 +1,5 @@
 # Dota Responses Reddit Bot
-[![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot) [![Code Climate](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/gpa.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot)
+[![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot) [![Code Climate](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/gpa.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot) [![Issue Count](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/issue_count.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot)
 
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
