@@ -66,8 +66,3 @@ All the responses are in lowercase in the dictionary, before comparision the com
 * one word responses are no longer in the dictionary
 * replaced double spaces with single space
 * bot is now working with hot submissions
-
----
-# Further plans:
-* start with tests the next time (TDD)
-* fix CodeClimate issues
