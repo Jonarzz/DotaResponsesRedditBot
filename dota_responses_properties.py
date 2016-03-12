@@ -6,13 +6,13 @@ APP_ID = ''
 APP_SECRET = ''
 APP_URI = ''
 APP_REFRESH_CODE = ''
-USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses
-                and links to the proper audio sample from
-                http://dota2.gamepedia.com/Category:Lists_of_responses (author: /u/Jonarz)"""
-SUBREDDIT = 'dota2'
+USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses and links to the proper
+             audio sample from http://dota2.gamepedia.com/Category:Lists_of_responses (author: /u/Jonarz)"""
+SUBREDDIT = "dota2"
 SCOPES = ''
 RESPONSES_FILENAME = ''
 HEROES_FILENAME = ''
+SHITTY_WIZARD_FILENAME = ''
 
 COMMENT_ENDING = ''
                     
@@ -52,4 +52,4 @@ EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance
                       "i don't think so", "I know, right?", "it begins", "too soon", "well done",
                       "i like it", "are you okay?", "ah, nice", "about time", "very good",
                       "are you kidding me?", "at last", "got it", "what happened?", "oh boy",
-                      "nice one", "i am"]
+                      "nice one", "i am", "exactly so", "aphotic shield", "ghost scepter", "outworld devourer"]

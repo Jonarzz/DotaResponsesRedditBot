@@ -54,9 +54,13 @@ def add_comments_to_submission(submission, sticky):
 
     responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
     heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
+    shitty_wizard_dict = parser.dictionary_from_file(properties.SHITTY_WIZARD_FILENAME)
+    
+    dictionaries = {'responses': responses_dict, 'heroes': heroes_dict, 'shitty_wizard': shitty_wizard_dict}
+    
     already_done_comments = load_already_done_comments()
 
-    add_comments(submission, already_done_comments, responses_dict, heroes_dict)
+    add_comments(submission, already_done_comments, dictionaries)
 
 
 def add_message_to_file(message, filename):
@@ -73,10 +77,10 @@ def log(message, error=False):
         add_message_to_file(message, properties.INFO_FILENAME)
 
 
-def add_comments(submission, already_done_comments, responses_dict, heroes_dict):
+def add_comments(submission, already_done_comments, dictionaries):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
-    All comments are loaded. If comment ID is on the already_done_comments list, next comment
+    All comments are loaded. If comment ID is in the already_done_comments set, next comment
     is checked (further actions are ommited). If the comment wasn't analized before,
     it is prepared for comparision to the responses in dictionary. If the comment is not on the
     excluded responses list (loaded from properties) and if it is in the dictionary, a reply
@@ -90,10 +94,14 @@ def add_comments(submission, already_done_comments, responses_dict, heroes_dict)
         already_done_comments.append(comment.id)
 
         response = prepare_response(comment.body)
-
-        if response not in properties.EXCLUDED_RESPONSES:
-            if response in responses_dict:
-                comment.reply(create_reply(responses_dict, heroes_dict, response, comment.body))
+        
+        if response == "shitty wizard":
+            comment.reply(create_reply(dictionaries['shitty_wizard'], dictionaries['heroes'],
+                          random.choice(list(dictionaries['shitty_wizard'].keys())), comment.body))
+            log("Added: " + comment.id)
+        elif response not in properties.EXCLUDED_RESPONSES:
+            if response in dictionaries['responses']:
+                comment.reply(create_reply(dictionaries['responses'], dictionaries['heroes'], response, comment.body))
                 log("Added: " + comment.id)
 
     save_already_done_comments(already_done_comments)
@@ -130,8 +138,8 @@ def load_already_done_comments():
     """
     with open(os.path.join(SCRIPT_DIR, "already_done_comments.txt")) as file:
         already_done_comments = [i for i in file.read().split()]
-        if len(already_done_comments) > 25000:
-            already_done_comments = already_done_comments[-25000:]
+        if len(already_done_comments) > 35000:
+            already_done_comments = already_done_comments[-35000:]
         return already_done_comments
 
 
