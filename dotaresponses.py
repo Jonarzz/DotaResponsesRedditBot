@@ -15,9 +15,9 @@ from datetime import datetime
 
 import praw
 
-from . import dota_responses_account as account
-from . import dota_responses_properties as properties
-from .responses_wiki import dota_wiki_parser as parser
+import dota_responses_account as account
+import dota_responses_properties as properties
+from responses_wiki import dota_wiki_parser as parser
 
 __author__ = 'Jonarzz'
 
