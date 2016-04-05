@@ -19,6 +19,13 @@ COMMENT_ENDING = ''
 INFO_FILENAME = ''
 ERROR_FILENAME = ''
 
+NUMBER_OF_DAYS_TO_DELETE_COMMENT = 7
+
+INVOKER_BOT_RESPONSES = ['one of my favourites', 'one of my favorites', 'r/dota2smut', '/r/dota2smut', 'dota2smut']
+INVOKER_RESPONSE = 'One of my favorites!'
+INVOKER_RESPONSE_URL = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6/Invo_ability_invoke_01.mp3'
+INVOKER_ENDING = 'Thus I invoke masturbation!'
+
 EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",
                       "helm of the dominator", "veil of discord", "shadow blade", "blade mail",

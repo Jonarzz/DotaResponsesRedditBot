@@ -11,7 +11,9 @@ Proper logging is provided - saved to 2 files as standard output and errors.
 
 import traceback
 import os
-from datetime import datetime
+from datetime import datetime, date
+import random
+import sqlite3
 
 import praw
 
@@ -23,6 +25,11 @@ __author__ = 'Jonarzz'
 
 
 SCRIPT_DIR = os.path.dirname(__file__)
+
+RESPONSES_DB_CONN = sqlite3.connect('responses.db')
+RESPONSES_DB_CURSOR = RESPONSES_DB_CONN.cursor()
+COMMENTS_DB_CONN = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
+COMMENTS_DB_CURSOR = COMMENTS_DB_CONN.cursor()
 
 
 def execute():
@@ -48,19 +55,14 @@ def execute():
 
 
 def add_comments_to_submission(submission, sticky):
-    """Method that adds the bot replies to the comments in given submission."""
+    """Method that adds the bot replies to the comments in the given submission."""
     if submission == sticky:
         return
 
-    responses_dict = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
     heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
     shitty_wizard_dict = parser.dictionary_from_file(properties.SHITTY_WIZARD_FILENAME)
-    
-    dictionaries = {'responses': responses_dict, 'heroes': heroes_dict, 'shitty_wizard': shitty_wizard_dict}
-    
-    already_done_comments = load_already_done_comments()
 
-    add_comments(submission, already_done_comments, dictionaries)
+    add_comments(submission, heroes_dict, shitty_wizard_dict)
 
 
 def add_message_to_file(message, filename):
@@ -77,10 +79,10 @@ def log(message, error=False):
         add_message_to_file(message, properties.INFO_FILENAME)
 
 
-def add_comments(submission, already_done_comments, dictionaries):
+def add_comments(submission, heroes_dict, shitty_wizard_dict):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
-    All comments are loaded. If comment ID is in the already_done_comments set, next comment
+    All comments are loaded. If comment ID is in the already doone comments database, next comment
     is checked (further actions are ommited). If the comment wasn't analized before,
     it is prepared for comparision to the responses in dictionary. If the comment is not on the
     excluded responses list (loaded from properties) and if it is in the dictionary, a reply
@@ -89,37 +91,52 @@ def add_comments(submission, already_done_comments, dictionaries):
     submission.replace_more_comments(limit=None, threshold=0)
 
     for comment in praw.helpers.flatten_tree(submission.comments):
-        if comment.id in already_done_comments:
+        COMMENTS_DB_CURSOR.execute("SELECT id FROM comments WHERE id=?", [comment.id])
+        if COMMENTS_DB_CURSOR.fetchone():
             continue
-        already_done_comments.append(comment.id)
 
         response = prepare_response(comment.body)
         
         if response == "shitty wizard":
-            comment.reply(create_reply(dictionaries['shitty_wizard'], dictionaries['heroes'],
-                          random.choice(list(dictionaries['shitty_wizard'].keys())), comment.body))
+            comment.reply(create_reply(shitty_wizard_dict, heroes_dict,
+                          random.choice(list(shitty_wizard_dict.keys())), comment.body))
+            log("Added: " + comment.id)
+        elif response in properties.INVOKER_BOT_RESPONSES:
+            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict))
             log("Added: " + comment.id)
         elif response not in properties.EXCLUDED_RESPONSES:
-            if response in dictionaries['responses']:
-                comment.reply(create_reply(dictionaries['responses'], dictionaries['heroes'], response, comment.body))
+            RESPONSES_DB_CURSOR.execute("SELECT response, link FROM responses WHERE response=?", [response])
+            reponse_and_link = RESPONSES_DB_CURSOR.fetchone()
+            if reponse_and_link:
+                comment.reply(create_reply(reponse_and_link[1], heroes_dict, response, comment.body))
                 log("Added: " + comment.id)
 
-    save_already_done_comments(already_done_comments)
+        COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
+        COMMENTS_DB_CONN.commit()
 
 
-def create_reply(responses_dict, heroes_dict, key, orignal_text):
+def create_reply(response_url, heroes_dict, key, orignal_text):
     """Method that creates a reply in reddit-post format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
     and an ending added from the properties file (post footer).
     """
-    response_url = responses_dict[key]
     short_hero_name = parser.short_hero_name_from_url(response_url)
     hero_name = heroes_dict[short_hero_name]
 
     return (
         "[{}]({}) (sound warning: {}){}"
         .format(orignal_text, response_url, hero_name, properties.COMMENT_ENDING)
+        )
+        
+        
+def create_reply_invoker_ending(response_url, heroes_dict):
+    short_hero_name = parser.short_hero_name_from_url(response_url)
+    hero_name = heroes_dict[short_hero_name]
+    
+    return (
+        "[{}]({}) (sound warning: {})\n\n{}{}"
+        .format(properties.INVOKER_RESPONSE, response_url, hero_name, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
         )
 
 
@@ -168,7 +185,9 @@ if __name__ == '__main__':
         try:
             execute()
         except (KeyboardInterrupt, SystemExit):
+            COMMENTS_DB_CONN.commit()
             raise
         except:
+            COMMENTS_DB_CONN.commit()
             log(traceback.format_exc(), True)
             
