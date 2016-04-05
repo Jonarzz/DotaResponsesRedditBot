@@ -16,6 +16,11 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####2.5
+* fixed random responses for the "Shitty wizard" line - now it's working properly
+* added special treatment for the comments related to "One of my favorites" response
+* moved from a dicionary for responses and a list for comment ids to databases
+
 #####2.4
 * added random responses for the "Shitty wizard" line (needs testing)
 
