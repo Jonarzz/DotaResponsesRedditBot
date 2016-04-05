@@ -26,9 +26,9 @@ __author__ = 'Jonarzz'
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
-RESPONSES_DB_CONN = sqlite3.connect('responses.db')
+RESPONSES_DB_CONN = sqlite3.connect(os.path.join(SCRIPT_DIR, 'responses.db'))
 RESPONSES_DB_CURSOR = RESPONSES_DB_CONN.cursor()
-COMMENTS_DB_CONN = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
+COMMENTS_DB_CONN = sqlite3.connect(os.path.join(SCRIPT_DIR, 'comments.db'), detect_types=sqlite3.PARSE_DECLTYPES)
 COMMENTS_DB_CURSOR = COMMENTS_DB_CONN.cursor()
 
 
@@ -98,8 +98,8 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
         response = prepare_response(comment.body)
         
         if response == "shitty wizard":
-            comment.reply(create_reply(shitty_wizard_dict, heroes_dict,
-                          random.choice(list(shitty_wizard_dict.keys())), comment.body))
+            comment.reply(create_reply(shitty_wizard_dict[random.choice(list(shitty_wizard_dict.keys()))], 
+                                       heroes_dict, comment.body))
             log("Added: " + comment.id)
         elif response in properties.INVOKER_BOT_RESPONSES:
             comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict))
@@ -108,14 +108,14 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
             RESPONSES_DB_CURSOR.execute("SELECT response, link FROM responses WHERE response=?", [response])
             reponse_and_link = RESPONSES_DB_CURSOR.fetchone()
             if reponse_and_link:
-                comment.reply(create_reply(reponse_and_link[1], heroes_dict, response, comment.body))
+                comment.reply(create_reply(reponse_and_link[1], heroes_dict, comment.body))
                 log("Added: " + comment.id)
 
         COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
         COMMENTS_DB_CONN.commit()
 
 
-def create_reply(response_url, heroes_dict, key, orignal_text):
+def create_reply(response_url, heroes_dict, orignal_text):
     """Method that creates a reply in reddit-post format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
