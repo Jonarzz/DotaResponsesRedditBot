@@ -1,5 +1,4 @@
 # Dota Responses Reddit Bot
-[![Code Climate](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/gpa.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot) [![Issue Count](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/badges/issue_count.svg)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot)
 
 Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
@@ -16,6 +15,9 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 ---
 # Changelog:
+#####2.6
+* added a few Io and Phoenix responses
+
 #####2.5
 * fixed random responses for the "Shitty wizard" line - now it's working properly
 * added special treatment for the comments related to "One of my favorites" response
