@@ -39,8 +39,26 @@ def dictionary_from_file(filename):
     with open(os.path.join(SCRIPT_DIR, filename)) as file:
         dictionary = json.load(file)
         return dictionary
-
-
+    
+    
+def create_responses_text_and_link_dict(ending):
+    """Method that for a given page ending creates a dictionary of pairs: response text-link."""
+    responses_dict = {}
+    
+    list_of_responses = create_list_of_responses(ending)
+    
+    for element in list_of_responses:
+        key = response_text_from_element(element)
+        if " " not in key:
+            continue
+            
+        value = value_from_element(element)
+        
+        if key not in responses_dict:
+            responses_dict[key] = value
+    
+    return responses_dict
+                
 def dictionary_of_responses(pages_endings):
     """Method that creates dictionaries - with the responses (response text - link to the file),
     with hero names (short hero name used in Wiki files - long hero names),
@@ -55,16 +73,10 @@ def dictionary_of_responses(pages_endings):
 
     for ending in pages_endings:
         print(ending)
-        page = page_to_parse(URL_BEGINNING + ending)
-        soup = BeautifulSoup(page, "html.parser")
-        list_of_responses = []
-
-        for element in soup.find_all("li"):
-            if "sm2_button" in str(element):
-                list_of_responses.append(str(element))
+        list_of_responses = create_list_of_responses(ending)
 
         for element in list_of_responses:
-            key = key_from_element(element)
+            key = response_text_from_element(element)
             if " " not in key:
                 continue
             value = value_from_element(element)
@@ -98,8 +110,20 @@ def dictionary_of_responses(pages_endings):
     heroes['Wisp'] = 'Io'
     
     return responses, heroes, shitty_wizard
+    
 
+def create_list_of_responses(ending):
+    page = page_to_parse(URL_BEGINNING + ending)
+    soup = BeautifulSoup(page, "html.parser")
+    list_of_responses = []
 
+    for element in soup.find_all("li"):
+        if "sm2_button" in str(element):
+            list_of_responses.append(str(element))
+            
+    return list_of_responses
+    
+    
 def page_to_parse(url):
     """Method used to open given url and return the received body (UTF-8 encoding)."""
     request = Request(url)
@@ -124,7 +148,7 @@ def pages_for_category(category_name):
     return output
 
 
-def key_from_element(element):
+def response_text_from_element(element):
     """Method that returns a key for a given element taken from parsed html body."""
     start_index = element.rfind("</a>") + 4
     end_index = element.find("</li>") - 1
