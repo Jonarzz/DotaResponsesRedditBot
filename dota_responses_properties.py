@@ -25,6 +25,7 @@ INVOKER_BOT_RESPONSES = ['one of my favourites', 'one of my favorites', 'r/dota2
 INVOKER_RESPONSE = 'One of my favorites!'
 INVOKER_RESPONSE_URL = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6/Invo_ability_invoke_01.mp3'
 INVOKER_ENDING = 'Thus I invoke masturbation!'
+INVOKER_IMG_DIR = '/hero-invoker'
 
 EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",

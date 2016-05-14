@@ -97,25 +97,42 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
 
         response = prepare_response(comment.body)
         
+        RESPONSES_DB_CURSOR.execute("SELECT id, img_dir FROM heroes WHERE css=?", [comment.author_flair_css_class])
+        if RESPONSES_DB_CURSOR.fetchone():
+            hero_id_img = RESPONSES_DB_CURSOR.fetchone()
+            RESPONSES_DB_CURSOR.execute("SELECT link FROM responses WHERE response=? AND hero_id=?", [response, hero_id_img[0]])
+            link = RESPONSES_DB_CURSOR.fetchone()
+            if link:
+                comment.reply(create_reply(link[0], heroes_dict, comment.body, hero_id_img[1]))
+                log("Added: " + comment.id)
+                COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
+                COMMENTS_DB_CONN.commit()
+                continue
+        
         if response == "shitty wizard":
-            comment.reply(create_reply(shitty_wizard_dict[random.choice(list(shitty_wizard_dict.keys()))], 
-                                       heroes_dict, comment.body))
+            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY RANDOM() LIMIT 1;", [response])
+            link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
+            RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
+            img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
+            comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
             log("Added: " + comment.id)
         elif response in properties.INVOKER_BOT_RESPONSES:
-            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict))
+            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
             log("Added: " + comment.id)
         elif response not in properties.EXCLUDED_RESPONSES:
-            RESPONSES_DB_CURSOR.execute("SELECT response, link FROM responses WHERE response=?", [response])
-            reponse_and_link = RESPONSES_DB_CURSOR.fetchone()
-            if reponse_and_link:
-                comment.reply(create_reply(reponse_and_link[1], heroes_dict, comment.body))
+            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NULL", [response])
+            link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
+            if link_and_hero_id:
+                RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
+                img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
+                comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
                 log("Added: " + comment.id)
 
         COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
         COMMENTS_DB_CONN.commit()
 
 
-def create_reply(response_url, heroes_dict, orignal_text):
+def create_reply(response_url, heroes_dict, orignal_text, img_dir):
     """Method that creates a reply in reddit-post format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
@@ -124,10 +141,16 @@ def create_reply(response_url, heroes_dict, orignal_text):
     short_hero_name = parser.short_hero_name_from_url(response_url)
     hero_name = heroes_dict[short_hero_name]
 
-    return (
-        "[{}]({}) (sound warning: {}){}"
-        .format(orignal_text, response_url, hero_name, properties.COMMENT_ENDING)
-        )
+    if img_dir:
+        return (
+            "[]({}): [{}]({}) (sound warning: {}){}"
+            .format(img_dir, orignal_text, response_url, hero_name, properties.COMMENT_ENDING)
+            )
+    else:
+        return (
+            "[{}]({}) (sound warning: {}){}"
+            .format(orignal_text, response_url, hero_name, properties.COMMENT_ENDING)
+            )
         
         
 def create_reply_invoker_ending(response_url, heroes_dict):
@@ -138,26 +161,6 @@ def create_reply_invoker_ending(response_url, heroes_dict):
         "[{}]({}) (sound warning: {})\n\n{}{}"
         .format(properties.INVOKER_RESPONSE, response_url, hero_name, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
         )
-
-
-def save_already_done_comments(already_done_comments):
-    """Method used to save a list of already done comment's IDs into a proper text file."""
-    with open(os.path.join(SCRIPT_DIR, "already_done_comments.txt"), "w") as file:
-        for item in already_done_comments:
-            file.write("%s " % item)
-
-
-def load_already_done_comments():
-    """Method used to load a list of already done comments' IDs.
-
-    Size of the already done comments list is kept at 25,000. If the list is bigger,
-    IDs are removed from the start of the list (oldest go out first).
-    """
-    with open(os.path.join(SCRIPT_DIR, "already_done_comments.txt")) as file:
-        already_done_comments = [i for i in file.read().split()]
-        if len(already_done_comments) > 35000:
-            already_done_comments = already_done_comments[-35000:]
-        return already_done_comments
 
 
 def prepare_response(response):

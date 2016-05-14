@@ -126,12 +126,40 @@ def create_heroes_database():
     c.execute("UPDATE responses SET hero_id = (SELECT heroes.id FROM heroes WHERE responses.hero = heroes.name);");
     conn.commit()
     c.close()
-           
+    
+    
+def add_hero_ids_to_general_responses():
+    """Method that adds hero ids to responses not assigned to specific heroes based on short hero
+    name taken from the response link and heroes dictionary."""
+    conn = sqlite3.connect('responses.db')
+    c = conn.cursor()
+    
+    heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
+    
+    c.execute("SELECT link FROM responses WHERE hero IS NULL AND hero_id IS NULL")
+    links = c.fetchall()
+    
+    for link_tuple in links:
+        short_hero_name = parser.short_hero_name_from_url(link_tuple[0])
+        try:
+            hero_name = heroes_dict[short_hero_name]
+        except:
+            continue
+        c.execute("SELECT id FROM heroes WHERE name=?", [hero_name])
+        id = c.fetchone()
+        if id is None:
+            continue
+        hero_id = id[0]
+        c.execute("UPDATE responses SET hero_id=? WHERE link=?;", [hero_id, link_tuple[0]]);
+        conn.commit()
+        
+    c.close()
 
 if __name__ == '__main__':
     #create_responses_database()
     #create_comments_database()
     #add_hero_specific_responses()
     #create_heroes_database()
+    #add_hero_ids_to_general_responses()
     delete_old_comment_ids()
     
