@@ -97,9 +97,14 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
 
         response = prepare_response(comment.body)
         
+        if response in properties.EXCLUDED_RESPONSES:
+            COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
+            COMMENTS_DB_CONN.commit()
+            continue
+        
         RESPONSES_DB_CURSOR.execute("SELECT id, img_dir FROM heroes WHERE css=?", [comment.author_flair_css_class])
-        if RESPONSES_DB_CURSOR.fetchone():
-            hero_id_img = RESPONSES_DB_CURSOR.fetchone()
+        hero_id_img = RESPONSES_DB_CURSOR.fetchone()
+        if hero_id_img:
             RESPONSES_DB_CURSOR.execute("SELECT link FROM responses WHERE response=? AND hero_id=?", [response, hero_id_img[0]])
             link = RESPONSES_DB_CURSOR.fetchone()
             if link:
@@ -119,7 +124,7 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
         elif response in properties.INVOKER_BOT_RESPONSES:
             comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
             log("Added: " + comment.id)
-        elif response not in properties.EXCLUDED_RESPONSES:
+        else:
             RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NULL", [response])
             link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
             if link_and_hero_id:
