@@ -19,7 +19,8 @@ The bot will try to match a response of the hero that is in the comment's author
 # Changelog:
 
 #####2.7
-* Now uses hero portraits instead of hero names
+* now hero portraits (flairs) are added before the response
+* the bot tries to match the hero response with the hero in the comment's author flair first
 
 #####2.6
 * added a few Io and Phoenix responses
