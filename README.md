@@ -4,7 +4,7 @@ Bot adding reply comments with links to appropriate responses found on /r/dota2.
 
 *Thanks to /u/iggys_reddit_account the bot is running 24/7.*
 
-![Example](http://i.imgur.com/PAcg57z.png)
+![Example](https://i.imgur.com/PAcg57z.png)
 
 The bot replies only for the comments that **are** responses. 
 
