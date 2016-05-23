@@ -141,7 +141,7 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
         
 def save_comment_id(comment_id, do_log=False):
     if do_log:
-        log("Added: " + comment.id)
+        log("Added: " + comment_id)
     COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment_id, date.today()))
     COMMENTS_DB_CONN.commit()
 
