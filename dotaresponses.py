@@ -98,8 +98,12 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
         response = prepare_response(comment.body)
         
         if response in properties.EXCLUDED_RESPONSES:
-            COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
-            COMMENTS_DB_CONN.commit()
+            save_comment_id(comment.id)
+            continue
+            
+        if response in properties.INVOKER_BOT_RESPONSES:
+            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
+            save_comment_id(comment.id, do_log=True)
             continue
         
         RESPONSES_DB_CURSOR.execute("SELECT id, img_dir FROM heroes WHERE css=?", [comment.author_flair_css_class])
@@ -109,9 +113,7 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
             link = RESPONSES_DB_CURSOR.fetchone()
             if link:
                 comment.reply(create_reply(link[0], heroes_dict, comment.body, hero_id_img[1]))
-                log("Added: " + comment.id)
-                COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
-                COMMENTS_DB_CONN.commit()
+                save_comment_id(comment.id, do_log=True)
                 continue
         
         if response == "shitty wizard":
@@ -120,9 +122,6 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
             RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
             img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
             comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
-            log("Added: " + comment.id)
-        elif response in properties.INVOKER_BOT_RESPONSES:
-            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
             log("Added: " + comment.id)
         else:
             RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NULL", [response])
@@ -137,8 +136,14 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
                     comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body))
                     log("Added: " + comment.id)
 
-        COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment.id, date.today()))
-        COMMENTS_DB_CONN.commit()
+        save_comment_id(comment.id)
+        
+        
+def save_comment_id(comment_id, do_log=False):
+    if do_log:
+        log("Added: " + comment.id)
+    COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment_id, date.today()))
+    COMMENTS_DB_CONN.commit()
 
 
 def create_reply(response_url, heroes_dict, orignal_text, img=None):
@@ -162,13 +167,10 @@ def create_reply(response_url, heroes_dict, orignal_text, img=None):
             )
         
         
-def create_reply_invoker_ending(response_url, heroes_dict, img_dir):
-    short_hero_name = parser.short_hero_name_from_url(response_url)
-    hero_name = heroes_dict[short_hero_name]
-    
+def create_reply_invoker_ending(response_url, heroes_dict, img_dir):   
     return (
         "[]({}): [{}]({}) (sound warning: {})\n\n{}{}"
-        .format(img_dir, properties.INVOKER_RESPONSE, response_url, hero_name, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
+        .format(img_dir, properties.INVOKER_RESPONSE, response_url, properties.INVOKER_HERO_NAME, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
         )
 
 
