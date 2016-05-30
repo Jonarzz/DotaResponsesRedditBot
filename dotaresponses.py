@@ -124,7 +124,7 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
             comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
             log("Added: " + comment.id)
         else:
-            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NULL", [response])
+            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY hero_id DESC, RANDOM() LIMIT 1", [response])
             link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
             if link_and_hero_id:
                 RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
