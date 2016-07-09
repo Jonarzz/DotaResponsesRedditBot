@@ -28,6 +28,10 @@ INVOKER_ENDING = 'Thus I invoke masturbation!'
 INVOKER_IMG_DIR = '/hero-invoker'
 INVOKER_HERO_NAME = 'Dirty Invoker'
 
+SNIPER_RESPONSE_URL = 'https://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
+SNIPER_IMG_DIR = '/hero-sniper'
+SNIPER_TRIGGER_WARNING = 'Trigger warning: Sniper'
+
 EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",
                       "helm of the dominator", "veil of discord", "shadow blade", "blade mail",

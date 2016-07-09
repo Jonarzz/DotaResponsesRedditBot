@@ -123,6 +123,9 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
             img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
             comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
             log("Added: " + comment.id)
+        elif response == "ho ho ha ha":
+            comment.reply(create_reply_sniper_ending(properties.SNIPER_RESPONSE_URL, heroes_dict, comment.body, properties.SNIPER_IMG_DIR))
+            log("Added: " + comment.id)
         else:
             RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY hero_id DESC, RANDOM() LIMIT 1", [response])
             link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
@@ -171,6 +174,13 @@ def create_reply_invoker_ending(response_url, heroes_dict, img_dir):
     return (
         "[]({}): [{}]({}) (sound warning: {})\n\n{}{}"
         .format(img_dir, properties.INVOKER_RESPONSE, response_url, properties.INVOKER_HERO_NAME, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
+        )
+
+
+def create_reply_sniper_ending(response_url, heroes_dict, orignal_text, img_dir):   
+    return (
+        "[]({}): [{}]({}) ({}){}"
+        .format(img_dir, orignal_text, response_url, properties.SNIPER_TRIGGER_WARNING, properties.COMMENT_ENDING)
         )
 
 
