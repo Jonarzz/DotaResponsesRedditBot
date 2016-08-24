@@ -71,16 +71,23 @@ def delete_old_comment_ids():
     print("COMMENTS DB CLR\nNumber of IDs: " + str(num_of_ids))
     
     
-def add_hero_specific_responses():
-    """Method that adds hero specific responses to the responses database."""
+def add_hero_specific_responses(endings=None):
+    """Method that adds hero specific responses to the responses database.
+    If no argument is provided, all responses pages are parsed. 
+    Argument expected: list of URL path endings (after the "http://dota2.gamepedia.com/")
+    pointing to the page with responses."""
     database_connection = sqlite3.connect('responses.db')
     cursor = database_connection.cursor()
     
-    for ending in parser.pages_for_category(parser.CATEGORY):
+    if not endings:
+        endings = parser.pages_for_category(parser.CATEGORY)
+        
+    for ending in endings:
         print(ending)
         responses_dict = parser.create_responses_text_and_link_dict(ending)
         for key, value in responses_dict.items():
-            cursor.execute("INSERT INTO responses VALUES (?, ?, ?)", (key, value, ending.replace('_', ' ').replace('responses', '').strip()))
+            cursor.execute("INSERT INTO responses(response, link, hero) VALUES (?, ?, ?)", 
+                           (key, value, ending.replace('_', ' ').replace('/Responses', '').strip()))
         database_connection.commit()
     
     cursor.close()
@@ -161,5 +168,6 @@ if __name__ == '__main__':
     #add_hero_specific_responses()
     #create_heroes_database()
     #add_hero_ids_to_general_responses()
-    delete_old_comment_ids()
+    add_hero_specific_responses(["Underlord/Responses"])
+    #delete_old_comment_ids()
     

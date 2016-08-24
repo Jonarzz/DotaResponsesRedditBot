@@ -65,4 +65,5 @@ EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance
                       "i don't think so", "I know, right?", "it begins", "too soon", "well done",
                       "i like it", "are you okay?", "ah, nice", "about time", "very good",
                       "are you kidding me?", "at last", "got it", "what happened?", "oh boy",
-                      "nice one", "i am", "exactly so", "aphotic shield", "ghost scepter", "outworld devourer"]
+                      "nice one", "i am", "exactly so", "aphotic shield", "ghost scepter",
+                      "outworld devourer", "shadow shaman"]
