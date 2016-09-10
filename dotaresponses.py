@@ -32,6 +32,63 @@ COMMENTS_DB_CONN = sqlite3.connect(os.path.join(SCRIPT_DIR, 'comments.db'), dete
 COMMENTS_DB_CURSOR = COMMENTS_DB_CONN.cursor()
 
 
+def add_invoker_response(comment, heroes_dict, response):
+    comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
+    save_comment_id(comment.id, do_log=True)
+        
+    
+def add_flair_specific_response_and_return(comment, heroes_dict, response):
+    RESPONSES_DB_CURSOR.execute("SELECT id, img_dir FROM heroes WHERE css=?", [comment.author_flair_css_class])
+    hero_id_img = RESPONSES_DB_CURSOR.fetchone()
+    if hero_id_img:
+        RESPONSES_DB_CURSOR.execute("SELECT link FROM responses WHERE response=? AND hero_id=?", [response, hero_id_img[0]])
+        link = RESPONSES_DB_CURSOR.fetchone()
+        if link:
+            comment.reply(create_reply(link[0], heroes_dict, comment.body, hero_id_img[1]))
+            save_comment_id(comment.id, do_log=True)
+            return True
+            
+    
+def add_shitty_wizard_response(comment, heroes_dict, response):
+    RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY RANDOM() LIMIT 1;", [response])
+    link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
+    RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
+    img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
+    comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
+    save_comment_id(comment.id, do_log=True)
+            
+            
+def add_sniper_response(comment, heroes_dict, response):
+    comment.reply(create_reply_sniper_ending(properties.SNIPER_RESPONSE_URL, heroes_dict, comment.body, properties.SNIPER_IMG_DIR))
+    save_comment_id(comment.id, do_log=True)
+    
+    
+def add_regular_response(comment, heroes_dict, response):
+    RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY hero_id DESC, RANDOM() LIMIT 1", [response])
+    link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
+    if link_and_hero_id:
+        RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
+        img_dir = RESPONSES_DB_CURSOR.fetchone()
+        if img_dir:
+            comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img=img_dir[0]))
+            log("Added: " + comment.id)
+        else:
+            comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body))
+            log("Added: " + comment.id)
+
+            
+def prepare_specific_responses():
+    output_dict = {}
+    for response in properties.INVOKER_BOT_RESPONSES:
+        output_dict[response] = add_invoker_response
+    output_dict["shitty wizard"] = add_shitty_wizard_response
+    output_dict["ho ho ha ha"] = add_sniper_response
+    return output_dict    
+    
+
+SPECIFIC_RESPONSES_DICT = prepare_specific_responses()
+
+
 def execute():
     """Main method executing the script.
 
@@ -60,9 +117,8 @@ def add_comments_to_submission(submission, sticky):
         return
 
     heroes_dict = parser.dictionary_from_file(properties.HEROES_FILENAME)
-    shitty_wizard_dict = parser.dictionary_from_file(properties.SHITTY_WIZARD_FILENAME)
 
-    add_comments(submission, heroes_dict, shitty_wizard_dict)
+    add_comments(submission, heroes_dict)
 
 
 def add_message_to_file(message, filename):
@@ -79,7 +135,7 @@ def log(message, error=False):
         add_message_to_file(message, properties.INFO_FILENAME)
 
 
-def add_comments(submission, heroes_dict, shitty_wizard_dict):
+def add_comments(submission, heroes_dict):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
     All comments are loaded. If comment ID is in the already doone comments database, next comment
@@ -100,45 +156,15 @@ def add_comments(submission, heroes_dict, shitty_wizard_dict):
         if response in properties.EXCLUDED_RESPONSES:
             save_comment_id(comment.id)
             continue
-            
-        if response in properties.INVOKER_BOT_RESPONSES:
-            comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, heroes_dict, properties.INVOKER_IMG_DIR))
-            save_comment_id(comment.id, do_log=True)
+        
+        if add_flair_specific_response_and_return(comment, heroes_dict, response):
             continue
-        
-        RESPONSES_DB_CURSOR.execute("SELECT id, img_dir FROM heroes WHERE css=?", [comment.author_flair_css_class])
-        hero_id_img = RESPONSES_DB_CURSOR.fetchone()
-        if hero_id_img:
-            RESPONSES_DB_CURSOR.execute("SELECT link FROM responses WHERE response=? AND hero_id=?", [response, hero_id_img[0]])
-            link = RESPONSES_DB_CURSOR.fetchone()
-            if link:
-                comment.reply(create_reply(link[0], heroes_dict, comment.body, hero_id_img[1]))
-                save_comment_id(comment.id, do_log=True)
-                continue
-        
-        if response == "shitty wizard":
-            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY RANDOM() LIMIT 1;", [response])
-            link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
-            RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
-            img_dir = RESPONSES_DB_CURSOR.fetchone()[0]
-            comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img_dir))
-            log("Added: " + comment.id)
-        elif response == "ho ho ha ha":
-            comment.reply(create_reply_sniper_ending(properties.SNIPER_RESPONSE_URL, heroes_dict, comment.body, properties.SNIPER_IMG_DIR))
-            log("Added: " + comment.id)
-        else:
-            RESPONSES_DB_CURSOR.execute("SELECT link, hero_id FROM responses WHERE response=? AND hero IS NOT NULL ORDER BY hero_id DESC, RANDOM() LIMIT 1", [response])
-            link_and_hero_id = RESPONSES_DB_CURSOR.fetchone()
-            if link_and_hero_id:
-                RESPONSES_DB_CURSOR.execute("SELECT img_dir FROM heroes WHERE id=?", [link_and_hero_id[1]])
-                img_dir = RESPONSES_DB_CURSOR.fetchone()
-                if img_dir:
-                    comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body, img=img_dir[0]))
-                    log("Added: " + comment.id)
-                else:
-                    comment.reply(create_reply(link_and_hero_id[0], heroes_dict, comment.body))
-                    log("Added: " + comment.id)
-
+            
+        if response in SPECIFIC_RESPONSES_DICT:
+            SPECIFIC_RESPONSES_DICT[specific_response](comment, heroes_dict, response)
+            continue
+                
+        add_regular_response(comment, heroes_dict, response)
         save_comment_id(comment.id)
         
         
