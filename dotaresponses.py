@@ -161,7 +161,7 @@ def add_comments(submission, heroes_dict):
             continue
             
         if response in SPECIFIC_RESPONSES_DICT:
-            SPECIFIC_RESPONSES_DICT[specific_response](comment, heroes_dict, response)
+            SPECIFIC_RESPONSES_DICT[response](comment, heroes_dict, response)
             continue
                 
         add_regular_response(comment, heroes_dict, response)
