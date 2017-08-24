@@ -168,6 +168,6 @@ if __name__ == '__main__':
     #add_hero_specific_responses()
     #create_heroes_database()
     #add_hero_ids_to_general_responses()
-    add_hero_specific_responses(["Underlord/Responses"])
-    #delete_old_comment_ids()
+    #add_hero_specific_responses(["Underlord/Responses"])
+    delete_old_comment_ids()
     
