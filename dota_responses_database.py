@@ -26,12 +26,28 @@ def create_responses_database():
     c = conn.cursor()
 
     c.execute('CREATE TABLE IF NOT EXISTS responses (response text, link text, hero text, hero_id integer)')
-    for key, value in responses_dictionary.items():
-        c.execute("INSERT INTO responses(response, text) VALUES (?, ?)", (key, value))
+    for response, link in responses_dictionary.items():
+        c.execute("INSERT INTO responses(response, link) VALUES (?, ?)", (response, link))
 
     conn.commit()
     c.close()
+    
+    
+def update_responses_database():
+    """Method that updates an SQLite database with pairs response-link
+    based on the JSON file with such pairs which was used before."""
+    responses_dictionary = parser.dictionary_from_file(properties.RESPONSES_FILENAME)
+    
+    conn = sqlite3.connect('responses.db')
+    c = conn.cursor()
+    
+    for response, link in responses_dictionary.items():
+        c.execute("UPDATE responses SET link = ? WHERE response = ? AND link != ?", (link, response, link))
+        c.execute("INSERT INTO responses(response, link) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM responses WHERE response = ?)", (response, link, response))
 
+    conn.commit()
+    c.close()
+    
 
 def create_comments_database():
     """Method that creates an SQLite database with ids of already checked comments."""
@@ -63,6 +79,7 @@ def delete_old_comment_ids():
     conn = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
     c = conn.cursor()
     c.execute("DELETE FROM comments WHERE date < ?", ([str(furthest_date)]))
+    conn.execute("VACUUM")
     conn.commit()
     c.execute("SELECT Count(*) FROM comments")
     num_of_ids = c.fetchone()[0]
@@ -170,4 +187,5 @@ if __name__ == '__main__':
     #add_hero_ids_to_general_responses()
     #add_hero_specific_responses(["Underlord/Responses"])
     delete_old_comment_ids()
+    #update_responses_database()
     
