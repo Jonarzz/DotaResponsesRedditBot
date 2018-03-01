@@ -221,7 +221,7 @@ def prepare_response(response):
     i = 1
     new_response = response
     try:
-        while response[-1] == response[-1 - i]:
+        while not response[-1].isalnum() and response[-1] == response[-1 - i]:
             new_response = new_response[:-1]
             i += 1
     except IndexError:
