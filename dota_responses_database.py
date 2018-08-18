@@ -26,8 +26,8 @@ def create_responses_database():
     c = conn.cursor()
 
     c.execute('CREATE TABLE IF NOT EXISTS responses (response text, link text, hero text, hero_id integer)')
-    for response, link in responses_dictionary.items():
-        c.execute("INSERT INTO responses(response, link) VALUES (?, ?)", (response, link))
+    for key, value in responses_dictionary.items():
+        c.execute("INSERT INTO responses(response, text) VALUES (?, ?)", (key, value))
 
     conn.commit()
     c.close()

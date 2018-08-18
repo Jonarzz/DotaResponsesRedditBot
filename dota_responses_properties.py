@@ -14,23 +14,24 @@ RESPONSES_FILENAME = ''
 HEROES_FILENAME = ''
 SHITTY_WIZARD_FILENAME = ''
 
-COMMENT_ENDING = ''
                     
 INFO_FILENAME = ''
 ERROR_FILENAME = ''
+COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz*
+                    \n\n*^(Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys\_reddit\_account for the server!)*"""                   
 
-NUMBER_OF_DAYS_TO_DELETE_COMMENT = 7
+NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
 
 INVOKER_BOT_RESPONSES = ['one of my favourites', 'one of my favorites', 'r/dota2smut', '/r/dota2smut', 'dota2smut']
 INVOKER_RESPONSE = 'One of my favorites!'
 INVOKER_RESPONSE_URL = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6/Invo_ability_invoke_01.mp3'
-INVOKER_ENDING = 'Thus I invoke masturbation!'
+INVOKER_ENDING = '^^Thus ^^I ^^Invoke ^^Masturbation'
 INVOKER_IMG_DIR = '/hero-invoker'
 INVOKER_HERO_NAME = 'Dirty Invoker'
 
 SNIPER_RESPONSE_URL = 'https://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
 SNIPER_IMG_DIR = '/hero-sniper'
-SNIPER_TRIGGER_WARNING = 'Trigger warning: Sniper'
+SNIPER_TRIGGER_WARNING = 'trigger warning: Sniper'
 
 EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",

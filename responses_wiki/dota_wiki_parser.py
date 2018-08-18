@@ -202,10 +202,10 @@ def short_hero_name_from_url(url):
     """Method that returns a short hero name for the given url
     (taken from the filename on the Wiki server)."""
     url = url.strip()
-    search = re.search(r'\/(\w+?)_[A-z0-9_]+?\.mp3$', url)
+    search = re.search(r'\/(\w+?)_[A-z0-9_]+?\.mp3$', url, re.IGNORECASE)
     if search:
         if search.group(1) == 'Dlc':
-            search = re.search(r'\/(Dlc_\w+?)_[A-z0-9_]+?\.mp3$', url)
+            search = re.search(r'\/(Dlc_\w+?)_[A-z0-9_]+?\.mp3$', url, re.IGNORECASE)
             if search.group(1) == 'tech':
                 return 'Dlc_tech_ann'
         return search.group(1)
