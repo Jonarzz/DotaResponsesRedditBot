@@ -19,7 +19,7 @@ __author__ = 'Jonarzz'
 URL_BEGINNING = 'http://dota2.gamepedia.com/'
 URL_API = ('api.php?action=query&list=categorymembers&cmlimit=max'
            '&cmprop=title&format=json&cmtitle=Category:')
-CATEGORY = 'Lists of responses'
+CATEGORY = 'Responses'
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
