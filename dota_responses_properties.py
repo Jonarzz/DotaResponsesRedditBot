@@ -18,7 +18,7 @@ SHITTY_WIZARD_FILENAME = ''
 INFO_FILENAME = ''
 ERROR_FILENAME = ''
 COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz*
-                    \n\n*^(Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys\_reddit\_account for the server!)*"""                   
+                    \n\n*^(Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys_reddit_account for the server!)*"""                   
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
 

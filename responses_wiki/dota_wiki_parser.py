@@ -19,7 +19,7 @@ __author__ = 'Jonarzz'
 URL_BEGINNING = 'http://dota2.gamepedia.com/'
 URL_API = ('api.php?action=query&list=categorymembers&cmlimit=max'
            '&cmprop=title&format=json&cmtitle=Category:')
-CATEGORY = 'Lists of responses'
+CATEGORY = 'Responses'
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
@@ -31,14 +31,6 @@ def generate_dictionaries(responses_filename, heroes_filename, shitty_wizard_fil
     json.dump(responses, open(os.path.join(SCRIPT_DIR, responses_filename), "w"))
     json.dump(heroes, open(os.path.join(SCRIPT_DIR, heroes_filename), "w"))
     json.dump(shitty_wizard, open(os.path.join(SCRIPT_DIR, shitty_wizard_filename), "w"))
-
-
-def dictionary_from_file(filename):
-    """Method used to load a dictionary from text file with given name
-    (file contains JSON structure)."""
-    with open(os.path.join(SCRIPT_DIR, filename)) as file:
-        dictionary = json.load(file)
-        return dictionary
     
     
 def create_responses_text_and_link_dict(ending):
@@ -58,7 +50,8 @@ def create_responses_text_and_link_dict(ending):
             responses_dict[key] = value
     
     return responses_dict
-                
+          
+          
 def dictionary_of_responses(pages_endings):
     """Method that creates dictionaries - with the responses (response text - link to the file),
     with hero names (short hero name used in Wiki files - long hero names),
@@ -206,7 +199,7 @@ def short_hero_name_from_url(url):
     if search:
         if search.group(1) == 'Dlc':
             search = re.search(r'\/(Dlc_\w+?)_[A-z0-9_]+?\.mp3$', url, re.IGNORECASE)
-            if search.group(1) == 'tech':
+            if search.group(1) == 'Dlc_tech':
                 return 'Dlc_tech_ann'
         return search.group(1)
 
@@ -222,7 +215,3 @@ def ellipsis_to_three_dots(dictionary):
             newdict[new] = newdict.pop(key)
 
     return newdict
-
-
-# generate_dictionaries(properties.RESPONSES_FILENAME, properties.HEROES_FILENAME, properties.SHITTY_WIZARD_FILENAME)
-# dictionary = dictionary_from_file(properties.RESPONSES_FILENAME)
