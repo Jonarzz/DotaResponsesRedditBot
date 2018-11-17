@@ -43,6 +43,7 @@ def create_responses_text_and_link_dict(url_path):
 
     return responses_dict
 
+    # TODO move to custom rules in config
     # responses['one of my favourites'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6' \
     #                                     '/Invo_ability_invoke_01.mp3 '
     # responses['lolicon'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a9/Arcwar_lasthit_04.mp3'
@@ -103,26 +104,34 @@ def pages_for_category(category_name):
 
 
 def response_text_from_element(element):
-    """Method that returns a key for a given element taken from parsed html body.
+    """Method that returns a plaintext for a given element taken from parsed html body. Removes all HTML tags as well.
+    Works specifically with currently existing responses on Gamepedia.
+    Note: Code can be replaced with older string manipulation equivalent if needed, but it could be unsafe for elements
+    that contain <span> tags.
+
+    :param element: The html code to be parsed for response
+    :return: plaintext clean response
     """
-    start_index = element.rfind("</a>") + 4
-    end_index = element.find("</li>") - 1
-    key = element[start_index:end_index]
-    key = clean_key(key)
+    soup = BeautifulSoup(element, 'html.parser')
+    link = soup.find('a')
+    link.decompose()
+    tooltip = soup.find('span')
+    tooltip.decompose()
+    key = clean_key(soup.get_text())
     return key
 
 
 def clean_key(key):
-    """Method that cleans the given key, so that it is a lowercase string with
-    no dots or exclamation marks ending the string. All html tags are removed as well.
-    :param key: the key to be cleaned
-    """
+    """Method that cleans the given key. It:
+    * removes anything between parenthesis
+    * removes trailing and leading spaces
+    * removes the ending '.', '!' and '--'
+    * removes double spaces
+    * changes to lowercase
 
-    og = key
-    if "<i>" in key:
-        start_index = key.find("<i>")
-        end_index = key.rfind("</i>") + 4
-        key = key.replace(key[start_index:end_index], "")
+    :param key: the key to be cleaned
+    :return: cleaned key
+    """
 
     if "(" in key and ")" in key:
         start_index = key.find("(")
@@ -131,13 +140,10 @@ def clean_key(key):
 
     key = key.strip()
 
-    try:
-        if key[-1] in [".", "!"]:
-            key = key[:-1]
-    except IndexError:
-        print("IndexError in: " + og)
+    if len(key) > 1 and key[-1] in [".", "!"]:
+        key = key[:-1]
 
-    if key[-2:] == "--":
+    if len(key) > 2 and key[-2:] == "--":
         key = key[:-2]
 
     key = key.replace("  ", " ")
@@ -198,7 +204,6 @@ def populate_responses():
         hero_id = get_hero_id_from_database(name=hero_name)
         response_link_dict = create_responses_text_and_link_dict(url_path=path)
 
-        print(response_link_dict)
         for response, link in response_link_dict.items():
             add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
 
