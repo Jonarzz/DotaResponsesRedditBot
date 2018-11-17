@@ -1,109 +1,62 @@
-# coding=UTF-8
-
 """Module used to create dictionaries requited for the script to work.
 
-Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota2.gamepedia.com/"""
+Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota2.gamepedia.com/
+"""
 
-import os
-import re
 import json
+import os
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
-import dota_responses_properties as properties
+from dota_responses_database import add_hero_to_database, get_hero_id_from_database, add_response_to_database
 
 __author__ = 'Jonarzz'
 
-
 URL_BEGINNING = 'http://dota2.gamepedia.com/'
-URL_API = ('api.php?action=query&list=categorymembers&cmlimit=max'
-           '&cmprop=title&format=json&cmtitle=Category:')
+URL_API = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
 CATEGORY = 'Responses'
 
 SCRIPT_DIR = os.path.dirname(__file__)
 
 
-def generate_dictionaries(responses_filename, heroes_filename, shitty_wizard_filename):
-    """Method used to generate dictionaries for responses and hero names
-    (short, used in urls matched with full names)."""
-    responses, heroes, shitty_wizard = dictionary_of_responses(pages_for_category(CATEGORY))
-    json.dump(responses, open(os.path.join(SCRIPT_DIR, responses_filename), "w"))
-    json.dump(heroes, open(os.path.join(SCRIPT_DIR, heroes_filename), "w"))
-    json.dump(shitty_wizard, open(os.path.join(SCRIPT_DIR, shitty_wizard_filename), "w"))
-    
-    
-def create_responses_text_and_link_dict(ending):
-    """Method that for a given page ending creates a dictionary of pairs: response text-link."""
+def create_responses_text_and_link_dict(url_path):
+    """Method that for a given page url_path creates a dictionary of pairs: response text-link.
+
+    :param url_path: path for the hero's url as string
+    :return: dictionary in the form of dict['response'] = link
+    """
+
     responses_dict = {}
-    
-    list_of_responses = create_list_of_responses(ending)
-    
+
+    list_of_responses = create_list_of_responses(url_path)
+
     for element in list_of_responses:
         key = response_text_from_element(element)
         if " " not in key:
             continue
-            
+
         value = value_from_element(element)
-        
+
         if key not in responses_dict:
             responses_dict[key] = value
-    
+
     return responses_dict
-          
-          
-def dictionary_of_responses(pages_endings):
-    """Method that creates dictionaries - with the responses (response text - link to the file),
-    with hero names (short hero name used in Wiki files - long hero names),
-    with "shitty wizard" responses (hero name - link to the file).
 
-    The dictionaries are created based on html body of a Wiki page related to the hero's responses.
-    Each response and hero name is prepared to be saved: stripped (unnecesary words/characters) and
-    turned to lowercase (only response text)."""
-    responses = {}
-    heroes = {}
-    shitty_wizard = {}
+    # responses['one of my favourites'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6' \
+    #                                     '/Invo_ability_invoke_01.mp3 '
+    # responses['lolicon'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a9/Arcwar_lasthit_04.mp3'
+    # responses['ho ho ha ha'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
+    #
+    # responses['caw'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/f/f6/Phoenix_bird_last_hit.mp3'
+    # responses['skree'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a5/Phoenix_bird_attack.mp3'
+    # responses['beep boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/4/4f/Wisp_Move04.mp3'
+    # responses['boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/5f/Wisp_Move02.mp3'
+    # responses['beep'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/54/Wisp_Move01.mp3'
+    #
+    # heroes['Phoenix'] = 'Phoenix'
+    # heroes['Wisp'] = 'Io'
 
-    for ending in pages_endings:
-        print(ending)
-        list_of_responses = create_list_of_responses(ending)
-
-        for element in list_of_responses:
-            key = response_text_from_element(element)
-            if " " not in key:
-                continue
-            value = value_from_element(element)
-
-            short_hero = short_hero_name_from_url(value)
-            hero = ending.replace('_', ' ')
-            hero = hero.replace(' Pack', '')
-            hero = hero.replace(' responses', '')
-
-            if short_hero not in heroes:
-                heroes[short_hero] = hero
-
-            if key == "shitty wizard":
-                if hero not in shitty_wizard:
-                    shitty_wizard[hero] = value
-            else:
-                if key not in responses:
-                    responses[key] = value
-
-    responses['one of my favourites'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6/Invo_ability_invoke_01.mp3'
-    responses['lolicon'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a9/Arcwar_lasthit_04.mp3'
-    responses['ho ho ha ha'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
-    
-    responses['caw'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/f/f6/Phoenix_bird_last_hit.mp3'
-    responses['skree'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a5/Phoenix_bird_attack.mp3'
-    responses['beep boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/4/4f/Wisp_Move04.mp3'
-    responses['boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/5f/Wisp_Move02.mp3'
-    responses['beep'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/54/Wisp_Move01.mp3'
-    
-    heroes['Phoenix'] = 'Phoenix'
-    heroes['Wisp'] = 'Io'
-    
-    return responses, heroes, shitty_wizard
-    
 
 def create_list_of_responses(ending):
     page = page_to_parse(URL_BEGINNING + ending)
@@ -113,12 +66,18 @@ def create_list_of_responses(ending):
     for element in soup.find_all("li"):
         if "sm2_button" in str(element):
             list_of_responses.append(str(element))
-            
+
     return list_of_responses
-    
-    
+
+
 def page_to_parse(url):
-    """Method used to open given url and return the received body (UTF-8 encoding)."""
+    """Method used to open given url and return the received body (UTF-8 encoding).
+    URL can contain spaces, which need to be changed to underscores before sending request.
+
+    :param url: URL to be parsed.
+    :return: html response for the url
+    """
+    url = url.replace(" ", "_")
     request = Request(url)
     request.add_header("User-Agent", "Mozilla/5.0")
     response = urlopen(request)
@@ -126,23 +85,26 @@ def page_to_parse(url):
 
 
 def pages_for_category(category_name):
-    """Method that returns a list of page endings for a given Wiki category."""
-    category_name = category_name.replace(" ", "_")
+    """Method that returns a list of page endings for a given Wiki category.
+
+    :param category_name: returns all category members in json response from gamepedia API.
+    """
     json_response = page_to_parse(URL_BEGINNING + URL_API + category_name)
 
-    output = []
+    pages = []
 
     parsed_json = json.loads(json_response)
-    for categorymembers in parsed_json["query"]["categorymembers"]:
-        for value in categorymembers.values():
-            if isinstance(value, str) and '/' not in value:
-                output.append(value.replace(" ", "_"))
+    for category_members in parsed_json['query']['categorymembers']:
+        title = category_members['title']
+        if isinstance(title, str):
+            pages.append(title)
 
-    return output
+    return pages
 
 
 def response_text_from_element(element):
-    """Method that returns a key for a given element taken from parsed html body."""
+    """Method that returns a key for a given element taken from parsed html body.
+    """
     start_index = element.rfind("</a>") + 4
     end_index = element.find("</li>") - 1
     key = element[start_index:end_index]
@@ -152,7 +114,11 @@ def response_text_from_element(element):
 
 def clean_key(key):
     """Method that cleans the given key, so that it is a lowercase string with
-    no dots or exclamation marks ending the string. All html tags are removed as well."""
+    no dots or exclamation marks ending the string. All html tags are removed as well.
+    :param key: the key to be cleaned
+    """
+
+    og = key
     if "<i>" in key:
         start_index = key.find("<i>")
         end_index = key.rfind("</i>") + 4
@@ -169,7 +135,7 @@ def clean_key(key):
         if key[-1] in [".", "!"]:
             key = key[:-1]
     except IndexError:
-        print("IndexError in: " + key)
+        print("IndexError in: " + og)
 
     if key[-2:] == "--":
         key = key[:-2]
@@ -191,27 +157,53 @@ def value_from_element(element):
     return value
 
 
-def short_hero_name_from_url(url):
-    """Method that returns a short hero name for the given url
-    (taken from the filename on the Wiki server)."""
-    url = url.strip()
-    search = re.search(r'\/(\w+?)_[A-z0-9_]+?\.mp3$', url, re.IGNORECASE)
-    if search:
-        if search.group(1) == 'Dlc':
-            search = re.search(r'\/(Dlc_\w+?)_[A-z0-9_]+?\.mp3$', url, re.IGNORECASE)
-            if search.group(1) == 'Dlc_tech':
-                return 'Dlc_tech_ann'
-        return search.group(1)
+def is_hero_type(page):
+    """Method to check if page belongs to a hero, creep-hero(Warlock's Golem). There's a few inconsistencies due to
+    Gamepedia's naming such as Feast of Abscession being a hero type in spite of being voice pack same as Call of
+    Bladeform Legacy and Mercurial's Call.
+
+    :param page: Page name as string.
+    :return: True if page belongs to hero else False
+    """
+    if '/Responses' in page:
+        return True
+    else:
+        return False
 
 
-def ellipsis_to_three_dots(dictionary):
-    """Method that replaces all ellipsis (…) with three dots (...) in the dictionary ketys."""
-    newdict = {}
+def get_hero_name(hero_page):
+    """Method that parses hero name from it's responses page
 
-    for key in dictionary:
-        newdict[key] = dictionary[key]
-        if "…" in key:
-            new = key.replace("…", "...")
-            newdict[new] = newdict.pop(key)
+    :param hero_page: hero's responses page as string.
+    :return: Hero name as parsed
+    """
+    return hero_page.split('/')[0]
 
-    return newdict
+
+def populate_responses():
+    """Method that adds all the responses to database. Assumes responses and hero database are already built.
+    hero_name is used commonly for both announcers, heroes and voice packs.
+    """
+
+    paths = pages_for_category(CATEGORY)
+    for path in paths:
+        if is_hero_type(path):
+            # path points to hero responses
+            hero_name = get_hero_name(path)
+        else:
+            # path points to voice pack, announcer or shopkeeper responses
+            hero_name = path
+
+        add_hero_to_database(name=hero_name)
+        hero_id = get_hero_id_from_database(name=hero_name)
+        response_link_dict = create_responses_text_and_link_dict(url_path=path)
+
+        print(response_link_dict)
+        for response, link in response_link_dict.items():
+            add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
+
+    # TODO move to config
+    custom_responses = {}
+
+    for response, link in custom_responses.items():
+        add_response_to_database(response=response, link=link)
