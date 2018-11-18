@@ -33,10 +33,13 @@ def create_responses_text_and_link_dict(url_path):
 
     for element in list_of_responses:
         key = response_text_from_element(element)
+
+        # ignores single word responses such as yeah, no, yes, victory etc.
+        # would be better to filter using a custom ignored words dictionary
         if " " not in key:
             continue
 
-        value = value_from_element(element)
+        value = link_from_element(element)
 
         if key not in responses_dict:
             responses_dict[key] = value
@@ -109,14 +112,16 @@ def response_text_from_element(element):
     Note: Code can be replaced with older string manipulation equivalent if needed, but it could be unsafe for elements
     that contain <span> tags.
 
-    :param element: The html code to be parsed for response
+    :param element: The html code to be parsed for the response
     :return: plaintext clean response
     """
     soup = BeautifulSoup(element, 'html.parser')
     link = soup.find('a')
-    link.decompose()
+    if link:
+        link.decompose()
     tooltip = soup.find('span')
-    tooltip.decompose()
+    if tooltip:
+        tooltip.decompose()
     key = clean_key(soup.get_text())
     return key
 
@@ -154,13 +159,17 @@ def clean_key(key):
     return key
 
 
-def value_from_element(element):
-    """Method that returns a value (url to the response) for a given element taken
-    from parsed html body."""
-    start_index = element.find("href=\"") + 6
-    end_index = element.find("\" title")
-    value = element[start_index:end_index]
-    return value
+def link_from_element(element):
+    """Method that returns a link (url to the response) for a given element taken
+    from parsed html body.
+
+    :param element: The html code to be parsed for the link
+    :return: The url to the response
+    """
+
+    soup = BeautifulSoup(element, 'html.parser')
+    link = soup.find('a').get('href')
+    return link
 
 
 def is_hero_type(page):
