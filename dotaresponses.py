@@ -7,14 +7,44 @@ prepared. The comment is posted as a reply to the original post on Reddit.
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
 
+import logging
 import traceback
-from datetime import datetime
 
 import dota_responses_account as account
 import dota_responses_database as db
 import dota_responses_properties as properties
 
 __author__ = 'Jonarzz'
+
+
+def setup_logger(log_format='%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s', log_name='',
+                 log_file_info=properties.INFO_FILENAME, log_file_error=properties.ERROR_FILENAME):
+    """Method to setup loggers (Can also use a single logger for error and info messages).
+    """
+
+    log = logging.getLogger(log_name)
+    log_formatter = logging.Formatter(log_format)
+
+    # uncomment this to get console output
+    # stream_handler = logging.StreamHandler()
+    # stream_handler.setFormatter(log_formatter)
+    # log.addHandler(stream_handler)
+
+    file_handler_info = logging.FileHandler(log_file_info, mode='w')
+    file_handler_info.setFormatter(log_formatter)
+    file_handler_info.setLevel(logging.INFO)
+    log.addHandler(file_handler_info)
+
+    file_handler_error = logging.FileHandler(log_file_error, mode='w')
+    file_handler_error.setFormatter(log_formatter)
+    file_handler_error.setLevel(logging.ERROR)
+    log.addHandler(file_handler_error)
+
+    log.setLevel(logging.INFO)
+    return log
+
+
+logger = setup_logger()
 
 
 def prepare_specific_responses():
@@ -42,8 +72,6 @@ def execute():
         sticky = reddit_account.subreddit(properties.SUBREDDIT).sticky()
     except:
         sticky = None
-
-    log('START')
 
     for submission in reddit_account.subreddit(properties.SUBREDDIT).new(limit=150):
         add_comments_to_submission(submission, sticky)
@@ -80,9 +108,9 @@ def add_comments(submission):
             continue
 
         response = prepare_response(comment.body)
+        save_comment_id(comment.id)
 
         if response in properties.EXCLUDED_RESPONSES:
-            save_comment_id(comment.id)
             continue
 
         if add_flair_specific_response_and_return(comment, response):
@@ -93,7 +121,6 @@ def add_comments(submission):
             continue
 
         add_regular_response(comment, response)
-        save_comment_id(comment.id)
 
 
 def prepare_response(response):
@@ -115,14 +142,13 @@ def prepare_response(response):
             new_response = new_response[:-1]
             i += 1
     except IndexError:
-        log("IndexError", True)
+        logger.error("IndexError in " + response)
 
     return new_response
 
 
-def save_comment_id(comment_id, do_log=False):
-    if do_log:
-        log("Added: " + comment_id)
+def save_comment_id(comment_id):
+    """Method that saves the comment id to the database"""
     db.add_comment_to_database(comment_id=comment_id)
 
 
@@ -132,7 +158,7 @@ def add_flair_specific_response_and_return(comment, response):
         link, hero_id = db.get_link_for_response(response=response, hero_id=hero_id)
         if link:
             comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id))
-            save_comment_id(comment.id, do_log=True)
+            logger.info("Added: " + comment.id)
             return True
 
 
@@ -145,15 +171,18 @@ def add_regular_response(comment, response):
     :param response: The plaintext processed comment body
     :return: None
     """
+
     link, hero_id = db.get_link_for_response(response=response)
 
     if link and hero_id:
         img_dir = db.get_img_dir_by_id(hero_id=hero_id)
+
         if img_dir:
             comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id, img=img_dir))
         else:
             comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id))
-        log("Added: " + comment.id)
+
+        logger.info("Added: " + comment.id)
 
 
 def create_reply(response_url, original_text, hero_id, img=None):
@@ -164,8 +193,8 @@ def create_reply(response_url, original_text, hero_id, img=None):
     rendering flairs properly.
     """
 
-    log('DEBUG: ' + str(response_url) + ' : ' + str(hero_id))
     hero_name = db.get_hero_name(hero_id)
+    logger.info(response_url + ' : ' + hero_name)
 
     # if img:
     #    return (
@@ -189,7 +218,7 @@ def add_shitty_wizard_response(comment, response):
 
 def add_invoker_response(comment):
     comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, properties.INVOKER_IMG_DIR))
-    save_comment_id(comment.id, do_log=True)
+    logger.info("Added: " + comment.id)
 
 
 def create_reply_invoker_ending(response_url, img_dir):
@@ -201,7 +230,7 @@ def create_reply_invoker_ending(response_url, img_dir):
 def add_sniper_response(comment):
     comment.reply(create_reply_sniper_ending(properties.SNIPER_RESPONSE_URL, comment.body,
                                              properties.SNIPER_IMG_DIR))
-    save_comment_id(comment.id, do_log=True)
+    logger.info("Added: " + comment.id)
 
 
 def create_reply_sniper_ending(response_url, original_text, img_dir):
@@ -209,25 +238,11 @@ def create_reply_sniper_ending(response_url, original_text, img_dir):
             .format(img_dir, original_text, response_url, properties.SNIPER_TRIGGER_WARNING, properties.COMMENT_ENDING))
 
 
-# To be replaced by logging
-def log(message, error=False):
-    """Method used to save messages to an proper (info/error) log file."""
-    if error:
-        add_message_to_file(message, properties.ERROR_FILENAME)
-    else:
-        add_message_to_file(message, properties.INFO_FILENAME)
-
-
-def add_message_to_file(message, filename):
-    """Method that appends given string message to a file with provided filename."""
-    with open(filename, 'a') as file:
-        file.write(str(datetime.now()) + '\n' + message + '\n')
-
-
 # Main script
 if __name__ == '__main__':
+    logger.info('START')
     while True:
         try:
             execute()
         except (KeyboardInterrupt, SystemExit):
-            log(traceback.format_exc(), True)
+            logger.error(traceback.format_exc())
