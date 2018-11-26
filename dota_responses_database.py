@@ -137,14 +137,7 @@ def delete_old_comment_ids():
     conn.execute("VACUUM")
 
     conn.commit()
-
-    c.execute('SELECT COUNT(*) FROM comments')
-    num_of_ids = c.fetchone()[0]
-
     c.close()
-
-    # TODO replace with logger
-    print("COMMENTS DB CLR\nNumber of IDs: " + str(num_of_ids))
 
 
 def check_if_comment_exists(comment_id):
