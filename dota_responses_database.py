@@ -49,6 +49,52 @@ def add_response_to_database(response, link, hero="", hero_id=""):
     c.close()
 
 
+def get_hero_id_by_response(response_url):
+    """Method that returns the hero id to which the given response url belongs to.
+
+    :param response_url: The url to the response.
+    :return The hero id
+    """
+
+    conn = sqlite3.connect('responses.db')
+    c = conn.cursor()
+
+    c.execute('SELECT hero_id FROM responses WHERE link = ?', (response_url,))
+    hero_id = c.fetchone()[0]
+
+    conn.commit()
+    c.close()
+
+    return hero_id
+
+
+def get_link_for_response(response, hero_id=None):
+    """Method that returns the link to the response. First tries to match with the given hero_id, otherwise returns
+    random result.
+
+    :param response: The plaintext response.
+    :param hero_id: The hero's id.
+    :return The link to the response and the hero_id
+    """
+
+    conn = sqlite3.connect('responses.db')
+    c = conn.cursor()
+
+    if hero_id is not None:
+        c.execute('SELECT link, hero_id FROM responses WHERE response = ? AND hero_id = ?', (response, hero_id))
+    else:
+        c.execute('SELECT link, hero_id FROM responses WHERE response = ? AND hero_id IS NOT NULL '
+                  'ORDER BY hero_id DESC, RANDOM() LIMIT 1', (response,))
+
+    link = c.fetchone()[0]
+    hero_id = c.fetchone()[1]
+
+    conn.commit()
+    c.close()
+
+    return link, hero_id
+
+
 # COMMENTS DATABASE METHODS
 def create_comments_database():
     """Method that creates an SQLite database with ids of already checked comments.
@@ -67,6 +113,7 @@ def add_comment_to_database(comment_id):
     """Method that adds current time and Reddit comments to database by their id.
     :param comment_id: The id of comment on Reddit
     """
+
     conn = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
     c = conn.cursor()
 
@@ -81,19 +128,42 @@ def delete_old_comment_ids():
     (number corresponding to number of days).
     """
 
-    furthest_date = datetime.date.today() - datetime.timedelta(days=properties.NUMBER_OF_DAYS_TO_DELETE_COMMENT)
-
     conn = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
     c = conn.cursor()
+
+    furthest_date = datetime.date.today() - datetime.timedelta(days=properties.NUMBER_OF_DAYS_TO_DELETE_COMMENT)
+
     c.execute("DELETE FROM comments WHERE date < ?", ([str(furthest_date)]))
     conn.execute("VACUUM")
+
     conn.commit()
+
     c.execute('SELECT COUNT(*) FROM comments')
     num_of_ids = c.fetchone()[0]
+
     c.close()
 
     # TODO replace with logger
     print("COMMENTS DB CLR\nNumber of IDs: " + str(num_of_ids))
+
+
+def check_if_comment_exists(comment_id):
+    """Method that checks if the comment id given is already present in the database
+
+    :param comment_id: The id of the comment on Reddit
+    :return: True if the it is already present in database, else False
+    """
+
+    conn = sqlite3.connect('comments.db', detect_types=sqlite3.PARSE_DECLTYPES)
+    c = conn.cursor()
+
+    c.execute('SELECT COUNT(*) FROM comments WHERE comment_id = ?', (comment_id,))
+    result = int(c.fetchone()[0]) > 0
+
+    conn.commit()
+    c.close()
+
+    return result
 
 
 # HEROES DATABASE METHODS
@@ -130,7 +200,7 @@ def add_hero_to_database(name, img_dir="", css=""):
 
 
 def get_hero_id_from_database(name):
-    """Method to get hero's id in database
+    """Method to get hero's id from database.
 
     :param name: Hero's name
     :return: Hero's id
@@ -148,10 +218,67 @@ def get_hero_id_from_database(name):
     return hero_id
 
 
+def get_hero_name(hero_id):
+    """Method to get hero's name from database.
+
+    :param hero_id: Hero's id
+    :return: Hero's name
+    """
+
+    conn = sqlite3.connect('heroes.db')
+    c = conn.cursor()
+
+    c.execute('SELECT name from heroes WHERE id = ? ', (hero_id,))
+    hero_name = c.fetchone()[0]
+
+    conn.commit()
+    c.close()
+
+    return hero_name
+
+
+def get_hero_id_by_css(css):
+    """Method to get hero_id from the database based on the flair css
+
+    :param css: Hero's css as in r/DotA2 subreddit
+    :return: Hero's id
+    """
+
+    conn = sqlite3.connect('heroes.db')
+    c = conn.cursor()
+
+    c.execute('SELECT id from heroes WHERE css = ? ', (css,))
+    hero_id = c.fetchone()[0]
+
+    conn.commit()
+    c.close()
+
+    return hero_id
+
+
+def get_img_dir_by_id(hero_id):
+    """Method to get image directory for hero's flair
+
+    :param hero_id: Hero's id
+    :return: The directory path to the image
+    """
+
+    conn = sqlite3.connect('heroes.db')
+    c = conn.cursor()
+
+    c.execute('SELECT img_dir from heroes WHERE id = ? ', (hero_id,))
+    img_dir = c.fetchone()[0]
+
+    conn.commit()
+    c.close()
+
+    return img_dir
+
+
 def add_heroes_to_database():
     """Method to add heroes to the database with hero names and proper css classes names as taken
     from the DotA2 subreddit and hero flair images from the reddit directory. Every hero has its
-    own id, so that it can be joined with the hero from responses database.
+    own id, so that it can be joined with the hero from responses database (Serves as Foreign Key).
 
     Note: Unused currently since flairs don't work in comments for new Reddit redesign.
     """
