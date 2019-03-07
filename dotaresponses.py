@@ -14,6 +14,7 @@ import os
 from datetime import datetime, date
 import random
 import sqlite3
+import re
 
 import praw
 
@@ -175,6 +176,19 @@ def save_comment_id(comment_id, do_log=False):
     COMMENTS_DB_CURSOR.execute("INSERT INTO comments VALUES (?, ?)", (comment_id, date.today()))
     COMMENTS_DB_CONN.commit()
 
+    
+def alter_link_to_new_version(link):
+    """Method that takes the old link(before Gamepedia Migration) and converts them to current version.
+    Old: https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/5/51/Mir_ability_arrow_11.mp3
+    New: https://gamepedia.cursecdn.com/dota2_gamepedia/5/51/Mir_ability_arrow_11.mp3
+    
+    There's no guarantee this will work properly in all cases (it should not). 
+    Remove this hack once all the links have been reparsed.
+    """
+    link = re.sub("https://(.*)/dota2_gamepedia/", "https://gamepedia.cursecdn.com/dota2_gamepedia/", link)
+    return link
+    
+    
 
 def create_reply(response_url, heroes_dict, orignal_text, img=None):
     """Method that creates a reply in reddit-post format.
@@ -182,6 +196,8 @@ def create_reply(response_url, heroes_dict, orignal_text, img=None):
     The message consists of a link the the response, the response itself, a warning about the sound
     and an ending added from the properties file (post footer).
     """
+    
+    response_url = alter_link_to_new_version(response_url)
     short_hero_name = parser.short_hero_name_from_url(response_url)
     log('DEBUG: ' + str(response_url) + ' : ' + str(short_hero_name))
     hero_name = heroes_dict[short_hero_name]
@@ -198,14 +214,16 @@ def create_reply(response_url, heroes_dict, orignal_text, img=None):
         )
         
         
-def create_reply_invoker_ending(response_url, heroes_dict, img_dir):   
+def create_reply_invoker_ending(response_url, heroes_dict, img_dir):
+    response_url = alter_link_to_new_version(response_url)
     return (
         "[]({}): [{}]({}) (sound warning: {})\n\n{}{}"
         .format(img_dir, properties.INVOKER_RESPONSE, response_url, properties.INVOKER_HERO_NAME, properties.INVOKER_ENDING, properties.COMMENT_ENDING)
         )
 
 
-def create_reply_sniper_ending(response_url, heroes_dict, orignal_text, img_dir):   
+def create_reply_sniper_ending(response_url, heroes_dict, orignal_text, img_dir):  
+    response_url = alter_link_to_new_version(response_url)
     return (
         "[]({}): [{}]({}) ({}){}"
         .format(img_dir, orignal_text, response_url, properties.SNIPER_TRIGGER_WARNING, properties.COMMENT_ENDING)
