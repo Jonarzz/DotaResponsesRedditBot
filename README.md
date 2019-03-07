@@ -17,6 +17,17 @@ All the responses are in lowercase in the dictionary, before comparision the com
 The bot will try to match a response of the hero that is in the comment's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
 
 ---
+### TODO
+Target: to complete the follwing in March
+* Move to Python 3.7
+* Have requirements.txt
+* Organise packages better
+* Write unittests
+* Setup hosting
+* Setup travis-ci, codecov and codacy
+* Have just run.py and test.py
+
+---
 ## Changelog:
 
 ##### 2.7:
