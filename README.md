@@ -1,10 +1,6 @@
 # Dota Responses Reddit Bot
-[![Maintainability](https://api.codeclimate.com/v1/badges/de2c724018076b34064f/maintainability)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/maintainability)
-[![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
-
+[![Build Status](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot)
 Bot adding reply comments with links to appropriate responses found on [/r/dota2](https://www.reddit.com/r/DotA2).
-
-*Thanks to [/u/iggys_reddit_account](https://www.reddit.com/u/iggys_reddit_account) the bot is running 24/7.*
 
 ![Example](https://i.imgur.com/PAcg57z.png)
 
@@ -19,14 +15,12 @@ The bot will try to match a response of the hero that is in the comment's author
 
 ---
 ## TODO:
-Target: to complete the follwing in March
+Target: to complete the following in March
 * Improve tests
 * Refactor code
 * Docs
 * Add support for custom responses
 * Add support dota plus voice lines.
-* Setup heroku hosting
-* Setup travis-ci, codecov and codacy
 
 ---
 ## Changelog:
