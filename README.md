@@ -18,11 +18,13 @@ The bot will try to match a response of the hero that is in the comment's author
 ---
 ## TODO:
 Target: to complete the following in March
+* Make the bot work in r/test
+* Add support for flair in responses
 * Improve tests
 * Refactor code
 * Docs
 * Add support for custom responses
-* Add support dota plus voice lines.
+* Add support dota plus voice lines
 
 ---
 ## Changelog:
