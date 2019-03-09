@@ -1,4 +1,5 @@
 # Dota Responses Reddit Bot
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/96e2b3fd0dfd495f87fda7dfad5fb545)](https://app.codacy.com/app/MePsyDuck/DotaResponsesRedditBot?utm_source=github.com&utm_medium=referral&utm_content=MePsyDuck/DotaResponsesRedditBot&utm_campaign=Badge_Grade_Dashboard)
 [![Maintainability](https://api.codeclimate.com/v1/badges/de2c724018076b34064f/maintainability)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/maintainability)
 [![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
 
