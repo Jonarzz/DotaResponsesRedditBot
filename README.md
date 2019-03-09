@@ -27,6 +27,17 @@ The bot will try to match a response of the hero that is in the comment's author
 * Add support for custom responses
 * Add support dota plus voice lines.
 ---
+### TODO
+Target: to complete the follwing in March
+* Move to Python 3.7
+* Have requirements.txt
+* Organise packages better
+* Write unittests
+* Setup hosting
+* Setup travis-ci, codecov and codacy
+* Have just run.py and test.py
+
+---
 ## Changelog:
 
 ##### 2.7:
