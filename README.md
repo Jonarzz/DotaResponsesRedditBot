@@ -19,23 +19,14 @@ The bot will try to match a response of the hero that is in the comment's author
 
 ---
 ## TODO:
-* Add logging
+Target: to complete the follwing in March
 * Improve tests
-* Improve folder structure
 * Refactor code
 * Docs
 * Add support for custom responses
 * Add support dota plus voice lines.
----
-### TODO
-Target: to complete the follwing in March
-* Move to Python 3.7
-* Have requirements.txt
-* Organise packages better
-* Write unittests
-* Setup hosting
+* Setup heroku hosting
 * Setup travis-ci, codecov and codacy
-* Have just run.py and test.py
 
 ---
 ## Changelog:
