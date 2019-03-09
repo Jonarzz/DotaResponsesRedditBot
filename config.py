@@ -1,24 +1,39 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
+import os
 
 __author__ = 'Jonarzz'
 
-APP_ID = ''
-APP_SECRET = ''
-APP_URI = ''
+# App config
+APP_ID = os.environ['APP_ID']
+APP_SECRET = os.environ['APP_SECRET']
+APP_URI = os.environ['APP_URI']
 APP_REFRESH_CODE = ''
+
+# Account config
 USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses and links to the proper
-             audio sample from http://dota2.gamepedia.com/Category:Lists_of_responses (author: /u/Jonarz)"""
-SUBREDDIT = "dota2"
-SCOPES = ''
+             audio sample from http://dota2.gamepedia.com/Category:Responses (author: /u/Jonarz)"""
+SUBREDDIT = "test"
+SCOPES = ' '  # This should be a list
+
+# Parser config
+URL_DOMAIN = 'http://dota2.gamepedia.com/'
+API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
+CATEGORY = 'Responses'
+
+# Path config
+DB_URL = os.environ['DATABASE_URL']
+LOG_DIR = 'logs'
+INFO_FILENAME = 'info.log'
+ERROR_FILENAME = 'error.log'
 RESPONSES_FILENAME = ''
 HEROES_FILENAME = ''
 SHITTY_WIZARD_FILENAME = ''
 
-                    
-INFO_FILENAME = ''
-ERROR_FILENAME = ''
-COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz*
-                    \n\n*^(Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys_reddit_account for the server!)*"""                   
+# Responses config
+COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz* \n\n*^(
+Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](
+https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](
+http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys_reddit_account for the server!)* """
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
 

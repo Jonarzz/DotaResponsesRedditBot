@@ -7,44 +7,14 @@ prepared. The comment is posted as a reply to the original post on Reddit.
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
 
-import logging
 import traceback
 
-import dota_responses_account as account
-import dota_responses_database as db
-import dota_responses_properties as properties
+import bot.account as account
+import config as properties
+import util.database as db
+from util.logger import logger
 
 __author__ = 'Jonarzz'
-
-
-def setup_logger(log_format='%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s', log_name='',
-                 log_file_info=properties.INFO_FILENAME, log_file_error=properties.ERROR_FILENAME):
-    """Method to setup loggers (Can also use a single logger for error and info messages).
-    """
-
-    log = logging.getLogger(log_name)
-    log_formatter = logging.Formatter(log_format)
-
-    # uncomment this to get console output
-    # stream_handler = logging.StreamHandler()
-    # stream_handler.setFormatter(log_formatter)
-    # log.addHandler(stream_handler)
-
-    file_handler_info = logging.FileHandler(log_file_info, mode='w')
-    file_handler_info.setFormatter(log_formatter)
-    file_handler_info.setLevel(logging.INFO)
-    log.addHandler(file_handler_info)
-
-    file_handler_error = logging.FileHandler(log_file_error, mode='w')
-    file_handler_error.setFormatter(log_formatter)
-    file_handler_error.setLevel(logging.ERROR)
-    log.addHandler(file_handler_error)
-
-    log.setLevel(logging.INFO)
-    return log
-
-
-logger = setup_logger()
 
 
 def prepare_specific_responses():

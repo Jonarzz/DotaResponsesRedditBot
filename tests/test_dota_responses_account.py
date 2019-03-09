@@ -2,15 +2,16 @@
 
 import unittest
 
-import dota_responses_account as account
-import dota_responses_properties as properties
+import bot.account as account
+import config as properties
 
 __author__ = 'Jonarzz'
 
 
 class AccountTest(unittest.TestCase):
     """Class used to test dota_responses_account module.
-    Inherits from TestCase class of unittest module."""
+    Inherits from TestCase class of unittest module.
+    """
 
     def test_get_reddit(self):
         """Method testing get_reddit method from dota_responses_account module.
@@ -53,11 +54,17 @@ class AccountTest(unittest.TestCase):
         self.assertTrue(prepared_uri in url)
         self.assertTrue(properties.APP_ID in url)
 
-    def test_get_access_information(self):
-        """Method testing get_access_information method from dota_responses_account module.
+    def test_get_refresh_token(self):
+        """Method testing get_refresh_token methods from dota_responses_account module.
 
-        The method tests only the wrong access code input as get_access_information method requires
+        The method tests only the wrong access code input as get_refresh_token method requires
         direct external interaction from the user.
         """
+        self.assertIsNone(account.get_refresh_token('123'))
 
-        self.assertEqual(account.get_access_information('123'), account.INVALID_CODE_ERR_MSG)
+    def test_get_scopes(self):
+        """Method testing get_scopes from dota_responses_account module.
+
+        For read only authorizations, scope should be {'*'}
+        """
+        self.assertEqual(account.get_scopes(), set(properties.SCOPES.split()))

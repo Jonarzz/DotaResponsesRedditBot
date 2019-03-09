@@ -1,16 +1,17 @@
 """Module used to test dota_wiki_parser module methods."""
 
-import unittest
 import json
+import unittest
 
 from responses_wiki import dota_wiki_parser as parser
 
 __author__ = 'Jonarzz'
 
 
-class AccountTest(unittest.TestCase):
+class WikiParserTest(unittest.TestCase):
     """Class used to test dota_wiki_parser module.
-    Inherits from TestCase class of unittest module."""
+    Inherits from TestCase class of unittest module.
+    """
 
     def test_pages_to_parse(self):
         """Method testing pages_to_parse method from dota_wiki_parser module.
@@ -18,15 +19,15 @@ class AccountTest(unittest.TestCase):
         The method checks if the requested response is consists of JSON payload as expected.
         """
 
-        url = parser.URL_BEGINNING + parser.URL_API + parser.CATEGORY
+        url = parser.URL_DOMAIN + parser.API_PATH + parser.CATEGORY
         parsed_json = json.loads(parser.page_to_parse(url))
 
         self.assertIsNotNone(parsed_json)
-        categorymembers = parsed_json["query"]["categorymembers"]
-        self.assertNotEqual(categorymembers, [])
-        self.assertTrue(len(categorymembers) > 150)
-        self.assertEqual(categorymembers[0]['title'], 'Abaddon/Responses')
-        self.assertEqual(categorymembers[-1]['title'], 'Zeus/Responses')
+        category_members = parsed_json["query"]["categorymembers"]
+        self.assertNotEqual(category_members, [])
+        self.assertTrue(len(category_members) > 150)
+        self.assertEqual(category_members[0]['title'], 'Abaddon/Responses')
+        self.assertEqual(category_members[-1]['title'], 'Zeus/Responses')
 
     def test_pages_for_category(self):
         """Method testing pages_for_category method from dota_wiki_parser module.
@@ -48,10 +49,4 @@ class AccountTest(unittest.TestCase):
         The module is testing if the method extracts a proper url from the given html element.
         """
         url = '<li> <a href="http://a.a" title="Play" class="sm2">Play</a> Earthshaker! </li>'
-        self.assertEqual(parser.value_from_element(url), 'http://a.a')
-
-    def test_short_hero_name_from_url(self):
-        """Method testing short_hero_name_from_url method from dota_wiki_parser module."""
-        self.assertEqual(parser.short_hero_name_from_url('/Test_asdf.mp3'), 'Test')
-        self.assertEqual(parser.short_hero_name_from_url('/Dlc_Test_asdf.mp3'), 'Dlc_Test')
-        self.assertEqual(parser.short_hero_name_from_url('/Dlc_tech_ann_asdf.mp3'), 'Dlc_tech_ann')
+        self.assertEqual(parser.link_from_element(url), 'http://a.a')

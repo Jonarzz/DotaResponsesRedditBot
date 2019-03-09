@@ -2,9 +2,7 @@
 
 import unittest
 
-import dotaresponses
-import dota_responses_properties as properties
-from responses_wiki import dota_wiki_parser as parser
+import bot.worker as worker
 
 __author__ = 'Jonarzz'
 
@@ -18,6 +16,6 @@ class DotaResponsesTest(unittest.TestCase):
 
         It checks whether the returned value is the same as the expected string.
         """
-        self.assertEqual(dotaresponses.prepare_response("That's a great idea!!!"), "that's a great idea")
-        self.assertEqual(dotaresponses.prepare_response("  WoNdErFuL  "), "wonderful")
-        self.assertEqual(dotaresponses.prepare_response("How are you?"), "how are you?")
+        self.assertEqual(worker.prepare_response("That's a great idea!!!"), "that's a great idea")
+        self.assertEqual(worker.prepare_response("  WoNdErFuL  "), "wonderful")
+        self.assertEqual(worker.prepare_response("How are you?"), "how are you?")

@@ -4,20 +4,16 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 """
 
 import json
-import os
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
-from dota_responses_database import add_hero_to_database, get_hero_id_from_database, add_response_to_database
+from config import URL_DOMAIN, API_PATH, CATEGORY
+from util.database import DBUtil
 
 __author__ = 'Jonarzz'
 
-URL_BEGINNING = 'http://dota2.gamepedia.com/'
-URL_API = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
-CATEGORY = 'Responses'
-
-SCRIPT_DIR = os.path.dirname(__file__)
+db = DBUtil()
 
 
 def create_responses_text_and_link_dict(url_path):
@@ -63,7 +59,7 @@ def create_responses_text_and_link_dict(url_path):
 
 
 def create_list_of_responses(ending):
-    page = page_to_parse(URL_BEGINNING + ending)
+    page = page_to_parse(URL_DOMAIN + ending)
     soup = BeautifulSoup(page, "html.parser")
     list_of_responses = []
 
@@ -93,7 +89,7 @@ def pages_for_category(category_name):
 
     :param category_name: returns all category members in json response from gamepedia API.
     """
-    json_response = page_to_parse(URL_BEGINNING + URL_API + category_name)
+    json_response = page_to_parse(URL_DOMAIN + API_PATH + category_name)
 
     pages = []
 
@@ -209,15 +205,19 @@ def populate_responses():
             # path points to voice pack, announcer or shopkeeper responses
             hero_name = path
 
-        add_hero_to_database(name=hero_name)
-        hero_id = get_hero_id_from_database(name=hero_name)
+        db.add_hero_to_database(name=hero_name)
+        hero_id = db.get_hero_id_from_database(name=hero_name)
         response_link_dict = create_responses_text_and_link_dict(url_path=path)
 
         for response, link in response_link_dict.items():
-            add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
+            db.add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
 
     # TODO move to config
     custom_responses = {}
 
     for response, link in custom_responses.items():
-        add_response_to_database(response=response, link=link)
+        db.add_response_to_database(response=response, link=link)
+
+
+# print(timeit.timeit('populate_responses()','from __main__ import populate_responses', number=1))
+print(create_responses_text_and_link_dict('Shadow Demon/Responses'))

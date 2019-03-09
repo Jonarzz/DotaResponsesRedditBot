@@ -16,6 +16,16 @@ All the responses are in lowercase in the dictionary, before comparision the com
 
 The bot will try to match a response of the hero that is in the comment's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
 
+
+---
+## TODO:
+* Add logging
+* Improve tests
+* Improve folder structure
+* Refactor code
+* Docs
+* Add support for custom responses
+* Add support dota plus voice lines.
 ---
 ## Changelog:
 
