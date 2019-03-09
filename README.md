@@ -1,5 +1,8 @@
 # Dota Responses Reddit Bot
 [![Build Status](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/96e2b3fd0dfd495f87fda7dfad5fb545)](https://app.codacy.com/app/MePsyDuck/DotaResponsesRedditBot?utm_source=github.com&utm_medium=referral&utm_content=MePsyDuck/DotaResponsesRedditBot&utm_campaign=Badge_Grade_Dashboard)
+[![Build Status](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
+
 Bot adding reply comments with links to appropriate responses found on [/r/dota2](https://www.reddit.com/r/DotA2).
 
 ![Example](https://i.imgur.com/PAcg57z.png)
