@@ -6,8 +6,6 @@ __author__ = 'Jonarzz'
 # App config
 APP_ID = os.environ['APP_ID']
 APP_SECRET = os.environ['APP_SECRET']
-APP_URI = os.environ['APP_URI']
-APP_REFRESH_CODE = ''
 
 # Account config
 USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses and links to the proper
