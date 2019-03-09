@@ -21,12 +21,12 @@ def setup_logger():
     # stream_handler.setFormatter(log_formatter)
     # log.addHandler(stream_handler)
 
-    file_handler_info = logging.FileHandler(log_file_info, mode='w')
+    file_handler_info = logging.FileHandler(log_file_info, mode='a')
     file_handler_info.setFormatter(log_formatter)
     file_handler_info.setLevel(logging.INFO)
     log.addHandler(file_handler_info)
 
-    file_handler_error = logging.FileHandler(log_file_error, mode='w')
+    file_handler_error = logging.FileHandler(log_file_error, mode='a')
     file_handler_error.setFormatter(log_formatter)
     file_handler_error.setLevel(logging.ERROR)
     log.addHandler(file_handler_error)
