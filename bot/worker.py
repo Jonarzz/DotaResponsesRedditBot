@@ -7,80 +7,48 @@ prepared. The comment is posted as a reply to the original post on Reddit.
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
 
-import traceback
-
 import bot.account as account
-import config as properties
-import util.database as db
+import config
+from util.database import DBUtil
 from util.logger import logger
 
 __author__ = 'Jonarzz'
 
-
-def prepare_specific_responses():
-    output_dict = {}
-    for response in properties.INVOKER_BOT_RESPONSES:
-        output_dict[response] = add_invoker_response
-    output_dict["shitty wizard"] = add_shitty_wizard_response
-    output_dict["ho ho ha ha"] = add_sniper_response
-    return output_dict
-
-
-SPECIFIC_RESPONSES_DICT = prepare_specific_responses()
+db = DBUtil()
 
 
 def execute():
     """Main method executing the script.
 
-    It connects to an account, loads dictionaries from proper files (declared in properties file).
-    Afterwards it executes add_comments method with proper arguments passed.
+    It connects to an account, loads dictionaries from proper files (declared in config file).
+    Afterwards it executes process_comments method with proper arguments passed.
     """
 
-    reddit_account = account.get_account()
+    reddit = account.get_account()
 
-    try:
-        sticky = reddit_account.subreddit(properties.SUBREDDIT).sticky()
-    except:
-        sticky = None
-
-    for submission in reddit_account.subreddit(properties.SUBREDDIT).new(limit=150):
-        add_comments_to_submission(submission, sticky)
-
-    for submission in reddit_account.subreddit(properties.SUBREDDIT).hot(limit=35):
-        add_comments_to_submission(submission, sticky)
+    comments = reddit.subreddit(config.SUBREDDIT).stream.comments()
+    process_comments(comments)
 
 
-def add_comments_to_submission(submission, sticky):
-    """Method that adds the bot replies to the comments in the given submission.
-    """
-
-    if submission == sticky:
-        return
-    else:
-        add_comments(submission)
-
-
-def add_comments(submission):
+def process_comments(comments):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
     All comments are loaded. If comment ID is in the already done comments database, next comment
     is checked (further actions are omitted). If the comment wasn't analyzed before,
     it is prepared for comparision to the responses in dictionary. If the comment is not on the
-    excluded responses list (loaded from properties) and if it is in the dictionary, a reply
+    excluded responses list (loaded from config) and if it is in the dictionary, a reply
     comment is prepared and posted.
     """
 
-    submission.comments.replace_more(limit=None)
-    submission.comment_sort = 'new'
+    for comment in comments:
 
-    for comment in submission.comments.list():
         if db.check_if_comment_exists(comment_id=comment.id):
             continue
 
         response = prepare_response(comment.body)
         save_comment_id(comment.id)
 
-        if response in properties.EXCLUDED_RESPONSES:
+        if response in config.EXCLUDED_RESPONSES:
             continue
 
         if add_flair_specific_response_and_return(comment, response):
@@ -159,7 +127,7 @@ def create_reply(response_url, original_text, hero_id, img=None):
     """Method that creates a reply in reddit-post format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
-    and an ending added from the properties file (post footer). Image is currently ignored due to new reddit not
+    and an ending added from the config file (post footer). Image is currently ignored due to new reddit not
     rendering flairs properly.
     """
 
@@ -169,15 +137,16 @@ def create_reply(response_url, original_text, hero_id, img=None):
     # if img:
     #    return (
     #        "[]({}): [{}]({}) (sound warning: {}){}"
-    #        .format(img, original_text, response_url, hero_name, properties.COMMENT_ENDING)
+    #        .format(img, original_text, response_url, hero_name, config.COMMENT_ENDING)
     #        )
     # else:
 
-    return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, properties.COMMENT_ENDING)
+    return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
 
 
 def add_shitty_wizard_response(comment, response):
-    """Method that creates a reply for 'shitty wizard' comments. Currently there's nothing different from regular responses.
+    """Method that creates a reply for 'shitty wizard' comments. Currently there's nothing different from regular
+    responses.
 
     :param comment: The comment on reddit
     :param response: The plaintext processed comment body
@@ -187,32 +156,34 @@ def add_shitty_wizard_response(comment, response):
 
 
 def add_invoker_response(comment):
-    comment.reply(create_reply_invoker_ending(properties.INVOKER_RESPONSE_URL, properties.INVOKER_IMG_DIR))
+    comment.reply(create_reply_invoker_ending(config.INVOKER_RESPONSE_URL, config.INVOKER_IMG_DIR))
     logger.info("Added: " + comment.id)
 
 
 def create_reply_invoker_ending(response_url, img_dir):
     return ("[]({}): [{}]({}) (sound warning: {})\n\n{}{}"
-            .format(img_dir, properties.INVOKER_RESPONSE, response_url, properties.INVOKER_HERO_NAME,
-                    properties.INVOKER_ENDING, properties.COMMENT_ENDING))
+            .format(img_dir, config.INVOKER_RESPONSE, response_url, config.INVOKER_HERO_NAME,
+                    config.INVOKER_ENDING, config.COMMENT_ENDING))
 
 
 def add_sniper_response(comment):
-    comment.reply(create_reply_sniper_ending(properties.SNIPER_RESPONSE_URL, comment.body,
-                                             properties.SNIPER_IMG_DIR))
+    comment.reply(create_reply_sniper_ending(config.SNIPER_RESPONSE_URL, comment.body,
+                                             config.SNIPER_IMG_DIR))
     logger.info("Added: " + comment.id)
 
 
 def create_reply_sniper_ending(response_url, original_text, img_dir):
     return ("[]({}): [{}]({}) ({}){}"
-            .format(img_dir, original_text, response_url, properties.SNIPER_TRIGGER_WARNING, properties.COMMENT_ENDING))
+            .format(img_dir, original_text, response_url, config.SNIPER_TRIGGER_WARNING, config.COMMENT_ENDING))
 
 
-# Main script
-if __name__ == '__main__':
-    logger.info('START')
-    while True:
-        try:
-            execute()
-        except (KeyboardInterrupt, SystemExit):
-            logger.error(traceback.format_exc())
+def prepare_specific_responses():
+    output_dict = {}
+    for response in config.INVOKER_BOT_RESPONSES:
+        output_dict[response] = add_invoker_response
+    output_dict["shitty wizard"] = add_shitty_wizard_response
+    output_dict["ho ho ha ha"] = add_sniper_response
+    return output_dict
+
+
+SPECIFIC_RESPONSES_DICT = prepare_specific_responses()

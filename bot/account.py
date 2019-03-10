@@ -9,8 +9,6 @@ import config
 
 __author__ = 'Jonarzz'
 
-INVALID_CODE_ERR_MSG = 'Invalid access code'
-
 
 def get_account():
     """Method preparing the connection to Reddit API using OAuth."""

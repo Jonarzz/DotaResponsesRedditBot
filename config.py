@@ -8,8 +8,7 @@ CLIENT_ID = os.environ['CLIENT_ID']
 CLIENT_SECRET = os.environ['CLIENT_SECRET']
 
 # Account config
-USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses and links to the proper
-             audio sample from http://dota2.gamepedia.com/Category:Responses (author: /u/Jonarz)"""
+USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/Jonarz)"""
 SUBREDDIT = "test"
 USERNAME = os.environ['REDDIT_USERNAME']
 PASSWORD = os.environ['REDDIT_PASSWORD']
@@ -24,9 +23,7 @@ DB_URL = os.environ['DATABASE_URL']
 LOG_DIR = 'logs'
 INFO_FILENAME = 'info.log'
 ERROR_FILENAME = 'error.log'
-RESPONSES_FILENAME = ''
-HEROES_FILENAME = ''
-SHITTY_WIZARD_FILENAME = ''
+PRAW_FILENAME = 'praw.log'
 
 # Responses config
 COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz* \n\n*^(
