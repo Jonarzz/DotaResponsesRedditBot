@@ -212,12 +212,7 @@ def populate_responses():
         for response, link in response_link_dict.items():
             db.add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
 
-    # TODO move to config
     custom_responses = {}
 
     for response, link in custom_responses.items():
         db.add_response_to_database(response=response, link=link)
-
-
-# print(timeit.timeit('populate_responses()','from __main__ import populate_responses', number=1))
-print(create_responses_text_and_link_dict('Shadow Demon/Responses'))

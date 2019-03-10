@@ -8,6 +8,9 @@ def setup_logger():
     """Method to setup loggers (Can also use a single logger for error and info messages).
     """
 
+    if not os.path.exists(config.LOG_DIR):
+        os.mkdir(config.LOG_DIR)
+
     log_format = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
     log_name = ''
     log_file_info = os.path.join(config.LOG_DIR, config.INFO_FILENAME)

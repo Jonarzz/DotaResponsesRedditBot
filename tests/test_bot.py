@@ -1,4 +1,4 @@
-"""Module used to test dotaresponses module methods."""
+"""Module used to test bot worker module methods."""
 
 import unittest
 
@@ -7,9 +7,10 @@ import bot.worker as worker
 __author__ = 'Jonarzz'
 
 
-class DotaResponsesTest(unittest.TestCase):
-    """Class used to test dotaresponses module.
-    Inherits from TestCase class of unittest module."""
+class BotWorkerTest(unittest.TestCase):
+    """Class used to test bot worker module.
+    Inherits from TestCase class of unittest module.
+    """
 
     def test_prepare_response(self):
         """Method that tests the prepare_response method from dotaresponses module.

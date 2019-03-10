@@ -25,7 +25,6 @@ class AccountTest(unittest.TestCase):
         """
         reddit = account.get_account()
 
-        self.assertTrue(reddit.has_oauth_app_info)
         self.assertFalse(reddit.is_logged_in())
         self.assertEqual(reddit.client_id, config.CLIENT_ID)
         self.assertEqual(reddit.client_secret, config.CLIENT_SECRET)

@@ -41,7 +41,7 @@ class WikiParserTest(unittest.TestCase):
 
         Please, check help for clean_key method for further information about the expected results.
         """
-        self.assertEqual(parser.clean_key(' Earthshaker! <i>test</i>(test2)'), 'earthshaker')
+        self.assertEqual(parser.clean_key('   Earthshaker  !  '), 'earthshaker')
 
     def test_value_from_element(self):
         """Method testing value_from_element method from dota_wiki_parser module.

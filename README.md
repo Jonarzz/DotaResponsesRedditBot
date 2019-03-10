@@ -24,7 +24,6 @@ Target: to complete the following in March
 * Refactor code
 * Docs
 * Add support for custom responses
-* Add support dota plus voice lines
 
 ---
 ## Changelog:
