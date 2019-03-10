@@ -1,9 +1,12 @@
-"""Module used to test dota_responses_account module methods."""
+"""Module used to test dota_responses_account module methods.
+Removed extra tests because they were not testing any of our code logic.
+This must've been tested by PRAW already.
+"""
 
 import unittest
 
 import bot.account as account
-import config as properties
+import config
 
 __author__ = 'Jonarzz'
 
@@ -20,51 +23,9 @@ class AccountTest(unittest.TestCase):
         and if the client properties (app ID and secret) were passed properly to the Reddit API
         handler framework object.
         """
-        reddit = account.get_reddit()
+        reddit = account.get_account()
 
         self.assertTrue(reddit.has_oauth_app_info)
         self.assertFalse(reddit.is_logged_in())
-        self.assertEqual(reddit.client_id, properties.APP_ID)
-        self.assertEqual(reddit.client_secret, properties.APP_SECRET)
-
-    def test_get_account(self):
-        """Method testing get_account method from dota_responses_account module.
-
-        The method tests if all the Reddit API scopes provided in properties file are applied
-        to the Reddit API handler framework object.
-        """
-        reddit = account.get_account()
-        scopes_list = properties.SCOPES.split(' ')
-
-        self.assertIsNotNone(reddit.access_token)
-        for scope in scopes_list:
-            self.assertTrue(reddit.has_scope(scope))
-
-    def test_generate_access_code(self):
-        """Method testing generate_access_code method from dota_responses_account module.
-
-        The method tests if the generated url that is opened in the web browser if the method
-        is called without an argument (test value set as False) contains the required data loaded
-        from the properties: Reddit API scopes, app URI, app ID.
-        """
-        prepared_uri = properties.APP_URI.replace(':', '%3A').replace('/', '%2F')
-        url = account.generate_access_code(test=True)
-
-        self.assertTrue(properties.SCOPES.replace(' ', '+') in url)
-        self.assertTrue(prepared_uri in url)
-        self.assertTrue(properties.APP_ID in url)
-
-    def test_get_refresh_token(self):
-        """Method testing get_refresh_token methods from dota_responses_account module.
-
-        The method tests only the wrong access code input as get_refresh_token method requires
-        direct external interaction from the user.
-        """
-        self.assertIsNone(account.get_refresh_token('123'))
-
-    def test_get_scopes(self):
-        """Method testing get_scopes from dota_responses_account module.
-
-        For read only authorizations, scope should be {'*'}
-        """
-        self.assertEqual(account.get_scopes(), set(properties.SCOPES.split()))
+        self.assertEqual(reddit.client_id, config.CLIENT_ID)
+        self.assertEqual(reddit.client_secret, config.CLIENT_SECRET)
