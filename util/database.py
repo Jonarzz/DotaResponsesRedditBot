@@ -34,7 +34,7 @@ class DBUtil:
 
         c.execute('CREATE TABLE IF NOT EXISTS responses '
                   '(response text, link text, hero text, hero_id integer, '
-                  'UNIQUE (response,link, hero, hero_id) ON CONFLICT IGNORE,'
+                  'UNIQUE (response,link, hero, hero_id),'
                   'FOREIGN KEY (hero_id) REFERENCES heroes (id))')
 
         c.close()
@@ -52,7 +52,8 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('INSERT INTO responses(response, link, hero, hero_id) VALUES(?,?,?,?)',
+        c.execute('INSERT INTO responses(response, link, hero, hero_id) VALUES(%s,%s,%s,%s)'
+                  'ON CONFLICT DO NOTHING',
                   (response, link, hero, hero_id))
         c.close()
 
@@ -65,8 +66,9 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT hero_id FROM responses WHERE link = ?', (response_url,))
-        hero_id = c.fetchone()[0]
+        c.execute('SELECT hero_id FROM responses WHERE link = %s', (response_url,))
+        result = c.fetchone()
+        hero_id = result[0] if result else None
         c.close()
 
         return hero_id
@@ -83,13 +85,18 @@ class DBUtil:
         c = self.conn.cursor()
 
         if hero_id is not None:
-            c.execute('SELECT link, hero_id FROM responses WHERE response = ? AND hero_id = ?', (response, hero_id))
+            c.execute('SELECT link, hero_id FROM responses WHERE response = %s AND hero_id = %s', (response, hero_id))
         else:
-            c.execute('SELECT link, hero_id FROM responses WHERE response = ? AND hero_id IS NOT NULL '
+            c.execute('SELECT link, hero_id FROM responses WHERE response = %s AND hero_id IS NOT NULL '
                       'ORDER BY hero_id DESC, RANDOM() LIMIT 1', (response,))
 
-        link = c.fetchone()[0]
-        hero_id = c.fetchone()[1]
+        result = c.fetchone()
+        if result:
+            link = result[0]
+            hero_id = result[1]
+        else:
+            link, hero_id = None, None
+
         c.close()
 
         return link, hero_id
@@ -109,7 +116,7 @@ class DBUtil:
         """
 
         c = self.conn.cursor()
-        c.execute('INSERT INTO comments VALUES (?, ?)', (comment_id, datetime.date.today()))
+        c.execute('INSERT INTO comments VALUES (%s, %s)', (comment_id, datetime.date.today()))
         c.close()
 
     def delete_old_comment_ids(self):
@@ -121,7 +128,7 @@ class DBUtil:
 
         furthest_date = datetime.date.today() - datetime.timedelta(days=properties.NUMBER_OF_DAYS_TO_DELETE_COMMENT)
 
-        c.execute("DELETE FROM comments WHERE date < ?", ([str(furthest_date)]))
+        c.execute("DELETE FROM comments WHERE date < %s", ([str(furthest_date)]))
         self.conn.execute("VACUUM")
 
         c.close()
@@ -135,8 +142,12 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT COUNT(*) FROM comments WHERE comment_id = ?', (comment_id,))
-        result = int(c.fetchone()[0]) > 0
+        c.execute('SELECT COUNT(*) FROM comments WHERE comment_id = %s', (comment_id,))
+        count = c.fetchone()
+        if count is not None:
+            result = int(count[0]) > 0
+        else:
+            result = False
 
         c.close()
 
@@ -148,9 +159,9 @@ class DBUtil:
         """
 
         c = self.conn.cursor()
-        c.execute('CREATE TABLE IF NOT EXISTS heroes '
-                  '(id integer primary key autoincrement, name text, img_dir text, css text,'
-                  'UNIQUE (name) ON CONFLICT IGNORE)')
+        c.execute('CREATE TABLE IF NOT EXISTS heroes'
+                  '(id serial primary key, name text, img_dir text, css text,'
+                  'UNIQUE(name))')
 
         c.close()
 
@@ -164,7 +175,8 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('INSERT INTO heroes (name, img_dir, css) VALUES (?,?,?)',
+        c.execute('INSERT INTO heroes (name, img_dir, css) VALUES (%s,%s,%s)'
+                  'ON CONFLICT(name) DO NOTHING',
                   (name, img_dir, css))
 
         c.close()
@@ -178,8 +190,9 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT id from heroes WHERE name = ? ', (name,))
-        hero_id = c.fetchone()[0]
+        c.execute('SELECT id from heroes WHERE name = %s ', (name,))
+        result = c.fetchone()
+        hero_id = result[0] if result else None
 
         c.close()
 
@@ -194,8 +207,9 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT name from heroes WHERE id = ? ', (hero_id,))
-        hero_name = c.fetchone()[0]
+        c.execute('SELECT name from heroes WHERE id = %s ', (hero_id,))
+        result = c.fetchone()
+        hero_name = result[0] if result else None
 
         c.close()
 
@@ -210,8 +224,9 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT id from heroes WHERE css = ? ', (css,))
-        hero_id = c.fetchone()[0]
+        c.execute('SELECT id from heroes WHERE css = %s ', (css,))
+        result = c.fetchone()
+        hero_id = result[0] if result else None
 
         c.close()
 
@@ -226,8 +241,9 @@ class DBUtil:
 
         c = self.conn.cursor()
 
-        c.execute('SELECT img_dir from heroes WHERE id = ? ', (hero_id,))
-        img_dir = c.fetchone()[0]
+        c.execute('SELECT img_dir from heroes WHERE id = %s ', (hero_id,))
+        result = c.fetchone()
+        img_dir = result[0] if result else None
 
         c.close()
 
@@ -269,7 +285,9 @@ class DBUtil:
                     hero_img_path = path.strip()
                     break
 
-            c.execute('INSERT INTO heroes(name, img_dir, css) VALUES (?, ?, ?)', (hero_name, hero_img_path, hero_css))
+            c.execute('INSERT INTO heroes(name, img_dir, css) VALUES (%s, %s, %s)'
+                      'ON CONFLICT(name) DO NOTHING',
+                      (hero_name, hero_img_path, hero_css))
 
         c.execute('UPDATE responses SET hero_id = (SELECT heroes.id FROM heroes WHERE responses.hero = heroes.name);')
         c.close()
