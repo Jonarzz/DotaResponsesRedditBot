@@ -11,31 +11,42 @@ def setup_logger():
     if not os.path.exists(config.LOG_DIR):
         os.mkdir(config.LOG_DIR)
 
+    # PRAW logging
+    praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
+    praw_handler = logging.FileHandler(praw_log_file, mode='a')
+    praw_handler.setLevel(logging.DEBUG)
+    praw_logger = logging.getLogger('prawcore')
+    praw_logger.setLevel(logging.DEBUG)
+    praw_logger.addHandler(praw_handler)
+
+    # Internal logging
     log_format = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
     log_name = ''
-    log_file_info = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
-    log_file_error = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
+    info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
+    error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
     log_formatter = logging.Formatter(log_format)
 
-    log = logging.getLogger(log_name)
+    internal_logger = logging.getLogger(log_name)
 
     # uncomment this to get console output
     # stream_handler = logging.StreamHandler()
     # stream_handler.setFormatter(log_formatter)
-    # log.addHandler(stream_handler)
+    # stream_handler.setLevel(logging.DEBUG)
+    # internal_logger.addHandler(stream_handler)
+    # praw_logger.addHandler(stream_handler)
 
-    file_handler_info = logging.FileHandler(log_file_info, mode='a')
-    file_handler_info.setFormatter(log_formatter)
-    file_handler_info.setLevel(logging.INFO)
-    log.addHandler(file_handler_info)
+    info_file_handler = logging.FileHandler(info_log_file, mode='a')
+    info_file_handler.setFormatter(log_formatter)
+    info_file_handler.setLevel(logging.INFO)
+    internal_logger.addHandler(info_file_handler)
 
-    file_handler_error = logging.FileHandler(log_file_error, mode='a')
-    file_handler_error.setFormatter(log_formatter)
-    file_handler_error.setLevel(logging.ERROR)
-    log.addHandler(file_handler_error)
+    error_file_handler = logging.FileHandler(error_log_file, mode='a')
+    error_file_handler.setFormatter(log_formatter)
+    error_file_handler.setLevel(logging.ERROR)
+    internal_logger.addHandler(error_file_handler)
 
-    log.setLevel(logging.INFO)
-    return log
+    internal_logger.setLevel(logging.INFO)
+    return internal_logger
 
 
 logger = setup_logger()
