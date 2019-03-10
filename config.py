@@ -4,14 +4,15 @@ import os
 __author__ = 'Jonarzz'
 
 # App config
-APP_ID = os.environ['APP_ID']
-APP_SECRET = os.environ['APP_SECRET']
+CLIENT_ID = os.environ['CLIENT_ID']
+CLIENT_SECRET = os.environ['CLIENT_SECRET']
 
 # Account config
 USER_AGENT = """A tool that finds a Dota 2-related comments with the game heroes\' responses and links to the proper
              audio sample from http://dota2.gamepedia.com/Category:Responses (author: /u/Jonarz)"""
 SUBREDDIT = "test"
-SCOPES = ' '  # This should be a list
+USERNAME = os.environ['REDDIT_USERNAME']
+PASSWORD = os.environ['REDDIT_PASSWORD']
 
 # Parser config
 URL_DOMAIN = 'http://dota2.gamepedia.com/'
