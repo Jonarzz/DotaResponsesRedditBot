@@ -28,6 +28,7 @@ Target: to complete the following in March
 * Add support for custom responses
 * Change the comment footer to universal (old, new and mobile reddit) format.
 * Use redis(or any other in-memory storage) for comment id caching
+* (If possible) Add support for chatwheel sounds.
 
 ---
 ## Changelog:
