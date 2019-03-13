@@ -27,10 +27,11 @@ Target: to complete the following in March
 * Docs
 * Add support for custom responses
 * Change the comment footer to universal (old, new and mobile reddit) format.
-* Use redis(or any other in-memory storage) for comment id caching
+* Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
 * (If possible) Add support for chatwheel sounds.
 * Remove punctuation marks from responses completely.
-* Drop database before populating them to take care of schema changes(not applicable in most cases, though.
+* Drop database before populating them to take care of schema changes(not applicable in most cases, though.)
+* Add indexes to tables.
 
 ---
 ## Changelog:
