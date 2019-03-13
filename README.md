@@ -27,8 +27,10 @@ Target: to complete the following in March
 * Docs
 * Add support for custom responses
 * Change the comment footer to universal (old, new and mobile reddit) format.
-* Use redis(or any other in-memory storage) for comment id caching
+* Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
 * (If possible) Add support for chatwheel sounds.
+* Add script to reinit db on each restart.
+* Add indexes to tables.
 
 ---
 ## Changelog:
