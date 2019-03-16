@@ -2,7 +2,7 @@
 Needs operation optimisation and normalization in databases
 """
 
-import psycopg2 as psycopg2
+import psycopg2
 
 from config import DB_URL
 
@@ -12,35 +12,50 @@ import datetime
 import re
 
 import config as properties
+import urllib.parse as up
 
 
 class DBUtil:
     conn = None
 
     def __init__(self):
-        self.conn = psycopg2.connect(DB_URL, sslmode='require')
+        up.uses_netloc.append("postgres")
+        url = up.urlparse(DB_URL)
+        self.conn = psycopg2.connect(database=url.path[1:],
+                                     user=url.username,
+                                     password=url.password,
+                                     host=url.hostname,
+                                     port=url.port
+                                     )
         self.conn.autocommit = True
 
     def __del__(self):
         if self.conn is not None:
             self.conn.close()
 
-    # RESPONSES DATABASE METHODS
-    def create_responses_database(self):
-        """Method that creates an SQLite database for response-link pairs.
+    # RESPONSES TABLE METHODS
+    def create_responses_table(self):
+        """Method that creates an table for response-link pairs.
         """
 
         c = self.conn.cursor()
-
         c.execute('CREATE TABLE IF NOT EXISTS responses '
                   '(response text, link text, hero text, hero_id integer, '
                   'UNIQUE (response,link, hero, hero_id),'
                   'FOREIGN KEY (hero_id) REFERENCES heroes (id))')
-
+        c.execute('CREATE INDEX idx_response ON responses(response)')
         c.close()
 
-    def add_response_to_database(self, response, link, hero="", hero_id=""):
-        """Method that updates an SQLite database with pairs of response-link.
+    def drop_responses_table(self):
+        """Method that deletes the Postgres table for response-link pairs.
+        """
+
+        c = self.conn.cursor()
+        c.execute('DROP TABLE IF EXISTS responses CASCADE')
+        c.close()
+
+    def add_response_to_table(self, response, link, hero="", hero_id=""):
+        """Method that updates the responses with pairs of response-link.
         If response already exists, update the link, else add the response to the table.
         All parameters should be strings.
 
@@ -101,17 +116,26 @@ class DBUtil:
 
         return link, hero_id
 
-    # COMMENTS DATABASE METHODS
-    def create_comments_database(self):
-        """Method that creates an SQLite database with ids of already checked comments.
+    # COMMENTS TABLE METHODS
+    def create_comments_table(self):
+        """Method that creates an table with ids of already checked comments.
         """
 
         c = self.conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS comments (comment_id text, date date)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_comment_id ON comments(comment_id)')
         c.close()
 
-    def add_comment_to_database(self, comment_id):
-        """Method that adds current time and Reddit comments to database by their id.
+    def drop_comments_table(self):
+        """Method that deletes the table with ids of already checked comments.
+        """
+
+        c = self.conn.cursor()
+        c.execute('DROP TABLE IF EXISTS comments CASCADE')
+        c.close()
+
+    def add_comment_to_table(self, comment_id):
+        """Method that adds current time and Reddit comments to comments table by their id.
         :param comment_id: The id of comment on Reddit
         """
 
@@ -134,10 +158,10 @@ class DBUtil:
         c.close()
 
     def check_if_comment_exists(self, comment_id):
-        """Method that checks if the comment id given is already present in the database
+        """Method that checks if the comment id given is already present in the comments table
 
         :param comment_id: The id of the comment on Reddit
-        :return: True if the it is already present in database, else False
+        :return: True if the it is already present in table, else False
         """
 
         c = self.conn.cursor()
@@ -153,20 +177,29 @@ class DBUtil:
 
         return result
 
-    # HEROES DATABASE METHODS
-    def create_heroes_database(self):
-        """Method that creates a database for heroes and announcer packs
+    # HEROES TABLE METHODS
+    def create_heroes_table(self):
+        """Method that creates a table for heroes and announcer packs
         """
 
         c = self.conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS heroes'
                   '(id serial primary key, name text, img_dir text, css text,'
                   'UNIQUE(name))')
+        c.execute('CREATE INDEX idx_hero_name ON heroes(name)')
+        c.close()
+
+    def drop_heroes_table(self):
+        """Method that deletes the table for heroes and announcer packs
+        """
+
+        c = self.conn.cursor()
+        c.execute('DROP TABLE IF EXISTS heroes CASCADE')
 
         c.close()
 
-    def add_hero_to_database(self, name, img_dir="", css=""):
-        """Method to add hero to the database. All parameters are strings.
+    def add_hero_to_table(self, name, img_dir="", css=""):
+        """Method to add hero to the table. All parameters are strings.
 
         :param name: Hero's name
         :param img_dir: path to hero's image
@@ -181,8 +214,8 @@ class DBUtil:
 
         c.close()
 
-    def get_hero_id_from_database(self, name):
-        """Method to get hero's id from database.
+    def get_hero_id_from_table(self, name):
+        """Method to get hero's id from table.
 
         :param name: Hero's name
         :return: Hero's id
@@ -199,7 +232,7 @@ class DBUtil:
         return hero_id
 
     def get_hero_name(self, hero_id):
-        """Method to get hero's name from database.
+        """Method to get hero's name from table.
 
         :param hero_id: Hero's id
         :return: Hero's name
@@ -216,7 +249,7 @@ class DBUtil:
         return hero_name
 
     def get_hero_id_by_css(self, css):
-        """Method to get hero_id from the database based on the flair css
+        """Method to get hero_id from the table based on the flair css
 
         :param css: Hero's css as in r/DotA2 subreddit
         :return: Hero's id
@@ -249,10 +282,10 @@ class DBUtil:
 
         return img_dir
 
-    def add_heroes_to_database(self):
-        """Method to add heroes to the database with hero names and proper css classes names as taken
+    def add_heroes_to_table(self):
+        """Method to add heroes to the table with hero names and proper css classes names as taken
         from the DotA2 subreddit and hero flair images from the reddit directory. Every hero has its
-        own id, so that it can be joined with the hero from responses database (Serves as Foreign Key).
+        own id, so that it can be joined with the hero from responses table (Serves as Foreign Key).
 
         Note: Unused currently since flairs don't work in comments for new Reddit redesign.
         """
@@ -292,9 +325,16 @@ class DBUtil:
         c.execute('UPDATE responses SET hero_id = (SELECT heroes.id FROM heroes WHERE responses.hero = heroes.name);')
         c.close()
 
-    def create_all_databases(self):
-        """Method that creates all used databases
+    def create_all_tables(self):
+        """Method that creates all used tables.
         """
-        self.create_comments_database()
-        self.create_heroes_database()
-        self.create_responses_database()
+        self.create_comments_table()
+        self.create_heroes_table()
+        self.create_responses_table()
+
+    def drop_all_tables(self):
+        """Method that deletes/drops all tables.
+        """
+        self.drop_comments_table()
+        self.drop_heroes_table()
+        self.drop_responses_table()

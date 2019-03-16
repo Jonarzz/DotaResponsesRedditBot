@@ -30,8 +30,7 @@ Target: to complete the following in March
 * Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
 * (If possible) Add support for chatwheel sounds.
 * Remove punctuation marks from responses completely.
-* Drop database before populating them to take care of schema changes(not applicable in most cases, though.)
-* Add indexes to tables.
+* Maybe use peewee to handle db ops.
 
 ---
 ## Changelog:

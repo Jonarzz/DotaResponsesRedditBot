@@ -3,12 +3,11 @@ from util.database import DBUtil
 
 
 def first_run():
-    """Method to be run first time to set up all the databases
+    """Method to be run first time to set up the database
     """
     db = DBUtil()
-    db.create_comments_database()
-    db.create_heroes_database()
-    db.create_responses_database()
+    db.drop_all_tables()
+    db.create_all_tables()
     populate_responses()
 
 

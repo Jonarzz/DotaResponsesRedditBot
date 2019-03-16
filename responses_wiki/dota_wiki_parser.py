@@ -205,14 +205,14 @@ def populate_responses():
             # path points to voice pack, announcer or shopkeeper responses
             hero_name = path
 
-        db.add_hero_to_database(name=hero_name)
-        hero_id = db.get_hero_id_from_database(name=hero_name)
+        db.add_hero_to_table(name=hero_name)
+        hero_id = db.get_hero_id_from_table(name=hero_name)
         response_link_dict = create_responses_text_and_link_dict(url_path=path)
 
         for response, link in response_link_dict.items():
-            db.add_response_to_database(response=response, link=link, hero=hero_name, hero_id=hero_id)
+            db.add_response_to_table(response=response, link=link, hero=hero_name, hero_id=hero_id)
 
     custom_responses = {}
 
     for response, link in custom_responses.items():
-        db.add_response_to_database(response=response, link=link)
+        db.add_response_to_table(response=response, link=link)

@@ -33,7 +33,7 @@ def execute():
 def process_comments(comments):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
-    All comments are loaded. If comment ID is in the already done comments database, next comment
+    All comments are loaded. If comment ID is in the already done comments table, next comment
     is checked (further actions are omitted). If the comment wasn't analyzed before,
     it is prepared for comparision to the responses in dictionary. If the comment is not on the
     excluded responses list (loaded from config) and if it is in the dictionary, a reply
@@ -87,7 +87,7 @@ def prepare_response(response):
 
 def save_comment_id(comment_id):
     """Method that saves the comment id to the database"""
-    db.add_comment_to_database(comment_id=comment_id)
+    db.add_comment_to_table(comment_id=comment_id)
 
 
 def add_flair_specific_response_and_return(comment, response):
