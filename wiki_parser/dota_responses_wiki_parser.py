@@ -4,6 +4,7 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 """
 
 import json
+import string
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
@@ -105,6 +106,7 @@ def pages_for_category(category_name):
 def response_text_from_element(element):
     """Method that returns a plaintext for a given element taken from parsed html body. Removes all HTML tags as well.
     Works specifically with currently existing responses on Gamepedia.
+    Remove <a> elements recursively since there can be many play buttons (see link_from_element).
     Note: Code can be replaced with older string manipulation equivalent if needed, but it could be unsafe for elements
     that contain <span> tags.
 
@@ -113,8 +115,10 @@ def response_text_from_element(element):
     """
     soup = BeautifulSoup(element, 'html.parser')
     link = soup.find('a')
-    if link:
+    while link:
         link.decompose()
+        link = soup.find('a')
+
     tooltip = soup.find('span')
     if tooltip:
         tooltip.decompose()
@@ -126,7 +130,7 @@ def clean_key(key):
     """Method that cleans the given key. It:
     * removes anything between parenthesis
     * removes trailing and leading spaces
-    * removes the ending '.', '!' and '--'
+    * removes all punctuations
     * removes double spaces
     * changes to lowercase
 
@@ -141,11 +145,7 @@ def clean_key(key):
 
     key = key.strip()
 
-    if len(key) > 1 and key[-1] in [".", "!"]:
-        key = key[:-1]
-
-    if len(key) > 2 and key[-2:] == "--":
-        key = key[:-2]
+    key = key.translate(str.maketrans('', '', string.punctuation))
 
     key = key.replace("  ", " ")
 
@@ -158,6 +158,8 @@ def clean_key(key):
 def link_from_element(element):
     """Method that returns a link (url to the response) for a given element taken
     from parsed html body.
+    If multiple links are present (such as Zeus and Zeus arcana, Dragon Knight human and dragon form responses),
+    it returns only the first link found in the element.
 
     :param element: The html code to be parsed for the link
     :return: The url to the response

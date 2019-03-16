@@ -6,6 +6,7 @@ prepared. The comment is posted as a reply to the original post on Reddit.
 
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
+import string
 
 import bot.account as account
 import config
@@ -62,8 +63,8 @@ def process_comments(comments):
 
 
 def prepare_response(response):
-    """Method used to prepare  the response.
-    Dots and exclamation marks are stripped. The response is turned to lowercase.
+    """Method used to prepare the response.
+    Punctuation marks are stripped. The response is turned to lowercase.
     Multiple letters ending the response are removed (e.g. ohhh->oh).
     Improve: Trimming letters in words which end with multiple letters repeating (e.g. all, tree etc ) .
 
@@ -71,7 +72,7 @@ def prepare_response(response):
     :return: Processed comment body
     """
 
-    response = response.strip(" .!").lower()
+    response = response.translate(str.maketrans('', '', string.punctuation))
 
     i = 1
     new_response = response

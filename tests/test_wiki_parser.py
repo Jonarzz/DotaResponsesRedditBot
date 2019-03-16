@@ -3,7 +3,7 @@
 import json
 import unittest
 
-from responses_wiki import dota_wiki_parser as parser
+from wiki_parser import dota_responses_wiki_parser as parser
 
 __author__ = 'Jonarzz'
 

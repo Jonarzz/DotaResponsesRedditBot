@@ -29,8 +29,8 @@ Target: to complete the following in March
 * Change the comment footer to universal (old, new and mobile reddit) format.
 * Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
 * (If possible) Add support for chatwheel sounds.
-* Remove punctuation marks from responses completely.
 * Maybe use peewee to handle db ops.
+* Remove hero name from responses table.
 
 ---
 ## Changelog:
