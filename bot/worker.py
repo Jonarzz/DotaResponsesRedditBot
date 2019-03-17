@@ -63,8 +63,11 @@ def process_comments(comments):
 
 
 def parse_comment(response):
-    """Method used to clean the response.
-    Punctuation marks are stripped. The response is turned to lowercase.
+    """Method used to clean the response. Logic is similar to clean_key on wiki parser.
+    * Punctuation marks are removed. 
+    * The response is turned to lowercase.
+    * Removes Double spaces
+    
     Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
 
@@ -72,7 +75,8 @@ def parse_comment(response):
     :return: Processed comment body
     """
 
-    response = response.translate(str.maketrans('', '', string.punctuation)).lower()
+    response = response.translate(str.maketrans('', '', string.punctuation))
+    response = response.replace("  ", " ").strip().lower()
 
     # i = 1
     # new_response = response
