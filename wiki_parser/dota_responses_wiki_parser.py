@@ -212,7 +212,7 @@ def populate_responses():
         response_link_dict = create_responses_text_and_link_dict(url_path=path)
 
         for response, link in response_link_dict.items():
-            db.add_response_to_table(response=response, link=link, hero=hero_name, hero_id=hero_id)
+            db.add_response_to_table(response=response, link=link, hero_id=hero_id)
 
     custom_responses = {}
 

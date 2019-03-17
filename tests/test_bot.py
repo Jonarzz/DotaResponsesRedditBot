@@ -17,6 +17,6 @@ class BotWorkerTest(unittest.TestCase):
 
         It checks whether the returned value is the same as the expected string.
         """
-        self.assertEqual(worker.prepare_response("That's a great idea!!!"), "that's a great idea")
-        self.assertEqual(worker.prepare_response("  WoNdErFuL  "), "wonderful")
-        self.assertEqual(worker.prepare_response("How are you?"), "how are you?")
+        self.assertEqual(worker.parse_comment("That's a great idea!!!"), "thats a great idea")
+        self.assertEqual(worker.parse_comment("  WoNdErFuL  "), "wonderful")
+        self.assertEqual(worker.parse_comment("How are you?"), "how are you")

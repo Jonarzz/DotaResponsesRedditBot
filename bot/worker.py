@@ -46,27 +46,27 @@ def process_comments(comments):
         if db.check_if_comment_exists(comment_id=comment.id):
             continue
 
-        response = prepare_response(comment.body)
+        clean_comment = parse_comment(comment.body)
         save_comment_id(comment.id)
 
-        if response in config.EXCLUDED_RESPONSES:
+        if clean_comment in config.EXCLUDED_RESPONSES:
             continue
 
-        if add_flair_specific_response_and_return(comment, response):
+        if add_flair_specific_response_and_return(comment, clean_comment):
             continue
 
-        if response in SPECIFIC_RESPONSES_DICT:
-            SPECIFIC_RESPONSES_DICT[response](comment, response)
+        if clean_comment in SPECIFIC_RESPONSES_DICT:
+            SPECIFIC_RESPONSES_DICT[clean_comment](comment, clean_comment)
             continue
 
-        add_regular_response(comment, response)
+        add_regular_response(comment, clean_comment)
 
 
-def prepare_response(response):
-    """Method used to prepare the response.
+def parse_comment(response):
+    """Method used to clean the response.
     Punctuation marks are stripped. The response is turned to lowercase.
-    Multiple letters ending the response are removed (e.g. ohhh->oh).
-    Improve: Trimming letters in words which end with multiple letters repeating (e.g. all, tree etc ) .
+    Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
+    'tree' are stripped to 'al' and 'tre' which dont match with any responses.
 
     :param response: The comment body
     :return: Processed comment body
@@ -74,16 +74,17 @@ def prepare_response(response):
 
     response = response.translate(str.maketrans('', '', string.punctuation))
 
-    i = 1
-    new_response = response
-    try:
-        while not response[-1].isalnum() and response[-1] == response[-1 - i]:
-            new_response = new_response[:-1]
-            i += 1
-    except IndexError:
-        logger.error("IndexError in " + response)
+    # i = 1
+    # new_response = response
+    #
+    # try:
+    #     while not response[-1].isalnum() and response[-1] == response[-1 - i]:
+    #         new_response = new_response[:-1]
+    #         i += 1
+    # except IndexError:
+    #     logger.error("IndexError in " + response)
 
-    return new_response
+    return response
 
 
 def save_comment_id(comment_id):

@@ -40,8 +40,8 @@ class DBUtil:
 
         c = self.conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS responses '
-                  '(response text, link text, hero text, hero_id integer, '
-                  'UNIQUE (response,link, hero, hero_id),'
+                  '(response text, link text, hero_id integer, '
+                  'UNIQUE (response,link, hero_id),'
                   'FOREIGN KEY (hero_id) REFERENCES heroes (id))')
         c.execute('CREATE INDEX idx_response ON responses(response)')
         c.close()
@@ -61,15 +61,14 @@ class DBUtil:
 
         :param response: response text.
         :param link: url to the response audio file.
-        :param hero: hero name.
         :param hero_id: hero id. Should be same as id in heroes database.
         """
 
         c = self.conn.cursor()
 
-        c.execute('INSERT INTO responses(response, link, hero, hero_id) VALUES(%s,%s,%s,%s)'
+        c.execute('INSERT INTO responses(response, link, hero_id) VALUES(%s,%s,%s)'
                   'ON CONFLICT DO NOTHING',
-                  (response, link, hero, hero_id))
+                  (response, link, hero_id))
         c.close()
 
     def get_hero_id_by_response(self, response_url):
