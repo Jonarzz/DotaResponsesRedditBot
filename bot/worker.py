@@ -72,7 +72,7 @@ def parse_comment(response):
     :return: Processed comment body
     """
 
-    response = response.translate(str.maketrans('', '', string.punctuation))
+    response = response.translate(str.maketrans('', '', string.punctuation)).lower()
 
     # i = 1
     # new_response = response
