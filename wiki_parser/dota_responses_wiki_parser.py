@@ -143,14 +143,12 @@ def clean_key(key):
         end_index = key.rfind(")") + 1
         key = key.replace(key[start_index:end_index], "")
 
-    key = key.strip()
-
-    key = key.translate(str.maketrans('', '', string.punctuation))
-
-    key = key.replace("  ", " ")
-
-    key = key.strip()
-    key = key.lower()
+    key = key.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    
+    while '  ' in key:
+        key = key.replace('  ', ' ')
+        
+    key = key.strip().lower()
 
     return key
 
