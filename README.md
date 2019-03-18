@@ -26,14 +26,27 @@ Target: to complete the following in March
 * Refactor code
 * Docs
 * Add support for custom responses
-* Change the comment footer to universal (old, new and mobile reddit) format.
-* Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
-* (If possible) Add support for chatwheel sounds.
-* Maybe use peewee to handle db ops.
-* Remove hero name from responses table.
+* (If possible) Add support for chatwheel sounds
+* Use sqlalchemy to handle db ops
+
+---
+## Some stats and general info:
+[/r/dota2](https://www.reddit.com/r/DotA2) subreddit generates around 3.5k comments/day, 
+peaking around 12.5k during December (stats via [subbreditstats](https://subredditstats.com/r/dota2). 
+Bot should be able to handle around 15k comments/day(10 comments/minute).
+
+Services needed by bot that bot and what it currently uses:
+* Heroku for Hosting: Hobby Dyno.
+* ElephantSQL for Postgres DB: Free tier.
+* RedisCloud for Redis Cache: Free tier.
 
 ---
 ## Changelog:
+
+##### 3.0:
+Major revamp for the bot
+* Moved from locally stored SQLite DBs to Cloud hosted Postgres DB.
+* Added caching for comment ids.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
