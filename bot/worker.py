@@ -68,9 +68,9 @@ def process_comments(reddit, comments):
 
 def parse_comment(response):
     """Method used to clean the response. Logic is similar to clean_key on wiki parser.
-    * Punctuation marks are removed. 
+    * Punctuation marks are replaced  with space. 
     * The response is turned to lowercase.
-    * Removes Double spaces
+    * Converts multiple spaces into single space.
     
     Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
@@ -79,8 +79,12 @@ def parse_comment(response):
     :return: Processed comment body
     """
 
-    response = response.translate(str.maketrans('', '', string.punctuation))
-    response = response.replace("  ", " ").strip().lower()
+    response = response.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    
+    while '  ' in reponse:
+        response = response.replace('  ', ' ')
+        
+    response = response.strip().lower()
 
     # i = 1
     # new_response = response
