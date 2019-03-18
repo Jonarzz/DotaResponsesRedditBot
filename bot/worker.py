@@ -81,7 +81,7 @@ def parse_comment(response):
 
     response = response.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
     
-    while '  ' in reponse:
+    while '  ' in response:
         response = response.replace('  ', ' ')
         
     response = response.strip().lower()
