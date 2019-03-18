@@ -28,10 +28,10 @@ def execute():
     reddit = account.get_account()
 
     comments = reddit.subreddit(config.SUBREDDIT).stream.comments()
-    process_comments(comments)
+    process_comments(reddit, comments)
 
 
-def process_comments(comments):
+def process_comments(reddit, comments):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
     All comments are loaded. If comment ID is in the already done comments table, next comment
@@ -48,6 +48,10 @@ def process_comments(comments):
 
         clean_comment = parse_comment(comment.body)
         save_comment_id(comment.id)
+        
+        # Ignore thyself
+        if comment.author == reddit.user.me:
+            continue
 
         if clean_comment in config.EXCLUDED_RESPONSES:
             continue
