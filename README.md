@@ -26,11 +26,8 @@ Target: to complete the following in March
 * Refactor code
 * Docs
 * Add support for custom responses
-* Change the comment footer to universal (old, new and mobile reddit) format.
-* Use redis for comment id caching. (Check if double comment parsing is possible in the first place.)
 * (If possible) Add support for chatwheel sounds.
 * Maybe use peewee to handle db ops.
-* Remove hero name from responses table.
 
 ---
 ## Changelog:

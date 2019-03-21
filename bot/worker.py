@@ -10,12 +10,14 @@ import string
 
 import bot.account as account
 import config
+from util.caching import Cache
 from util.database import DBUtil
 from util.logger import logger
 
 __author__ = 'Jonarzz'
 
 db = DBUtil()
+cache = Cache()
 
 
 def execute():
@@ -43,7 +45,7 @@ def process_comments(reddit, comments):
 
     for comment in comments:
 
-        if db.check_if_comment_exists(comment_id=comment.id):
+        if cache.check_comment(comment_id=comment.id):
             continue
 
         clean_comment = parse_comment(comment.body)

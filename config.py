@@ -19,17 +19,23 @@ API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&f
 CATEGORY = 'Responses'
 
 # Path config
-DB_URL = os.environ['DATABASE_URL']
 LOG_DIR = 'logs'
 INFO_FILENAME = 'info.log'
 ERROR_FILENAME = 'error.log'
 PRAW_FILENAME = 'praw.log'
 
+# External add-on config
+DB_URL = os.environ['DATABASE_URL']
+REDIS_URL = os.environ['REDIS_URL']
+
 # Responses config
-COMMENT_ENDING = """\n\n---\n*^^^I ^^^am ^^^a ^^^bot. ^^^Question/problem? ^^^Ask ^^^my ^^^master: /u/Jonarz* \n\n*^(
-Description/changelog:)* [*^(GitHub)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* [*^(IDEAS)*](
-https://github.com/Jonarzz/DotaResponsesRedditBot/issues) *^(|)* [*^(Responses source)*](
-http://dota2.gamepedia.com/Category:Lists_of_responses) *^(|  Thanks iggys_reddit_account for the server!)* """
+COMMENT_ENDING = """
+---
+Bleep bloop, I am a robot.
+
+[*^(Github)*](https://github.com/MePsyDuck/DotaResponsesRedditBot) *^(|)* [*^(Suggestions/Issues)*](
+https://github.com/MePsyDuck/DotaResponsesRedditBot/issues) *^(|)* [*^(contact)*](https://www.reddit.com/user/mepsyduck/)
+"""
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
 
