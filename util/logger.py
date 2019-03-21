@@ -26,6 +26,7 @@ def setup_logger():
     error_file_handler = logging.FileHandler(error_log_file, mode='a')
     error_file_handler.setFormatter(log_formatter)
     error_file_handler.setLevel(logging.ERROR)
+
     praw_handler = logging.FileHandler(praw_log_file, mode='a')
     praw_handler.setLevel(logging.WARNING)
 
@@ -41,6 +42,7 @@ def setup_logger():
 
     # Internal logging
     internal_logger = logging.getLogger(log_name)
+    internal_logger.setLevel(logging.INFO)
     internal_logger.addHandler(info_file_handler)
     internal_logger.addHandler(error_file_handler)
     internal_logger.addHandler(stream_handler)

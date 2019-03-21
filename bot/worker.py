@@ -36,11 +36,16 @@ def execute():
 def process_comments(reddit, comments):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
-    All comments are loaded. If comment ID is in the already done comments table, next comment
-    is checked (further actions are omitted). If the comment wasn't analyzed before,
-    it is prepared for comparision to the responses in dictionary. If the comment is not on the
-    excluded responses list (loaded from config) and if it is in the dictionary, a reply
-    comment is prepared and posted.
+    PRAW generates past ~100 comments on the first iteration. Then the loop only runs if there is a new comment added to
+    the comments stream. This also means that once PRAW is up and running, after the initial comments list it won't
+    generate any duplicate comments.
+
+    However, just as a safeguard, Caching is used to store comment ids as they are processed for the first time. If
+    comment id is in the already present in the cache, then it is ignored, else processed and added to the cache.
+    * Self comments are ignored.
+    * It is prepared for comparision to the responses in dictionary.
+    * If the comment is not on the excluded responses list (loaded from config) and if it is in the responses db or
+    specific responses list, a reply comment is prepared and posted.
     """
 
     for comment in comments:
@@ -48,12 +53,14 @@ def process_comments(reddit, comments):
         if cache.check_comment(comment_id=comment.id):
             continue
 
-        clean_comment = parse_comment(comment.body)
-        save_comment_id(comment.id)
-        
+        logger.debug("Found new comment: " + str(comment.id))
+
         # Ignore thyself
         if comment.author == reddit.user.me:
             continue
+
+        clean_comment = parse_comment(comment.body)
+        save_comment_id(comment.id)
 
         if clean_comment in config.EXCLUDED_RESPONSES:
             continue
@@ -81,11 +88,11 @@ def parse_comment(response):
     :return: Processed comment body
     """
 
-    response = response.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
-    
+    response = response.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
+
     while '  ' in response:
         response = response.replace('  ', ' ')
-        
+
     response = response.strip().lower()
 
     # i = 1
