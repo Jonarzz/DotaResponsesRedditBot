@@ -4,29 +4,23 @@ import os
 __author__ = 'Jonarzz'
 
 # App config
-CLIENT_ID = os.environ['CLIENT_ID']
-CLIENT_SECRET = os.environ['CLIENT_SECRET']
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
 USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/Jonarz)"""
-SUBREDDIT = "test"
-USERNAME = os.environ['REDDIT_USERNAME']
-PASSWORD = os.environ['REDDIT_PASSWORD']
+SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
+USERNAME = os.environ.get('REDDIT_USERNAME')
+PASSWORD = os.environ.get('REDDIT_PASSWORD')
 
 # Parser config
 URL_DOMAIN = 'http://dota2.gamepedia.com/'
 API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
 CATEGORY = 'Responses'
 
-# Path config
-LOG_DIR = 'logs'
-INFO_FILENAME = 'info.log'
-ERROR_FILENAME = 'error.log'
-PRAW_FILENAME = 'praw.log'
-
 # External add-on config
-DB_URL = os.environ['DATABASE_URL']
-REDIS_URL = os.environ['REDIS_URL']
+DB_URL = os.environ.get('DATABASE_URL')
+REDIS_URL = os.environ.get('REDIS_URL')
 
 # Responses config
 COMMENT_ENDING = """
@@ -39,6 +33,16 @@ Bleep bloop, I am a robot.
 [*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
 [*^(Author)*](https://www.reddit.com/user/Jonarz/)
 """
+
+# Logging config
+BOT_LOG = 'bot'
+PRAW_LOG = 'prawcore'
+LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
+LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
+LOG_DIR = 'logs'
+INFO_FILENAME = 'info.log'
+ERROR_FILENAME = 'error.log'
+PRAW_FILENAME = 'praw.log'
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
 
@@ -53,17 +57,17 @@ SNIPER_RESPONSE_URL = 'https://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17
 SNIPER_IMG_DIR = '/hero-sniper'
 SNIPER_TRIGGER_WARNING = 'trigger warning: Sniper'
 
-EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance",
+EXCLUDED_RESPONSES = ["thank you", "why not", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",
                       "helm of the dominator", "veil of discord", "shadow blade", "blade mail",
                       "urn of shadows", "skull basher", "battle fury", "crimson guard",
-                      "eul's scepter", "eul's scepter of divinity", "scepter of divinity",
+                      "eul s scepter", "eul s scepter of divinity", "scepter of divinity",
                       "ethereal blade", "black king bar", "diffusal blade", "lotus orb",
                       "silver edge", "solar crest", "medallion of courage", "rod of atos",
-                      "shiva's guard", "heaven's halberd", "sange and yasha", "monkey king bar",
-                      "orchid malevolence", "drum of endurance", "aghanim's scepter",
-                      "manta style", "eye of skadi", "hand of midas", "vladimir's offering",
-                      "refresher orb", "linken's sphere", "assault cuirass", "divine rapier",
+                      "shiva s guard", "heaven s halberd", "sange and yasha", "monkey king bar",
+                      "orchid malevolence", "drum of endurance", "aghanim s scepter",
+                      "manta style", "eye of skadi", "hand of midas", "vladimir s offering",
+                      "refresher orb", "linken s sphere", "assault cuirass", "divine rapier",
                       "scythe of vyse", "sheep stick", "pipe of insight", "boots of travel",
                       "blink dagger", "moon shard", "guardian greaves", "octarine core",
                       "heart of tarrasque", "abyssal blade", "abyssal underlord",
@@ -71,8 +75,8 @@ EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance
                       "chaos knight", "crystal maiden", "dark seer", "death prophet",
                       "dragon knight", "drow ranger", "earth spirit", "earth shaker",
                       "elder titan", "ember spirit", "faceless void", "keeper of the light",
-                      "legion commander", "lone druid", "naga siren", "nature's prophet",
-                      "natures prophet", "night stalker", "nyx assassin", "ogre magi",
+                      "legion commander", "lone druid", "naga siren", "nature s prophet",
+                      "nature s prophet", "night stalker", "nyx assassin", "ogre magi",
                       "outworld destroyer", "phantom assassin", "phantom lancer", "queen of pain",
                       "sand king", "shadow demon", "shadow fiend", "skywrath mage",
                       "skeleton king", "spirit breaker", "storm spirit", "templar assassin",
@@ -80,11 +84,11 @@ EXCLUDED_RESPONSES = ["thank you", "why not?", "glimmer cape", "hood of defiance
                       "witch doctor", "wraith king", "i agree", "my bad", "ha ha", "why not",
                       "fair enough", "no way", "you're welcome", "very nice", "of course",
                       "well deserved", "try again", "it worked", "nice try", "seems fair",
-                      "that's right", "thank god", "thank you so much", "well said", "holy shit",
+                      "that s right", "thank god", "thank you so much", "well said", "holy shit",
                       "so beautiful", "try harder", "go outside", "arc warden", "he he he",
-                      "pit lord", "shut up", "how so?", "hey now", "much appreciated",
-                      "i don't think so", "I know, right?", "it begins", "too soon", "well done",
-                      "i like it", "are you okay?", "ah, nice", "about time", "very good",
-                      "are you kidding me?", "at last", "got it", "what happened?", "oh boy",
+                      "pit lord", "shut up", "how so", "hey now", "much appreciated",
+                      "i don t think so", "I know right", "it begins", "too soon", "well done",
+                      "i like it", "are you okay", "ah, nice", "about time", "very good",
+                      "are you kidding me", "at last", "got it", "what happened", "oh boy",
                       "nice one", "i am", "exactly so", "aphotic shield", "ghost scepter",
                       "outworld devourer", "shadow shaman"]

@@ -1,13 +1,27 @@
 from redis import Redis
 
 from config import REDIS_URL
+from util.logger import logger
 
 
 class Cache:
     """Used to store comment ids in cache.
     """
 
-    redis = Redis.from_url(REDIS_URL)
+    redis = None
+
+    def __init__(self):
+        """Create a new Redis instance when a new object for this class is created.
+        """
+        self.redis = Redis.from_url(REDIS_URL)
+        logger.info('Connected to Redis at ' + REDIS_URL)
+
+    def __del__(self):
+        """This method is not actually needed since Redis automatically handles connections, but added it anyway to
+        dereference the connection variable.
+        """
+        self.redis = None
+        logger.info('Closed connection to Redis at ' + REDIS_URL)
 
     def redis_check(self, key):
         """Return `True` if `key` exist in redis DB.

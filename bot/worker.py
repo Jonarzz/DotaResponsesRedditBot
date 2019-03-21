@@ -28,6 +28,7 @@ def execute():
     """
 
     reddit = account.get_account()
+    logger.info('Connected to Reddit account' + config.USERNAME)
 
     comments = reddit.subreddit(config.SUBREDDIT).stream.comments()
     process_comments(reddit, comments)
@@ -40,8 +41,9 @@ def process_comments(reddit, comments):
     the comments stream. This also means that once PRAW is up and running, after the initial comments list it won't
     generate any duplicate comments.
 
-    However, just as a safeguard, Caching is used to store comment ids as they are processed for the first time. If
-    comment id is in the already present in the cache, then it is ignored, else processed and added to the cache.
+    However, just as a safeguard, Caching is used to store comment ids as they are processed for the first time.
+    Otherwise, when the bot is restarted it might reply twice to same comments. If comment id is in the already present
+    in the cache, then it is ignored, else processed and added to the cache.
     * Self comments are ignored.
     * It is prepared for comparision to the responses in dictionary.
     * If the comment is not on the excluded responses list (loaded from config) and if it is in the responses db or

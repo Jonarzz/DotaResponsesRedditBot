@@ -3,51 +3,53 @@ import os
 
 import config
 
+logger = logging.getLogger(config.BOT_LOG)
+
 
 def setup_logger():
-    """Method to setup loggers (Can also use a single logger for error and info messages).
+    """Method to setup loggers.
+    Current logs only application logs and PRAW logs.
+
+    Disabled file logging since Heroku does not offer persistent disk storage. All logs should be read from Stream
+    Output instead.
     """
 
     if not os.path.exists(config.LOG_DIR):
         os.mkdir(config.LOG_DIR)
 
-    log_format = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
-    log_name = 'bot'
+    log_format = config.LOG_FORMAT
+    log_name = config.BOT_LOG
     log_formatter = logging.Formatter(log_format)
-    info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
-    error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
-    praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
+    log_level = logging.getLevelName(level=config.LOG_LEVEL)
+    # info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
+    # error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
+    # praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
 
     # Handlers
-    info_file_handler = logging.FileHandler(info_log_file, mode='a')
-    info_file_handler.setFormatter(log_formatter)
-    info_file_handler.setLevel(logging.INFO)
-
-    error_file_handler = logging.FileHandler(error_log_file, mode='a')
-    error_file_handler.setFormatter(log_formatter)
-    error_file_handler.setLevel(logging.ERROR)
-
-    praw_handler = logging.FileHandler(praw_log_file, mode='a')
-    praw_handler.setLevel(logging.WARNING)
+    # info_file_handler = logging.FileHandler(info_log_file, mode='a')
+    # info_file_handler.setFormatter(log_formatter)
+    # info_file_handler.setLevel(logging.INFO)
+    #
+    # error_file_handler = logging.FileHandler(error_log_file, mode='a')
+    # error_file_handler.setFormatter(log_formatter)
+    # error_file_handler.setLevel(logging.ERROR)
+    #
+    # praw_handler = logging.FileHandler(praw_log_file, mode='a')
+    # praw_handler.setLevel(logging.WARNING)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(log_formatter)
     stream_handler.setLevel(logging.DEBUG)
 
     # PRAW logging
-    praw_logger = logging.getLogger('prawcore')
+    praw_logger = logging.getLogger(config.PRAW_LOG)
     praw_logger.setLevel(logging.WARNING)
     praw_logger.addHandler(stream_handler)
-    praw_logger.addHandler(praw_handler)
+    # praw_logger.addHandler(praw_handler)
 
     # Internal logging
-    internal_logger = logging.getLogger(log_name)
-    internal_logger.setLevel(logging.INFO)
-    internal_logger.addHandler(info_file_handler)
-    internal_logger.addHandler(error_file_handler)
-    internal_logger.addHandler(stream_handler)
-
-    return internal_logger
-
-
-logger = setup_logger()
+    bot_logger = logging.getLogger(log_name)
+    bot_logger.setLevel(log_level)
+    # bot_logger.addHandler(info_file_handler)
+    # bot_logger.addHandler(error_file_handler)
+    bot_logger.addHandler(stream_handler)
