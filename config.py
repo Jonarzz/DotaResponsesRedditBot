@@ -30,11 +30,14 @@ REDIS_URL = os.environ['REDIS_URL']
 
 # Responses config
 COMMENT_ENDING = """
+
 ---
 Bleep bloop, I am a robot.
 
-[*^(Github)*](https://github.com/MePsyDuck/DotaResponsesRedditBot) *^(|)* [*^(Suggestions/Issues)*](
-https://github.com/MePsyDuck/DotaResponsesRedditBot/issues) *^(|)* [*^(contact)*](https://www.reddit.com/user/mepsyduck/)
+[*^(Source)*](https://github.com/MePsyDuck/DotaResponsesRedditBot) *^(|)* 
+[*^(Suggestions/Issues)*](https://github.com/MePsyDuck/DotaResponsesRedditBot/issues) *^(|)* 
+[*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
+[*^(Author)*](https://www.reddit.com/user/Jonarz/)
 """
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
