@@ -25,13 +25,33 @@ The bot will try to match a response of the hero that is in the comment's author
 * Refactor code
 * Docs
 * Add support for custom responses
-* (If possible) Add support for chatwheel sounds.
-* Maybe use peewee to handle db ops.
+* (If possible) Add support for chatwheel sounds
+* Use sqlalchemy to handle db ops
 * Reply to quoted text.
 * Comment on post if title is a response.
 
+
+---
+## Some stats and general info:
+[/r/dota2](https://www.reddit.com/r/DotA2) subreddit generates around 3.5k comments/day, 
+peaking around 12.5k during December (stats via [subbreditstats](https://subredditstats.com/r/dota2). 
+Bot should be able to handle around 15k comments/day(10 comments/minute).
+
+Services needed by bot that bot and what it currently uses:
+* Heroku for Hosting: Hobby Dyno.
+* ElephantSQL for Postgres DB: Free tier.
+* RedisCloud for Redis Cache: Free tier.
+* (If possible) Add support for chatwheel sounds.
+* Maybe use peewee to handle db ops.
+
+
 ---
 ## Changelog:
+
+##### 3.0:
+Major revamp for the bot
+* Moved from locally stored SQLite DBs to Cloud hosted Postgres DB.
+* Added caching for comment ids.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
