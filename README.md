@@ -41,8 +41,6 @@ Services needed by bot that bot and what it currently uses:
 * Heroku for Hosting: Hobby Dyno.
 * ElephantSQL for Postgres DB: Free tier.
 * RedisCloud for Redis Cache: Free tier.
-* (If possible) Add support for chatwheel sounds.
-* Maybe use peewee to handle db ops.
 
 
 ---
