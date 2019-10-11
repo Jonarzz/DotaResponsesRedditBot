@@ -5,6 +5,7 @@ Needs operation optimisation and normalization in databases
 import psycopg2
 
 from config import DB_URL
+from util.logger import logger
 
 __author__ = 'Jonarzz'
 
@@ -28,10 +29,12 @@ class DBUtil:
                                      port=url.port
                                      )
         self.conn.autocommit = True
+        logger.info('Connected to database at ' + DB_URL)
 
     def __del__(self):
         if self.conn is not None:
             self.conn.close()
+            logger.info('Closed connection to database at ' + DB_URL)
 
     # RESPONSES TABLE METHODS
     def create_responses_table(self):
