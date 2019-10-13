@@ -48,8 +48,11 @@ Services needed by bot that bot and what it currently uses:
 
 ##### 3.0:
 Major revamp for the bot
+Things that are new:
 * Moved from locally stored SQLite DBs to Cloud hosted Postgres DB.
 * Added caching for comment ids.
+* Better parsing of responses from wiki (handling punctutation, etc)
+* Better parsing for comments.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
