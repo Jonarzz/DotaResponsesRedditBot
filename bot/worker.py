@@ -79,10 +79,11 @@ def process_comments(reddit, comments):
 
 def parse_comment(response):
     """Method used to clean the response. Logic is similar to clean_key on wiki parser.
+    * If comment contains a quote, the first quote is considered as the response.
     * Punctuation marks are replaced  with space. 
     * The response is turned to lowercase.
     * Converts multiple spaces into single space.
-    
+
     Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
 
@@ -90,7 +91,15 @@ def parse_comment(response):
     :return: Processed comment body
     """
 
-    response = response.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
+    if '>' in response:
+        lines = response.split('\n\n')
+        for line in lines:
+            if line.startswith('>'):
+                response = line
+                break
+
+    response = response.translate(PUNCTUATION_TRANS)
+    response = response.translate(WHITESPACE_TRANS)
 
     while '  ' in response:
         response = response.replace('  ', ' ')
@@ -118,9 +127,11 @@ def save_comment_id(comment_id):
 def add_flair_specific_response_and_return(comment, response):
     hero_id = db.get_hero_id_by_css(css=comment.author_flair_css_class)
     if hero_id:
-        link, hero_id = db.get_link_for_response(response=response, hero_id=hero_id)
+        link, hero_id = db.get_link_for_response(
+            response=response, hero_id=hero_id)
         if link:
-            comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id))
+            comment.reply(create_reply(response_url=link,
+                                       original_text=comment.body, hero_id=hero_id))
             logger.info("Added: " + comment.id)
             return True
 
@@ -141,9 +152,11 @@ def add_regular_response(comment, response):
         img_dir = db.get_img_dir_by_id(hero_id=hero_id)
 
         if img_dir:
-            comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id, img=img_dir))
+            comment.reply(create_reply(
+                response_url=link, original_text=comment.body, hero_id=hero_id, img=img_dir))
         else:
-            comment.reply(create_reply(response_url=link, original_text=comment.body, hero_id=hero_id))
+            comment.reply(create_reply(response_url=link,
+                                       original_text=comment.body, hero_id=hero_id))
 
         logger.info("Added: " + comment.id)
 
@@ -181,7 +194,8 @@ def add_shitty_wizard_response(comment, response):
 
 
 def add_invoker_response(comment):
-    comment.reply(create_reply_invoker_ending(config.INVOKER_RESPONSE_URL, config.INVOKER_IMG_DIR))
+    comment.reply(create_reply_invoker_ending(
+        config.INVOKER_RESPONSE_URL, config.INVOKER_IMG_DIR))
     logger.info("Added: " + comment.id)
 
 
@@ -212,3 +226,5 @@ def prepare_specific_responses():
 
 
 SPECIFIC_RESPONSES_DICT = prepare_specific_responses()
+PUNCTUATION_TRANS = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+WHITESPACE_TRANS = str.maketrans(string.whitespace, ' ' * len(string.whitespace))
