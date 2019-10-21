@@ -12,11 +12,20 @@ class BotWorkerTest(unittest.TestCase):
     Inherits from TestCase class of unittest module.
     """
 
-    def test_prepare_response(self):
-        """Method that tests the prepare_response method from dotaresponses module.
-
-        It checks whether the returned value is the same as the expected string.
+    def test_parse_response(self):
+        """Method that tests the parse_response method from worker module.
         """
-        self.assertEqual(worker.parse_comment("That's a great idea!!!"), "that s a great idea")
+        self.assertEqual(worker.parse_comment(
+            "That's a great idea!!!"), "that s a great idea")
         self.assertEqual(worker.parse_comment("  WoNdErFuL  "), "wonderful")
         self.assertEqual(worker.parse_comment("How are you?"), "how are you")
+        self.assertEqual(worker.parse_comment(
+            "Isn't is good to have quotes?  you can add your response in quote and bot would still \n\n> reply to them"), "reply to them")
+        self.assertEqual(worker.parse_comment(
+            "> multiple quotes \n\n > but reply to \n\n > only first one"), "multiple quotes")
+
+    def test_specific_response_dict(self):
+        worker.prepare_specific_responses()
+
+        self.assertTrue("shitty wizard" in worker.SPECIFIC_RESPONSES_DICT)
+        self.assertTrue("ho ho ha ha" in worker.SPECIFIC_RESPONSES_DICT)
