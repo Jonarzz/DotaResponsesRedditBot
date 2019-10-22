@@ -12,10 +12,18 @@ The bot replies only for the comments that **are** responses.
 
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
+## Comment Parsing
+* All the comment text is transformed into lowercase
+* Any puncation is replaced with spaces
+* Multiple spaces are trimmed to single space.
+* If comment has blockquote, first blockquote is considered for matching.
+
+<!-- Old behavior
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the comment is ignored.
-
+-->
+<!-- Old behavior
 The bot will try to match a response of the hero that is in the comment's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
-
+-->
 
 ---
 ## TODO:
@@ -27,7 +35,6 @@ The bot will try to match a response of the hero that is in the comment's author
 * Add support for custom responses
 * (If possible) Add support for chatwheel sounds
 * Use sqlalchemy to handle db ops
-* Reply to quoted text.
 * Comment on post if title is a response.
 
 
@@ -41,6 +48,7 @@ Services needed by bot that bot and what it currently uses:
 * Heroku for Hosting: Hobby Dyno.
 * ElephantSQL for Postgres DB: Free tier.
 * RedisCloud for Redis Cache: Free tier.
+* Timber.io for log monitoring: Free tier.
 
 
 ---
@@ -53,6 +61,7 @@ Things that are new:
 * Added caching for comment ids.
 * Better parsing of responses from wiki (handling punctutation, etc)
 * Better parsing for comments.
+* Bot can reply to responses that are in blockquotes and ingnore rest of comment.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
