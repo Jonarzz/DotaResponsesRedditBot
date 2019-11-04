@@ -65,7 +65,7 @@ def create_list_of_responses(ending):
     list_of_responses = []
 
     for element in soup.find_all("li"):
-        if "sm2_button" in str(element):
+        if "ext-audiobutton" in str(element):
             list_of_responses.append(str(element))
 
     return list_of_responses

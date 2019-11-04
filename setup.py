@@ -1,5 +1,5 @@
 from util.database import DBUtil
-from wiki_parser.dota_responses_wiki_parser import populate_responses
+from wiki_parser.wiki_parser import populate_responses
 
 
 def first_run():

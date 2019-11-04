@@ -3,6 +3,7 @@
 import unittest
 
 import bot.worker as worker
+from bot.account import get_account
 
 __author__ = 'Jonarzz'
 
@@ -20,7 +21,8 @@ class BotWorkerTest(unittest.TestCase):
         self.assertEqual(worker.parse_comment("  WoNdErFuL  "), "wonderful")
         self.assertEqual(worker.parse_comment("How are you?"), "how are you")
         self.assertEqual(worker.parse_comment(
-            "Isn't is good to have quotes?  you can add your response in quote and bot would still \n\n> reply to them"), "reply to them")
+            "Isn't is good to have quotes?  you can add your response in quote and bot would still \n\n> reply to them"),
+            "reply to them")
         self.assertEqual(worker.parse_comment(
             "> multiple quotes \n\n > but reply to \n\n > only first one"), "multiple quotes")
 
@@ -29,3 +31,7 @@ class BotWorkerTest(unittest.TestCase):
 
         self.assertTrue("shitty wizard" in worker.SPECIFIC_RESPONSES_DICT)
         self.assertTrue("ho ho ha ha" in worker.SPECIFIC_RESPONSES_DICT)
+
+    def test_account(self):
+        reddit = get_account()
+        self.assertEqual(reddit.user.me(), 'dota2_responses_bot')

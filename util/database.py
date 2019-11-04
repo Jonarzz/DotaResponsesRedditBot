@@ -34,7 +34,7 @@ class DBUtil:
     def __del__(self):
         if self.conn is not None:
             self.conn.close()
-            logger.info('Closed connection to database at ' + DB_URL)
+            # logger.info('Closed connection to database at ' + DB_URL)
 
     # RESPONSES TABLE METHODS
     def create_responses_table(self):

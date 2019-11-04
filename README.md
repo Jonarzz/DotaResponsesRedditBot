@@ -20,13 +20,13 @@ The bot will try to match a response of the hero that is in the comment's author
 ---
 ## TODO:
 * ~~Make the bot work in r/test~~ _(Rejoice! It works!!!)_
-* Add support for flair in responses
+* Add support for flair in responses (Waiting on reddit to support this in reddit red
 * Improve tests
 * Refactor code
 * Docs
 * Add support for custom responses
 * (If possible) Add support for chatwheel sounds
-* Use sqlalchemy to handle db ops
+* Use sqlalchemy/records to handle db ops (https://docs.python-guide.org/scenarios/db/)
 * Reply to quoted text.
 * Comment on post if title is a response.
 
