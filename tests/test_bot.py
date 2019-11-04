@@ -3,6 +3,7 @@
 import unittest
 
 import bot.worker as worker
+import config
 from bot.account import get_account
 
 __author__ = 'Jonarzz'
@@ -13,8 +14,8 @@ class BotWorkerTest(unittest.TestCase):
     Inherits from TestCase class of unittest module.
     """
 
-    def test_parse_response(self):
-        """Method that tests the parse_response method from worker module.
+    def test_parse_comment(self):
+        """Method that tests the parse_comment method from worker module.
         """
         self.assertEqual(worker.parse_comment(
             "That's a great idea!!!"), "that s a great idea")
@@ -34,4 +35,4 @@ class BotWorkerTest(unittest.TestCase):
 
     def test_account(self):
         reddit = get_account()
-        self.assertEqual(reddit.user.me(), 'dota2_responses_bot')
+        self.assertEqual(reddit.user.me(), config.USERNAME)

@@ -8,7 +8,7 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/Jonarz)"""
+USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/Jonarz)"
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')

@@ -48,5 +48,9 @@ class WikiParserTest(unittest.TestCase):
 
         The module is testing if the method extracts a proper url from the given html element.
         """
-        url = '<li> <a href="http://a.a" title="Play" class="sm2">Play</a> Earthshaker! </li>'
-        self.assertEqual(parser.link_from_element(url), 'http://a.a')
+        url = '<ul><li><span><audio hidden="" class="ext-audiobutton" data-volume="1.0"><source ' \
+              'src="https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3" type="audio/mpeg" /><a ' \
+              'href="https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3">Link</a></audio><a ' \
+              'class="ext-audiobutton" data-state="play" title="Play/Pause">▶️</a></span> Ratchet up the trap!</li> '
+        self.assertEqual(parser.link_from_element(url),
+                         '"https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3')
