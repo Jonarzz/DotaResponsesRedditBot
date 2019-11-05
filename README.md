@@ -23,11 +23,13 @@ Priority :
 * Add support for custom responses
 * Use pony-orm to handle db ops (https://docs.python-guide.org/scenarios/db/)
 * Comment on post if title is a response.
+* Add \_\_maintainter__ header to all files
 * Use composition over inheritance pattern to use different caching, db and logging config between prod and dev setups.
   * Caching : File based, In memory, DB based, Redis
   * DB : Pony-ORM to handle Sqlite, MySQL and PostgreSQL.
   * Logging : Stream handler, file handler etc.
-
+* Add debug mode support
+* Parse responses with unused and rare tag correctly
 
 In Future :
 * Add support for flair in responses (Waiting on reddit to support this in reddit red

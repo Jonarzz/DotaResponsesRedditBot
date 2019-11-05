@@ -8,6 +8,7 @@ from config import DB_URL
 from util.logger import logger
 
 __author__ = 'Jonarzz'
+__maintainer__ = 'MePsyDuck'
 
 import datetime
 import re
@@ -44,7 +45,7 @@ class DBUtil:
         c = self.conn.cursor()
         c.execute('CREATE TABLE IF NOT EXISTS responses '
                   '(response text, link text, hero_id integer, '
-                  'UNIQUE (response,link, hero_id),'
+                  'UNIQUE (response, link, hero_id),'
                   'FOREIGN KEY (hero_id) REFERENCES heroes (id))')
         c.execute('CREATE INDEX idx_response ON responses(response)')
         c.close()

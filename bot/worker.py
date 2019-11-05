@@ -10,8 +10,8 @@ import string
 
 import bot.account as account
 import config
-from util.caching import Cache
-from util.database import DBUtil
+from util.caching.caching import Cache
+from util.database.database import DBUtil
 from util.logger import logger
 
 __author__ = 'Jonarzz'

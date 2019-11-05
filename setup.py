@@ -1,4 +1,4 @@
-from util.database import DBUtil
+from util.database.database import DBUtil
 from wiki_parser.wiki_parser import populate_responses
 
 

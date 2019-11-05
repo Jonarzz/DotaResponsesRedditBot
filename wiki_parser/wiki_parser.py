@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 
 from config import URL_DOMAIN, API_PATH, CATEGORY
-from util.database import DBUtil
+from util.database.database import DBUtil
 
 __author__ = 'Jonarzz'
 
