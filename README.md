@@ -23,7 +23,10 @@ Priority :
 * Add support for custom responses
 * Use pony-orm to handle db ops (https://docs.python-guide.org/scenarios/db/)
 * Comment on post if title is a response.
-* Use strategy pattern to use different caching, db and logging config between prod and dev setups.
+* Use composition over inheritance pattern to use different caching, db and logging config between prod and dev setups.
+  * Caching : File based, In memory, DB based, Redis
+  * DB : Pony-ORM to handle Sqlite, MySQL and PostgreSQL.
+  * Logging : Stream handler, file handler etc.
 
 
 In Future :
@@ -37,7 +40,7 @@ In Future :
 ## Some stats and general info:
 [/r/dota2](https://www.reddit.com/r/DotA2) subreddit generates around 3.5k comments/day, 
 peaking around 12.5k during December (stats via [subbreditstats](https://subredditstats.com/r/dota2). 
-Bot should be able to handle around 15k comments/day(10 comments/minute).
+Bot should be able to handle more than 15k comments/day(10 comments/minute) easily (Just an estimate, actual performance not yet tested).
 
 Services needed by bot that bot and what it currently uses:
 * Heroku for Hosting: Hobby Dyno.
