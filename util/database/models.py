@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from pony.orm import *
 
 db = Database()
@@ -14,7 +15,7 @@ class Responses(db.Entity):
 class Comments(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
     comment_id = Required(str, unique=True)  # Comment id that are already processed
-    process_datetime = Required(datetime, default=lambda: datetime.utcnow())  # Datetime of processing the comment
+    process_datetime = Optional(datetime, default=lambda: datetime.utcnow())  # Datetime of processing the comment
 
 
 class Heroes(db.Entity):

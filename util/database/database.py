@@ -13,7 +13,7 @@ __maintainer__ = 'MePsyDuck'
 import datetime
 import re
 
-import config as properties
+from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT
 import urllib.parse as up
 
 
@@ -58,7 +58,7 @@ class DBUtil:
         c.execute('DROP TABLE IF EXISTS responses CASCADE')
         c.close()
 
-    def add_response_to_table(self, response, link, hero="", hero_id=""):
+    def add_response_to_table(self, response, link, hero_id=""):
         """Method that updates the responses with pairs of response-link.
         If response already exists, update the link, else add the response to the table.
         All parameters should be strings.
@@ -147,13 +147,13 @@ class DBUtil:
         c.close()
 
     def delete_old_comment_ids(self):
-        """Method used to remove comments older than a period of time defined in the properties file
+        """Method used to remove comments older than a period of time defined in the config file
         (number corresponding to number of days).
         """
 
         c = self.conn.cursor()
 
-        furthest_date = datetime.date.today() - datetime.timedelta(days=properties.NUMBER_OF_DAYS_TO_DELETE_COMMENT)
+        furthest_date = datetime.date.today() - datetime.timedelta(days=NUMBER_OF_DAYS_TO_DELETE_COMMENT)
 
         c.execute("DELETE FROM comments WHERE date < %s", ([str(furthest_date)]))
         self.conn.execute("VACUUM")
@@ -299,7 +299,7 @@ class DBUtil:
         hero_file = open('hero_names.txt', 'r')
         img_file = open('hero_img.txt', 'r')
 
-        flair_match = re.findall('"flair flair\-([^ ]+)"', flair_file.read())
+        flair_match = re.findall('"flair flair-([^ ]+)"', flair_file.read())
         hero_lines = hero_file.readlines()
         img_paths = img_file.readlines()
 
@@ -316,7 +316,7 @@ class DBUtil:
                     break
 
             for path in img_paths:
-                path_match = re.search(r'\/hero\-([a-z]+)', path)
+                path_match = re.search(r'/hero-([a-z]+)', path)
                 if hero_name.lower().translate(str.maketrans("", "", " -'")) == path_match.group(1):
                     hero_img_path = path.strip()
                     break
