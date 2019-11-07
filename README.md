@@ -1,8 +1,8 @@
 # Dota Responses Reddit Bot
+[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Build Status](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/96e2b3fd0dfd495f87fda7dfad5fb545)](https://app.codacy.com/app/MePsyDuck/DotaResponsesRedditBot?utm_source=github.com&utm_medium=referral&utm_content=MePsyDuck/DotaResponsesRedditBot&utm_campaign=Badge_Grade_Dashboard)
 [![codecov](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot)
-[![](https://img.shields.io/badge/python-3.4+-blue.svg)](https://www.python.org/download/releases/3.4.0/) 
 > This is a forked version of the original with added improvements. Can be tested on r/test.
 Bot adding reply comments with links to appropriate responses found on [/r/dota2](https://www.reddit.com/r/DotA2).
 
@@ -30,6 +30,7 @@ Priority :
   * Logging : Stream handler, file handler etc.
 * Add debug mode support
 * Parse responses with unused and rare tag correctly
+* Improve response parsing.
 
 In Future :
 * Add support for flair in responses (Waiting on reddit to support this in reddit red
