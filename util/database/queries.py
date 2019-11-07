@@ -149,7 +149,7 @@ class DatabaseAPI:
     def update_hero(self, hero_name, img_path, flair_css):
         hero = Heroes.get(hero_name=hero_name)
         hero.img_path = img_path
-        hero.img_path = flair_css
+        hero.flair_css = flair_css
 
     def create_all_tables(self):
         self.db.create_tables()
