@@ -1,13 +1,17 @@
 import datetime
+import json
+import re
+import requests
 import urllib.parse as up
 
+from fuzzywuzzy import process
 from pony.orm import db_session, Database
 
 from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT, DB_URL, DB_PROVIDER
 from util.database.models import Responses, Comments, Heroes
 
 
-class DBUtil:
+class DB_API:
     def __init__(self):
         self.db = Database()
         if DB_PROVIDER == 'sqlite':
@@ -24,6 +28,8 @@ class DBUtil:
         else:
             self.db.bind(provider='sqlite', filename=':memory:')
 
+        self.db.generate_mapping(create_tables=True)
+
     # Responses table queries
     @db_session
     def add_response_to_table(self, response, link, hero_id):
@@ -38,7 +44,7 @@ class DBUtil:
         r = Responses(response=response, link=link, hero_id=hero_id)
 
     @db_session
-    def get_link_for_response(self, response, hero_id=None):
+    def get_link_for_response(self, response_text, hero_id=None):
         """Method that returns the link to the response. First tries to match with the given hero_id, otherwise returns
         random result.
 
@@ -46,12 +52,16 @@ class DBUtil:
         :param hero_id: The hero's id.
         :return The link to the response and the hero_id
         """
-        responses = Responses.select(lambda r: r.response == response)
-        # TODO
+        # TODO review
+        responses = Responses.select(lambda r: r.response == response_text)
+
         if hero_id is not None:
-            pass
+            for response in responses:
+                if response.hero_id == hero_id:
+                    return response.link, response.hero_id
         else:
-            pass
+            response = random.choice(responses)            
+            return response.link, response.hero_id
 
     # Comments table queries
     @db_session
@@ -133,8 +143,34 @@ class DBUtil:
 
     @db_session
     def add_heroes_to_table(self):
-        # TODO get css from r/dota2 subreddit and update heroes table
-        pass
+        """Method to add heroes to the table with hero names and proper css classes names as taken
+        from the DotA2 subreddit and hero flair images from the reddit directory. Every hero has its
+        own id, so that it can be joined with the hero from responses table (Serves as Foreign Key).
+        Note: Unused currently since flairs don't work in comments for new Reddit redesign.
+        """
+
+        heroes  = Heroes.select()[:]
+        hero_names = [hero.name for hero in heroes]
+
+        css_url = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
+        response = requests.get(css_url)
+        r = json.loads(response.text)
+        stylesheet = r['data']['stylesheet']
+
+        flair_regex = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_dir>/hero-\w+)"\]'
+        all_hero_flairs = re.findall(flair_regex, stylesheet, re.DOTALL)
+
+        for flair in all_hero_flairs:
+            flair_css = flair[0]
+            img_dir = flair[1]
+            flair_hero = img_dir[6:]
+
+            match, confidence = process.extractOne(flair_hero, hero_names)
+            if confidence >= 90:
+                hero = Heroes.get(name=match)
+                hero.img_dir = img_dir
+                hero.css = flair_css
+
 
     @db_session
     def create_all_tables(self):
