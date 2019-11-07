@@ -29,4 +29,4 @@ def populate_heroes():
 
         match, confidence = process.extractOne(flair_hero, hero_names)
         if confidence >= 90:
-            db_api.update_hero(name=match, img_path=img_path, flair_css=flair_css)
+            db_api.update_hero(hero_name=match, img_path=img_path, flair_css=flair_css)

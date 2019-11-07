@@ -21,21 +21,21 @@ def setup_logger():
     log_name = config.BOT_LOG
     log_formatter = logging.Formatter(log_format)
     log_level = logging.getLevelName(level=config.LOG_LEVEL)
-    # info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
-    # error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
-    # praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
+    info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
+    error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
+    praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
 
     # Handlers
-    # info_file_handler = logging.FileHandler(info_log_file, mode='a')
-    # info_file_handler.setFormatter(log_formatter)
-    # info_file_handler.setLevel(logging.INFO)
-    #
-    # error_file_handler = logging.FileHandler(error_log_file, mode='a')
-    # error_file_handler.setFormatter(log_formatter)
-    # error_file_handler.setLevel(logging.ERROR)
-    #
-    # praw_handler = logging.FileHandler(praw_log_file, mode='a')
-    # praw_handler.setLevel(logging.WARNING)
+    info_file_handler = logging.FileHandler(info_log_file, mode='a')
+    info_file_handler.setFormatter(log_formatter)
+    info_file_handler.setLevel(logging.INFO)
+
+    error_file_handler = logging.FileHandler(error_log_file, mode='a')
+    error_file_handler.setFormatter(log_formatter)
+    error_file_handler.setLevel(logging.ERROR)
+
+    praw_handler = logging.FileHandler(praw_log_file, mode='a')
+    praw_handler.setLevel(logging.WARNING)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(log_formatter)
@@ -45,11 +45,11 @@ def setup_logger():
     praw_logger = logging.getLogger(config.PRAW_LOG)
     praw_logger.setLevel(logging.WARNING)
     praw_logger.addHandler(stream_handler)
-    # praw_logger.addHandler(praw_handler)
+    praw_logger.addHandler(praw_handler)
 
     # Internal logging
     bot_logger = logging.getLogger(log_name)
     bot_logger.setLevel(log_level)
-    # bot_logger.addHandler(info_file_handler)
-    # bot_logger.addHandler(error_file_handler)
+    bot_logger.addHandler(info_file_handler)
+    bot_logger.addHandler(error_file_handler)
     bot_logger.addHandler(stream_handler)
