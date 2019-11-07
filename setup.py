@@ -1,14 +1,15 @@
-from util.database.database import DBUtil
-from wiki_parser.wiki_parser import populate_responses
+from parsers import css_parser
+from parsers import wiki_parser
+from util.database.queries import db_api
 
 
 def first_run():
     """Method to be run first time to set up the database
     """
-    db = DBUtil()
-    db.drop_all_tables()
-    db.create_all_tables()
-    populate_responses()
+    db_api.drop_all_tables()
+    db_api.create_all_tables()
+    wiki_parser.populate_responses()
+    css_parser.populate_heroes()
 
 
 if __name__ == '__main__':

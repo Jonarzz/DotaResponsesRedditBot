@@ -3,3 +3,6 @@ praw
 psycopg2
 redis
 pony
+fuzzywuzzy
+requests
+python-Levenshtein

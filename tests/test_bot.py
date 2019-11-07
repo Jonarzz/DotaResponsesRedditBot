@@ -2,9 +2,9 @@
 
 import unittest
 
-import bot.worker as worker
 import config
-from bot.account import get_account
+from bot import account
+from bot import worker
 
 __author__ = 'Jonarzz'
 
@@ -34,5 +34,5 @@ class BotWorkerTest(unittest.TestCase):
         self.assertTrue("ho ho ha ha" in worker.SPECIFIC_RESPONSES_DICT)
 
     def test_account(self):
-        reddit = get_account()
+        reddit = account.get_account()
         self.assertEqual(reddit.user.me(), config.USERNAME)

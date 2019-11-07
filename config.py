@@ -17,6 +17,8 @@ PASSWORD = os.environ.get('REDDIT_PASSWORD')
 URL_DOMAIN = 'http://dota2.gamepedia.com/'
 API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
 CATEGORY = 'Responses'
+CSS_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
+FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_dir>/hero-\w+)"\]'
 
 # External add-on config
 DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres

@@ -1,19 +1,18 @@
 import datetime
-import json
-import re
-import requests
+import random
 import urllib.parse as up
 
-from fuzzywuzzy import process
-from pony.orm import db_session, Database
+from pony.orm import db_session, commit
 
 from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT, DB_URL, DB_PROVIDER
-from util.database.models import Responses, Comments, Heroes
+from util.database.models import Responses, Comments, Heroes, db
+
+__author__ = 'MePsyDuck'
 
 
-class DB_API:
+class DatabaseAPI:
     def __init__(self):
-        self.db = Database()
+        self.db = db
         if DB_PROVIDER == 'sqlite':
             self.db.bind(provider='sqlite', filename=DB_URL, create_db=True)
         elif DB_PROVIDER == 'mysql':
@@ -32,36 +31,36 @@ class DB_API:
 
     # Responses table queries
     @db_session
-    def add_response_to_table(self, response, link, hero_id):
+    def add_response_to_table(self, response_text, response_link, hero_id):
         """Method that updates the responses with pairs of response-link.
         If response already exists, update the link, else add the response to the table.
         All parameters should be strings.
 
-        :param response: response text.
-        :param link: url to the response audio file.
+        :param response_text: response text.
+        :param response_link: url to the response audio file.
         :param hero_id: hero id. Should be same as id in heroes database.
         """
-        r = Responses(response=response, link=link, hero_id=hero_id)
+        r = Responses(response_text=response_text, response_link=response_link, hero_id=hero_id)
 
     @db_session
     def get_link_for_response(self, response_text, hero_id=None):
-        """Method that returns the link to the response. First tries to match with the given hero_id, otherwise returns
+        """Method that returns the link to the response_text. First tries to match with the given hero_id, otherwise returns
         random result.
 
-        :param response: The plaintext response.
+        :param response_text: The plaintext response_text.
         :param hero_id: The hero's id.
-        :return The link to the response and the hero_id
+        :return The link to the response_text and the hero_id
         """
         # TODO review
-        responses = Responses.select(lambda r: r.response == response_text)
+        responses = Responses.select(lambda r: r.response_text == response_text)
 
         if hero_id is not None:
             for response in responses:
                 if response.hero_id == hero_id:
-                    return response.link, response.hero_id
+                    return response.response_link, response.hero_id
         else:
-            response = random.choice(responses)            
-            return response.link, response.hero_id
+            response = random.choice(responses)
+            return response.response_link, response.hero_id
 
     # Comments table queries
     @db_session
@@ -87,28 +86,28 @@ class DB_API:
         :param comment_id: The id of the comment on Reddit
         :return: True if the it is already present in table, else False
         """
-        c = Comments.select(lambda c: c.comment_id == comment_id)
-        return c is not None
+        comment = Comments.select(lambda c: c.comment_id == comment_id)
+        return comment is not None
 
     # Heroes table queries
     @db_session
-    def add_hero_to_table(self, name, img_dir=None, css=None):
+    def add_hero_to_table(self, hero_name, img_path=None, flair_css=None):
         """Method to add hero to the table. All parameters are strings.
 
-        :param name: Hero's name
-        :param img_dir: path to hero's image
-        :param css: CSS for the flair
+        :param hero_name: Hero's name
+        :param img_path: path to hero's image
+        :param flair_css: CSS for the flair
         """
-        h = Heroes(name=name, img_dir=img_dir, css=css)
+        h = Heroes(hero_name=hero_name, img_path=img_path, flair_css=flair_css)
 
     @db_session
-    def get_hero_id_from_table(self, name):
+    def get_hero_id_from_table(self, hero_name):
         """Method to get hero's id from table.
 
-        :param name: Hero's name
+        :param hero_name: Hero's name
         :return: Hero's id
         """
-        h = Heroes.get(name=name)
+        h = Heroes.get(hero_name=hero_name)
         return h.id if h is not None else None
 
     @db_session
@@ -119,16 +118,16 @@ class DB_API:
         :return: Hero's name
         """
         h = Heroes[hero_id]
-        return h.name if h is not None else None
+        return h.hero_name if h is not None else None
 
     @db_session
-    def get_hero_id_by_css(self, css):
+    def get_hero_id_by_css(self, flair_css):
         """Method to get hero_id from the table based on the flair css
 
-        :param css: Hero's css as in r/DotA2 subreddit
+        :param flair_css: Hero's css as in r/DotA2 subreddit
         :return: Hero's id
         """
-        h = Heroes.get(css=css)
+        h = Heroes.get(flair_css=flair_css)
         return h.id if h is not None else None
 
     @db_session
@@ -139,43 +138,32 @@ class DB_API:
          :return: The directory path to the image
          """
         h = Heroes[hero_id]
-        return h.img_dir if h is not None else None
+        return h.img_path if h is not None else None
 
     @db_session
-    def add_heroes_to_table(self):
-        """Method to add heroes to the table with hero names and proper css classes names as taken
-        from the DotA2 subreddit and hero flair images from the reddit directory. Every hero has its
-        own id, so that it can be joined with the hero from responses table (Serves as Foreign Key).
-        Note: Unused currently since flairs don't work in comments for new Reddit redesign.
-        """
-
-        heroes  = Heroes.select()[:]
-        hero_names = [hero.name for hero in heroes]
-
-        css_url = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
-        response = requests.get(css_url)
-        r = json.loads(response.text)
-        stylesheet = r['data']['stylesheet']
-
-        flair_regex = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_dir>/hero-\w+)"\]'
-        all_hero_flairs = re.findall(flair_regex, stylesheet, re.DOTALL)
-
-        for flair in all_hero_flairs:
-            flair_css = flair[0]
-            img_dir = flair[1]
-            flair_hero = img_dir[6:]
-
-            match, confidence = process.extractOne(flair_hero, hero_names)
-            if confidence >= 90:
-                hero = Heroes.get(name=match)
-                hero.img_dir = img_dir
-                hero.css = flair_css
-
+    def get_all_hero_names(self):
+        heroes = Heroes.select()[:]
+        return [hero.hero_name for hero in heroes]
 
     @db_session
+    def update_hero(self, hero_name, img_path, flair_css):
+        hero = Heroes.get(hero_name=hero_name)
+        hero.img_path = img_path
+        hero.img_path = flair_css
+
     def create_all_tables(self):
         self.db.create_tables()
 
-    @db_session
     def drop_all_tables(self):
         self.db.drop_all_tables(with_all_data=True)
+
+    @db_session
+    def add_hero_and_responses(self, hero_name, response_link_dict):
+        h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
+        commit()
+
+        for response, link in response_link_dict.items():
+            r = Responses(response_text=response, response_link=link, hero_id=h.id)
+
+
+db_api = DatabaseAPI()

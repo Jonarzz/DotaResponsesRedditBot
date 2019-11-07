@@ -8,13 +8,14 @@ Proper logging is provided - saved to 2 files as standard output and errors.
 """
 import string
 
-import bot.account as account
 import config
+from bot import account
 from util.caching.caching import Cache
 from util.database.database import DBUtil
 from util.logger import logger
 
 __author__ = 'Jonarzz'
+__maintainer__ = 'MePsyDuck'
 
 db = DBUtil()
 cache = Cache()
@@ -77,46 +78,46 @@ def process_comments(reddit, comments):
         add_regular_response(comment, clean_comment)
 
 
-def parse_comment(response):
-    """Method used to clean the response. Logic is similar to clean_key on wiki parser.
-    * If comment contains a quote, the first quote is considered as the response.
+def parse_comment(comment_text):
+    """Method used to clean the comment text. Logic is similar to clean_key on wiki parsers.
+    * If comment contains a quote, the first quote is considered as the response_text.
     * Punctuation marks are replaced  with space. 
-    * The response is turned to lowercase.
+    * The response_text is turned to lowercase.
     * Converts multiple spaces into single space.
 
     Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
 
-    :param response: The comment body
+    :param comment_text: The comment body
     :return: Processed comment body
     """
 
-    if '>' in response:
-        lines = response.split('\n\n')
+    if '>' in comment_text:
+        lines = comment_text.split('\n\n')
         for line in lines:
             if line.startswith('>'):
-                response = line
+                comment_text = line
                 break
 
-    response = response.translate(PUNCTUATION_TRANS)
-    response = response.translate(WHITESPACE_TRANS)
+    comment_text = comment_text.translate(PUNCTUATION_TRANS)
+    comment_text = comment_text.translate(WHITESPACE_TRANS)
 
-    while '  ' in response:
-        response = response.replace('  ', ' ')
+    while '  ' in comment_text:
+        comment_text = comment_text.replace('  ', ' ')
 
-    response = response.strip().lower()
+    comment_text = comment_text.strip().lower()
 
     # i = 1
-    # new_response = response
+    # new_response = response_text
     #
     # try:
-    #     while not response[-1].isalnum() and response[-1] == response[-1 - i]:
+    #     while not response_text[-1].isalnum() and response_text[-1] == response_text[-1 - i]:
     #         new_response = new_response[:-1]
     #         i += 1
     # except IndexError:
-    #     logger.error("IndexError in " + response)
+    #     logger.error("IndexError in " + response_text)
 
-    return response
+    return comment_text
 
 
 def save_comment_id(comment_id):
