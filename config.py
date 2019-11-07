@@ -19,7 +19,8 @@ API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&f
 CATEGORY = 'Responses'
 
 # External add-on config
-DB_URL = os.environ.get('DATABASE_URL')
+DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
+DB_URL = os.environ.get('DATABASE_URL', ':memory:')
 REDIS_URL = os.environ.get('REDIS_URL')
 
 # Responses config
@@ -44,7 +45,7 @@ INFO_FILENAME = 'info.log'
 ERROR_FILENAME = 'error.log'
 PRAW_FILENAME = 'praw.log'
 
-NUMBER_OF_DAYS_TO_DELETE_COMMENT = 6
+NUMBER_OF_DAYS_TO_DELETE_COMMENT = 5
 
 INVOKER_BOT_RESPONSES = ['one of my favourites', 'one of my favorites', 'r/dota2smut', '/r/dota2smut', 'dota2smut']
 INVOKER_RESPONSE = 'One of my favorites!'

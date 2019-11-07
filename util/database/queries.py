@@ -1,18 +1,28 @@
 import datetime
+import urllib.parse as up
 
 from pony.orm import db_session, Database
 
-from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT
+from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT, DB_URL, DB_PROVIDER
 from util.database.models import Responses, Comments, Heroes
 
 
-class DBUtil():
+class DBUtil:
     def __init__(self):
         self.db = Database()
-        self.db.bind(provider='sqlite', filename=':memory:')
-        self.db.bind(provider='sqlite', filename='filename', create_db=True)
-        self.db.bind(provider='mysql', host='', user='', passwd='', db='')
-        self.db.bind(provider='oracle', user='', password='', dsn='')
+        if DB_PROVIDER == 'sqlite':
+            self.db.bind(provider='sqlite', filename=DB_URL, create_db=True)
+        elif DB_PROVIDER == 'mysql':
+            up.uses_netloc.append("mysql")
+            url = up.urlparse(DB_URL)
+            self.db.bind(provider='mysql', host=url.hostname, user=url.username, passwd=url.password, db=url.path[1:])
+        elif DB_PROVIDER == 'postgres':
+            up.uses_netloc.append("postgres")
+            url = up.urlparse(DB_URL)
+            self.db.bind(provider='postgres', user=url.username, password=url.password, host=url.hostname,
+                         database=url.path[1:])
+        else:
+            self.db.bind(provider='sqlite', filename=':memory:')
 
     # Responses table queries
     @db_session
@@ -83,22 +93,47 @@ class DBUtil():
 
     @db_session
     def get_hero_id_from_table(self, name):
-        pass
+        """Method to get hero's id from table.
+
+        :param name: Hero's name
+        :return: Hero's id
+        """
+        h = Heroes.get(name=name)
+        return h.id if h is not None else None
 
     @db_session
     def get_hero_name(self, hero_id):
-        pass
+        """Method to get hero's name from table.
+
+        :param hero_id: Hero's id
+        :return: Hero's name
+        """
+        h = Heroes[hero_id]
+        return h.name if h is not None else None
 
     @db_session
     def get_hero_id_by_css(self, css):
-        pass
+        """Method to get hero_id from the table based on the flair css
+
+        :param css: Hero's css as in r/DotA2 subreddit
+        :return: Hero's id
+        """
+        h = Heroes.get(css=css)
+        return h.id if h is not None else None
 
     @db_session
     def get_img_dir_by_id(self, hero_id):
-        pass
+        """Method to get image directory for hero's flair
+
+         :param hero_id: Hero's id
+         :return: The directory path to the image
+         """
+        h = Heroes[hero_id]
+        return h.img_dir if h is not None else None
 
     @db_session
     def add_heroes_to_table(self):
+        # TODO get css from r/dota2 subreddit and update heroes table
         pass
 
     @db_session
