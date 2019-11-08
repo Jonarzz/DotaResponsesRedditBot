@@ -21,23 +21,20 @@ The bot will try to match a response of the hero that is in the comment's author
 ## TODO:
 Priority : 
 * Add support for custom responses
-* Use pony-orm to handle db ops (https://docs.python-guide.org/scenarios/db/)
 * Comment on post if title is a response.
-* Add \_\_maintainter__ header to all files
+* Add \_\_maintainer__ header to all files
 * Use composition over inheritance pattern to use different caching, db and logging config between prod and dev setups.
   * Caching : File based, In memory, DB based, Redis
-  * DB : Pony-ORM to handle Sqlite, MySQL and PostgreSQL.
   * Logging : Stream handler, file handler etc.
 * Add debug mode support
-* Parse responses with unused and rare tag correctly
 * Improve response parsing.
 
 In Future :
-* Add support for flair in responses (Waiting on reddit to support this in reddit red
+* Add hero flair in responses (Waiting on reddit to support this in reddit redesign)
 * Improve tests
 * Refactor code
 * Docs
-* (If possible) Add support for chatwheel sounds
+* (If possible) Add support for chat wheel sounds
 
 ---
 ## Some stats and general info:
@@ -57,9 +54,9 @@ Services needed by bot that bot and what it currently uses:
 ##### 3.0:
 Major revamp for the bot
 Things that are new:
-* Moved from locally stored SQLite DBs to Cloud hosted Postgres DB.
+* Support sqlite, MySQL and PostgreSQL dbs via Pony-ORM.
 * Added caching for comment ids.
-* Better parsing of responses from wiki (handling punctutation, etc)
+* Better parsing of responses from wiki (handling punctuation, etc)
 * Better parsing for comments.
 * Reply to quoted text.
 

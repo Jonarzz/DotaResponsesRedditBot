@@ -55,4 +55,4 @@ class WikiParserTest(unittest.TestCase):
               'href="https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3">Link</a></audio><a ' \
               'class="ext-audiobutton" data-state="play" title="Play/Pause">▶️</a></span> Ratchet up the trap!</li> '
         self.assertEqual(wiki_parser.link_from_element(url),
-                         '"https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3')
+                         'https://gamepedia.cursecdn.com/dota2_gamepedia/8/8c/Ratt_level_01.mp3')
