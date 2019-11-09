@@ -27,7 +27,7 @@ Priority :
   * Caching : File based, In memory, DB based, Redis
   * Logging : Stream handler, file handler etc.
 * Add debug mode support
-* Improve response parsing.
+* Delete all common responses (count > 50)
 
 In Future :
 * Add hero flair in responses (Waiting on reddit to support this in reddit redesign)

@@ -4,12 +4,12 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 """
 
 import json
+import re
 import string
-from urllib.request import Request, urlopen
 
-from bs4 import BeautifulSoup
+import requests
 
-from config import URL_DOMAIN, API_PATH, CATEGORY
+from config import API_PATH, RESPONSES_CATEGORY, RESPONSES_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS
 from util.database.queries import db_api
 
 __author__ = 'Jonarzz'
@@ -21,7 +21,7 @@ def populate_responses():
     hero_name is used commonly for both announcers, heroes and voice packs.
     """
 
-    paths = pages_for_category(CATEGORY)
+    paths = pages_for_category(RESPONSES_CATEGORY)
     for path in paths:
         if is_hero_type(path):
             # path points to hero responses
@@ -32,6 +32,8 @@ def populate_responses():
 
         response_link_dict = create_responses_text_and_link_dict(url_path=path)
 
+        # Note: Save all responses to the db. Apply single word and common words filter on comments, not while saving
+        # responses
         db_api.add_hero_and_responses(hero_name=hero_name, response_link_dict=response_link_dict)
 
     # TODO add support for custom responses
@@ -44,9 +46,10 @@ def populate_responses():
 def pages_for_category(category_name):
     """Method that returns a list of page endings for a given Wiki category.
 
-    :param category_name: returns all category members in json response from gamepedia API.
+    :param category_name: returns all category members in json response from mediawiki API.
     """
-    json_response = page_to_parse(URL_DOMAIN + API_PATH + category_name)
+    params = get_params_for_category(category_name)
+    json_response = requests.get(url=API_PATH, params=params).text
 
     pages = []
 
@@ -55,21 +58,22 @@ def pages_for_category(category_name):
         title = category_members['title']
         if isinstance(title, str):
             pages.append(title)
+        else:
+            pass
 
     return pages
 
 
-def page_to_parse(url):
-    """Method used to open given url and return the received body (UTF-8 encoding).
-    URL can contain spaces, which need to be changed to underscores before sending request.
+def get_params_for_category(category):
+    params = CATEGORY_API_PARAMS.copy()
+    params['cmtitle'] = 'Category:' + category
+    return params
 
-    :param url: URL to be parsed.
-    :return: html response for the url
-    """
-    url = url.replace(" ", "_")
-    request = Request(url)
-    response = urlopen(request)
-    return response.read().decode("UTF-8")
+
+def get_params_for_file(file):
+    params = FILE_API_PARAMS.copy()
+    params['titles'] = 'File:' + file
+    return params
 
 
 def is_hero_type(page):
@@ -98,26 +102,24 @@ def get_hero_name(hero_page):
 def create_responses_text_and_link_dict(url_path):
     """Method that for a given page url_path creates a dictionary of pairs: response text-link.
 
-    :param url_path: path for the hero's url as string
+    :param url_path: path for the hero's responses as string
     :return: dictionary in the form of dict['response'] = link
     """
 
     responses_dict = {}
 
-    list_of_responses = create_list_of_responses(url_path)
+    responses_source = requests.get(url=URL_DOMAIN + '/' + url_path, params={'action': 'raw'}).text
 
-    for element in list_of_responses:
-        key = response_from_element(element)
+    r = re.compile(RESPONSES_REGEX)
 
-        # ignores single word responses such as yeah, no, yes, victory etc.
-        # would be better to filter using a custom ignored words dictionary
-        if " " not in key:
-            continue
+    for response in r.finditer(responses_source):
+        text = response['text']
+        file = response['file']
 
-        value = link_from_element(element)
+        text = clean_response_text(text)
+        link = link_for_file(file)
 
-        if key not in responses_dict and value:
-            responses_dict[key] = value
+        responses_dict[text] = link
 
     return responses_dict
 
@@ -137,43 +139,9 @@ def create_responses_text_and_link_dict(url_path):
     # heroes['Wisp'] = 'Io'
 
 
-def create_list_of_responses(ending):
-    page = page_to_parse(URL_DOMAIN + ending)
-    soup = BeautifulSoup(page, "html.parser")
-    list_of_responses = []
-
-    for element in soup.find_all("li"):
-        if "ext-audiobutton" in str(element):
-            list_of_responses.append(str(element))
-
-    return list_of_responses
-
-
-def response_from_element(element):
-    """Method that returns a plaintext for a given element taken from parsed html body. Removes all HTML tags as well.
-    Works specifically with currently existing responses on Gamepedia.
-    Remove <a> elements recursively since there can be many play buttons (see link_from_element).
-    Note: Code can be replaced with older string manipulation equivalent if needed, but it could be unsafe for elements
-    that contain <span> tags.
-
-    :param element: The html code to be parsed for the response
-    :return: plaintext clean response
-    """
-    soup = BeautifulSoup(element, 'html.parser')
-    link = soup.find('a')
-    while link:
-        link.decompose()
-        link = soup.find('a')
-
-    tooltip = soup.find('span')
-    if tooltip:
-        tooltip.decompose()
-    key = clean_key(soup.get_text())
-    return key
-
-
-def clean_key(key):
-    """Method that cleans the given key. It:
+def clean_response_text(key):
+    """Method that cleans the given response text.
+    It:
     * removes anything between parenthesis
     * removes trailing and leading spaces
     * removes all punctuations
@@ -184,10 +152,10 @@ def clean_key(key):
     :return: cleaned key
     """
 
-    if "(" in key and ")" in key:
-        start_index = key.find("(")
-        end_index = key.rfind(")") + 1
-        key = key.replace(key[start_index:end_index], "")
+    if '(' in key and ')' in key:
+        start_index = key.find('(')
+        end_index = key.rfind(')') + 1
+        key = key.replace(key[start_index:end_index], '')
 
     key = key.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
 
@@ -199,16 +167,9 @@ def clean_key(key):
     return key
 
 
-def link_from_element(element):
-    """Method that returns a link (url to the response) for a given element taken
-    from parsed html body.
-    If multiple links are present (such as Zeus and Zeus arcana, Dragon Knight human and dragon form responses),
-    it returns only the first link found in the element.
-
-    :param element: The html code to be parsed for the link
-    :return: The url to the response
-    """
-
-    soup = BeautifulSoup(element, 'html.parser')
-    link = soup.find('a').get('href')
-    return link
+def link_for_file(file):
+    json_response = json.loads(requests.get(url=API_PATH, params=get_params_for_file(file)).text)
+    pages = json_response['query']['pages']
+    imageinfo = pages[next(iter(pages))]['imageinfo'][0]
+    file_url = imageinfo['url']
+    return file_url.split('?')[0]  # Remove file version

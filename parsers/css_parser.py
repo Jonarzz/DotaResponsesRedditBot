@@ -4,7 +4,7 @@ import re
 import requests
 from fuzzywuzzy import process
 
-from config import CSS_URL, FLAIR_REGEX
+from config import STYLESHEET_URL, FLAIR_REGEX, USER_AGENT
 from util.database.queries import db_api
 
 
@@ -16,15 +16,14 @@ def populate_heroes():
     """
     hero_names = db_api.get_all_hero_names()
 
-    response = requests.get(CSS_URL)
+    response = requests.get(STYLESHEET_URL, headers={'User-Agent': USER_AGENT})
     r = json.loads(response.text)
     stylesheet = r['data']['stylesheet']
 
-    all_hero_flairs = re.findall(FLAIR_REGEX, stylesheet, re.DOTALL)
-
-    for flair in all_hero_flairs:
-        flair_css = flair[0]
-        img_path = flair[1]
+    r = re.compile(FLAIR_REGEX)
+    for flair in r.finditer(stylesheet):
+        flair_css = flair['css_class']
+        img_path = flair['img_path']
         flair_hero = img_path[6:]
 
         match, confidence = process.extractOne(flair_hero, hero_names)

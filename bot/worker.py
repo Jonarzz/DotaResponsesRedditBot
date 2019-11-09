@@ -79,7 +79,7 @@ def process_comments(reddit, comments):
 
 
 def parse_comment(comment_text):
-    """Method used to clean the comment text. Logic is similar to clean_key on wiki parsers.
+    """Method used to clean the comment text. Logic is similar to clean_response_text on wiki parsers.
     * If comment contains a quote, the first quote is considered as the response_text.
     * Punctuation marks are replaced  with space. 
     * The response_text is turned to lowercase.

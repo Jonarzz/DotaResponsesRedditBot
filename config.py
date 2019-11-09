@@ -8,17 +8,22 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/Jonarz)"
+USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/MePsyDuck)"
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
 
 # Parser config
-URL_DOMAIN = 'http://dota2.gamepedia.com/'
-API_PATH = 'api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&format=json&cmtitle=Category:'
-CATEGORY = 'Responses'
-CSS_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
-FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_dir>/hero-\w+)"\]'
+URL_DOMAIN = 'http://dota2.gamepedia.com'
+API_PATH = URL_DOMAIN + '/api.php'
+CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
+                       'format': 'json',
+                       'cmtitle': ''}
+FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
+RESPONSES_CATEGORY = 'Responses'
+STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
+FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
+RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> ({{.+?}} )*(?P<text>(.*)(\.|!))'
 
 # External add-on config
 DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
