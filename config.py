@@ -23,7 +23,7 @@ FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop
 RESPONSES_CATEGORY = 'Responses'
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
-RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> ({{.+?}} )*(?P<text>(.*)(\.|!))'
+RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> (<sm2>(?P<file2>[a-z0-9_.]+)</sm2> )?({{.+?}} )*(?P<text>(.*)(\.|!|?))'
 
 # External add-on config
 DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres

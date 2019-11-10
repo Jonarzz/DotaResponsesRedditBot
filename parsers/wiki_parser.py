@@ -30,11 +30,11 @@ def populate_responses():
             # path points to voice pack, announcer or shopkeeper responses
             hero_name = path
 
-        response_link_dict = create_responses_text_and_link_dict(url_path=path)
+        response_link_list = create_responses_text_and_link_list(url_path=path)
 
         # Note: Save all responses to the db. Apply single word and common words filter on comments, not while saving
         # responses
-        db_api.add_hero_and_responses(hero_name=hero_name, response_link_dict=response_link_dict)
+        db_api.add_hero_and_responses(hero_name=hero_name, response_link_list=response_link_list)
 
     # TODO add support for custom responses
     # custom_responses = {}
@@ -56,10 +56,7 @@ def pages_for_category(category_name):
     parsed_json = json.loads(json_response)
     for category_members in parsed_json['query']['categorymembers']:
         title = category_members['title']
-        if isinstance(title, str):
-            pages.append(title)
-        else:
-            pass
+        pages.append(title)
 
     return pages
 
@@ -99,29 +96,35 @@ def get_hero_name(hero_page):
     return hero_page.split('/')[0]
 
 
-def create_responses_text_and_link_dict(url_path):
-    """Method that for a given page url_path creates a dictionary of pairs: response text-link.
+def create_responses_text_and_link_list(url_path):
+    """Method that for a given page url_path creates a list of tuple: (original_text, processed_text, link).
 
     :param url_path: path for the hero's responses as string
-    :return: dictionary in the form of dict['response'] = link
+    :return: list in the form of (original_text, processed_text, link).
     """
 
-    responses_dict = {}
+    responses_list = []
 
     responses_source = requests.get(url=URL_DOMAIN + '/' + url_path, params={'action': 'raw'}).text
 
     r = re.compile(RESPONSES_REGEX)
 
     for response in r.finditer(responses_source):
-        text = response['text']
+        original_text = response['text']
         file = response['file']
+        processed_text = clean_response_text(original_text)
 
-        text = clean_response_text(text)
         link = link_for_file(file)
+        if link:
+            responses_list.append((original_text, processed_text, link))
 
-        responses_dict[text] = link
+        # In some cases there's two links when there's arcana audio file available for the same response.
+        file2 = response['file2']
+        if file2:
+            link2 = link_for_file(file2)
+            responses_list.append((original_text, processed_text, link2))
 
-    return responses_dict
+    return responses_list
 
     # TODO move to custom rules in config
     # responses['one of my favourites'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6' \
@@ -168,8 +171,11 @@ def clean_response_text(key):
 
 
 def link_for_file(file):
-    json_response = json.loads(requests.get(url=API_PATH, params=get_params_for_file(file)).text)
-    pages = json_response['query']['pages']
-    imageinfo = pages[next(iter(pages))]['imageinfo'][0]
-    file_url = imageinfo['url']
-    return file_url.split('?')[0]  # Remove file version
+    try:
+        json_response = json.loads(requests.get(url=API_PATH, params=get_params_for_file(file)).text)
+        pages = json_response['query']['pages']
+        imageinfo = pages[next(iter(pages))]['imageinfo'][0]
+        file_url = imageinfo['url']
+        return file_url.split('?')[0]  # Remove file version
+    except KeyError:
+        return None

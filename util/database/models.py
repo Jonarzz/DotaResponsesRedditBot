@@ -9,9 +9,10 @@ db = Database()
 
 class Responses(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
-    response_text = Required(str, 1000, index='idx_response_text')  # Stores the parsed response_text
-    response_link = Required(str, unique=False)  # Link to the response_text TODO this should be unique
-    hero_id = Required('Heroes')  # The hero_id for hero whose response_text this is
+    processed_text = Required(str, 1000, index='idx_parsed_text')  # Stores the processed response text
+    original_text = Required(str, 1000)  # Stores the original response text/ Unused currently, but may help in future.
+    response_link = Required(str, unique=False)  # Link to the response text TODO this should be unique
+    hero_id = Required('Heroes')  # The hero_id for hero whose response text this is
 
 
 class Comments(db.Entity):

@@ -31,28 +31,30 @@ class DatabaseAPI:
 
     # Responses table queries
     @db_session
-    def add_response_to_table(self, response_text, response_link, hero_id):
+    def add_response_to_table(self, processed_text, original_text, response_link, hero_id):
         """Method that updates the responses with pairs of response-link.
         If response already exists, update the link, else add the response to the table.
         All parameters should be strings.
 
-        :param response_text: response text.
+        :param processed_text: processed response text.
+        :param original_text: original response text
         :param response_link: url to the response audio file.
         :param hero_id: hero id. Should be same as id in heroes database.
         """
-        r = Responses(response_text=response_text, response_link=response_link, hero_id=hero_id)
+        r = Responses(processed_text=processed_text, original_text=original_text, response_link=response_link,
+                      hero_id=hero_id)
 
     @db_session
-    def get_link_for_response(self, response_text, hero_id=None):
-        """Method that returns the link to the response_text. First tries to match with the given hero_id, otherwise returns
-        random result.
+    def get_link_for_response(self, processed_text, hero_id=None):
+        """Method that returns the link to the processed response text. First tries to match with the given hero_id,
+        otherwise returns random result.
 
-        :param response_text: The plaintext response_text.
+        :param processed_text: The plain processed response text.
         :param hero_id: The hero's id.
-        :return The link to the response_text and the hero_id
+        :return The link to the processed response text and the hero_id
         """
         # TODO review
-        responses = Responses.select(lambda r: r.response_text == response_text)
+        responses = Responses.select(lambda r: r.processed_text == processed_text)
 
         if hero_id is not None:
             for response in responses:
@@ -158,12 +160,18 @@ class DatabaseAPI:
         self.db.drop_all_tables(with_all_data=True)
 
     @db_session
-    def add_hero_and_responses(self, hero_name, response_link_dict):
+    def add_hero_and_responses(self, hero_name, response_link_list):
+        """Method to add hero and it's responses to the db.
+
+        :param hero_name: Hero name who's responses will be inserted
+        :param response_link_list: List with tuples in the form of (original_text, processed_text, link)
+        :return:
+        """
         h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
         commit()
 
-        for response, link in response_link_dict.items():
-            r = Responses(response_text=response, response_link=link, hero_id=h.id)
+        for processed_text, original_text, link in response_link_list:
+            r = Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
 
 
 db_api = DatabaseAPI()
