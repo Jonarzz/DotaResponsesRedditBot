@@ -11,13 +11,12 @@ import string
 import config
 from bot import account
 from util.caching.caching import Cache
-from util.database.database import DBUtil
+from util.database.database import db_api
 from util.logger import logger
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
 
-db = DBUtil()
 cache = Cache()
 
 
@@ -122,13 +121,13 @@ def parse_comment(comment_text):
 
 def save_comment_id(comment_id):
     """Method that saves the comment id to the database"""
-    db.add_comment_to_table(comment_id=comment_id)
+    db_api.add_comment_to_table(comment_id=comment_id)
 
 
 def add_flair_specific_response_and_return(comment, response):
-    hero_id = db.get_hero_id_by_css(css=comment.author_flair_css_class)
+    hero_id = db_api.get_hero_id_by_css(css=comment.author_flair_css_class)
     if hero_id:
-        link, hero_id = db.get_link_for_response(
+        link, hero_id = db_api.get_link_for_response(
             response=response, hero_id=hero_id)
         if link:
             comment.reply(create_reply(response_url=link,
@@ -147,10 +146,10 @@ def add_regular_response(comment, response):
     :return: None
     """
 
-    link, hero_id = db.get_link_for_response(response=response)
+    link, hero_id = db_api.get_link_for_response(response=response)
 
     if link and hero_id:
-        img_dir = db.get_img_dir_by_id(hero_id=hero_id)
+        img_dir = db_api.get_img_dir_by_id(hero_id=hero_id)
 
         if img_dir:
             comment.reply(create_reply(
@@ -170,7 +169,7 @@ def create_reply(response_url, original_text, hero_id, img=None):
     rendering flairs properly.
     """
 
-    hero_name = db.get_hero_name(hero_id)
+    hero_name = db_api.get_hero_name(hero_id)
     logger.info(response_url + ' : ' + hero_name)
 
     # if img:

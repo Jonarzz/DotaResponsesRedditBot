@@ -10,7 +10,7 @@ import string
 import requests
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSES_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS
-from util.database.queries import db_api
+from util.database.database import db_api
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'

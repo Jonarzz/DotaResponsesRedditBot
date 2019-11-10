@@ -5,7 +5,7 @@ import requests
 from fuzzywuzzy import process
 
 from config import STYLESHEET_URL, FLAIR_REGEX, USER_AGENT
-from util.database.queries import db_api
+from util.database.database import db_api
 
 
 def populate_heroes():

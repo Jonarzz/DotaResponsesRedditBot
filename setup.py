@@ -1,5 +1,5 @@
 from parsers import css_parser, wiki_parser
-from util.database.queries import db_api
+from util.database.database import db_api
 
 
 def first_run():
