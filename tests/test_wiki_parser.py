@@ -21,7 +21,7 @@ class WikiParserTest(unittest.TestCase):
         The method checks if the requested response is consists of JSON payload as expected.
         """
         parsed_json = json.loads(requests.get(url=config.API_PATH,
-                                              params=wiki_parser.get_params_for_category(
+                                              params=wiki_parser.get_params_for_category_api(
                                                   config.RESPONSES_CATEGORY)).text)
 
         self.assertIsNotNone(parsed_json)

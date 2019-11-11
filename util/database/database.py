@@ -25,7 +25,7 @@ class DatabaseAPI:
             self.db.bind(provider='postgres', user=url.username, password=url.password, host=url.hostname,
                          database=url.path[1:])
         else:
-            self.db.bind(provider='sqlite', filename=':memory:')
+            self.db.bind(provider='sqlite', filename='bot.db', create_db=True)
 
         self.db.generate_mapping(create_tables=True)
 

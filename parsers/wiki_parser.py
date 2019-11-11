@@ -9,8 +9,10 @@ import string
 
 import requests
 
-from config import API_PATH, RESPONSES_CATEGORY, RESPONSES_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS
+from config import API_PATH, RESPONSES_CATEGORY, RESPONSES_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
+    FILES_PER_API_CALL
 from util.database.database import db_api
+from util.logger import logger
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -48,7 +50,7 @@ def pages_for_category(category_name):
 
     :param category_name: returns all category members in json response from mediawiki API.
     """
-    params = get_params_for_category(category_name)
+    params = get_params_for_category_api(category_name)
     json_response = requests.get(url=API_PATH, params=params).text
 
     pages = []
@@ -61,15 +63,16 @@ def pages_for_category(category_name):
     return pages
 
 
-def get_params_for_category(category):
+def get_params_for_category_api(category):
     params = CATEGORY_API_PARAMS.copy()
     params['cmtitle'] = 'Category:' + category
     return params
 
 
-def get_params_for_file(file):
+def get_params_for_files_api(files):
     params = FILE_API_PARAMS.copy()
-    params['titles'] = 'File:' + file
+    titles = 'File:' + '|File:'.join(files)
+    params['titles'] = titles
     return params
 
 
@@ -109,20 +112,27 @@ def create_responses_text_and_link_list(url_path):
 
     r = re.compile(RESPONSES_REGEX)
 
+    file_and_text_list = []
+
     for response in r.finditer(responses_source):
         original_text = response['text']
         file = response['file']
-        processed_text = clean_response_text(original_text)
-
-        link = link_for_file(file)
-        if link:
-            responses_list.append((original_text, processed_text, link))
+        file_and_text_list.append([original_text, file])
 
         # In some cases there's two links when there's arcana audio file available for the same response.
         file2 = response['file2']
         if file2:
-            link2 = link_for_file(file2)
-            responses_list.append((original_text, processed_text, link2))
+            file_and_text_list.append([original_text, file2])
+
+    file_and_link_dict = links_for_files(file_and_text_list)
+
+    for original_text, file in file_and_text_list:
+        processed_text = clean_response_text(original_text)
+        try:
+            link = file_and_link_dict[file]
+            responses_list.append((original_text, processed_text, link))
+        except KeyError:
+            pass
 
     return responses_list
 
@@ -170,12 +180,44 @@ def clean_response_text(key):
     return key
 
 
-def link_for_file(file):
-    try:
-        json_response = json.loads(requests.get(url=API_PATH, params=get_params_for_file(file)).text)
-        pages = json_response['query']['pages']
-        imageinfo = pages[next(iter(pages))]['imageinfo'][0]
-        file_url = imageinfo['url']
-        return file_url.split('?')[0]  # Remove file version
-    except KeyError:
-        return None
+def links_for_files(files_list):
+    """
+    Allows max 50 files(titles) at once : https://www.mediawiki.org/wiki/API:Query
+    :param files_list:  list of [original_text, file]
+    :return files_link_mapping: dict with file names and their links. dict['file'] = link
+    """
+    files_link_mapping = {}
+
+    for batch in batches(files_list, FILES_PER_API_CALL):
+        files_batch_list = [file for text, file in batch]
+
+        files_from_to_mapping = {}
+
+        http_response = requests.get(url=API_PATH, params=get_params_for_files_api(files_batch_list))
+        json_response = json.loads(http_response.text)
+        query = json_response['query']
+
+        normalized = query['normalized']
+        for mapping in normalized:
+            from_file = mapping['from']
+            to_file = mapping['to']
+            files_from_to_mapping[to_file] = from_file
+
+        pages = query['pages']
+        for page_id, page in pages.items():
+            title = page['title']  # Same as 'to' in 'normalized' entry
+            try:
+                imageinfo = page['imageinfo'][0]
+                file_url = imageinfo['url'].split('?')[0]  # Remove file version
+                files_link_mapping[files_from_to_mapping[title][5:]] = file_url
+            except KeyError:
+                logger.critical('File does not have a link : ' + title)
+
+    return files_link_mapping
+
+
+def batches(l, n):
+    """Yield successive n-sized chunks from l.
+    """
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
