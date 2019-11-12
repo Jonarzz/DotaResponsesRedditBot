@@ -20,21 +20,20 @@ The bot will try to match a response of the hero that is in the comment's author
 ---
 ## TODO:
 Priority : 
-* Add support for custom responses
-* Comment on post if title is a response.
-* Add \_\_maintainer__ header to all files
+* Add \_\_maintainer__ header to all files.
 * Use composition over inheritance pattern to use different caching, db and logging config between prod and dev setups.
-  * Caching : File based, In memory, DB based, Redis
+  * Caching : File based, In memory, DB based, Redis.
   * Logging : Stream handler, file handler etc.
-* Add debug mode support
-* Delete all common responses (count > 50)
+* Blacklist all common (count > 50), one word responses, hero name and item responses.
+* Add support for custom responses.
 
 In Future :
-* Add hero flair in responses (Waiting on reddit to support this in reddit redesign)
-* Improve tests
-* Refactor code
-* Docs
-* (If possible) Add support for chat wheel sounds
+* Improve tests.
+* Update Docs.
+* (If possible) Add support for chat wheel sounds.
+* (If possible) Comment on post if title is a response.
+* (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
+
 
 ---
 ## Some stats and general info:
