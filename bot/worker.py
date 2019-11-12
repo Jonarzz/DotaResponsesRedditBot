@@ -10,14 +10,14 @@ import string
 
 import config
 from bot import account
-from util.caching.caching import Cache
+from util.caching.caching import get_cache_api
 from util.database.database import db_api
 from util.logger import logger
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
 
-cache = Cache()
+cache_api = get_cache_api()
 
 
 def execute():
@@ -43,7 +43,7 @@ def process_comments(reddit, comments):
 
     However, just as a safeguard, Caching is used to store comment ids as they are processed for the first time.
     Otherwise, when the bot is restarted it might reply twice to same comments. If comment id is in the already present
-    in the cache, then it is ignored, else processed and added to the cache.
+    in the cache_api, then it is ignored, else processed and added to the cache_api.
     * Self comments are ignored.
     * It is prepared for comparision to the responses in dictionary.
     * If the comment is not on the excluded responses list (loaded from config) and if it is in the responses db or
@@ -52,7 +52,7 @@ def process_comments(reddit, comments):
 
     for comment in comments:
 
-        if cache.check_comment(comment_id=comment.id):
+        if cache_api.check_comment(comment_id=comment.id):
             continue
 
         logger.debug("Found new comment: " + str(comment.id))

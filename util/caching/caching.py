@@ -1,49 +1,43 @@
-from config import REDIS_URL
-from util.logger import logger
+from abc import ABC, abstractmethod
+
+from config import CACHE_PROVIDER
+from util.caching.in_memory_cache import MemoryCache
+from util.caching.redis_cache import RedisCache
 
 __author__ = 'MePsyDuck'
 
 
-class Cache:
-    """Used to store comment ids in cache.
+class CacheAPI(ABC):
+    """Used to store comment ids in cache_api.
+    Currently support only three implementations : DB based, in memory, file based and redis.
+    Support for more implementations can be added by extending this class.
     """
 
-    redis = None
+    @abstractmethod
+    def check(self, comment_id):
+        pass
 
-    def __init__(self):
-        """Create a new Redis instance when a new object for this class is created.
-        """
-        self.redis = []
-        # self.redis = Redis.from_url(REDIS_URL)
-        logger.info('Connected to Redis at ' + REDIS_URL)
-
-    def __del__(self):
-        """This method is not actually needed since Redis automatically handles connections, but added it anyway to
-        dereference the connection variable.
-        """
-        self.redis = None
-        # logger.info('Closed connection to Redis at ' + REDIS_URL)
-
-    def redis_check(self, key):
-        """Return `True` if `key` exist in redis DB.
-        """
-        # if self.redis.exists(key):
-        if key in self.redis:
-            return True
-
-    def redis_set(self, key, value):
-        """Set ``key`` with ``value`` in redis DB.
-        Key expires after 1 day (=24*60*60 seconds)
-        """
-        # self.redis.set(name=key, value=value, ex=24 * 60 * 60)
-        self.redis.append(key)
+    @abstractmethod
+    def set(self, comment_id):
+        pass
 
     def check_comment(self, comment_id):
         """Check if comment is already processed/replied.
-        Returns `True` if comment exists, else adds the comment to cache and returns `False`.
+        Returns `True` if comment exists, else adds the comment to cache_api and returns `False`.
         """
-        if self.redis_check(comment_id):
+        if self.check(comment_id):
             return True
         else:
-            self.redis_set(comment_id, "")
+            self.set(comment_id)
             return False
+
+
+def get_cache_api():
+    if CACHE_PROVIDER == 'redis':
+        return RedisCache()
+    elif CACHE_PROVIDER == 'memory':
+        return MemoryCache()
+    elif CACHE_PROVIDER == 'file':
+        return MemoryCache()  # TODO impl
+    elif CACHE_PROVIDER == 'db':
+        return MemoryCache()  # TODO impl
