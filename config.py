@@ -29,7 +29,7 @@ RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> (<sm2>(?P<file2>[a-z0-9_
 
 # External add-on config
 DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
-DB_URL = os.environ.get('DATABASE_URL', ':memory:')
+DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))
 REDIS_URL = os.environ.get('REDIS_URL')
 
 # Responses config
