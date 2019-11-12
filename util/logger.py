@@ -23,19 +23,19 @@ def setup_logger():
     log_name = config.BOT_LOG
     log_formatter = logging.Formatter(log_format)
     log_level = logging.getLevelName(level=config.LOG_LEVEL)
-    info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
-    error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
-    praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
 
     # Handlers
+    info_log_file = os.path.join(config.LOG_DIR, config.INFO_FILENAME)
     info_file_handler = logging.FileHandler(info_log_file, mode='a')
     info_file_handler.setFormatter(log_formatter)
     info_file_handler.setLevel(logging.INFO)
 
+    error_log_file = os.path.join(config.LOG_DIR, config.ERROR_FILENAME)
     error_file_handler = logging.FileHandler(error_log_file, mode='a')
     error_file_handler.setFormatter(log_formatter)
     error_file_handler.setLevel(logging.ERROR)
 
+    praw_log_file = os.path.join(config.LOG_DIR, config.PRAW_FILENAME)
     praw_handler = logging.FileHandler(praw_log_file, mode='a')
     praw_handler.setLevel(logging.WARNING)
 
@@ -52,6 +52,6 @@ def setup_logger():
     # Internal logging
     bot_logger = logging.getLogger(log_name)
     bot_logger.setLevel(log_level)
-    bot_logger.addHandler(info_file_handler)
-    bot_logger.addHandler(error_file_handler)
+    bot_logger.addHandler(info_file_handler)  # This should be commented out if running on Heroku
+    bot_logger.addHandler(error_file_handler)  # This should be commented out if running on Heroku
     bot_logger.addHandler(stream_handler)

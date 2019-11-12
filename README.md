@@ -20,10 +20,8 @@ The bot will try to match a response of the hero that is in the comment's author
 ---
 ## TODO:
 Priority : 
-* Add \_\_maintainer__ header to all files.
 * Use composition over inheritance pattern to use different caching, db and logging config between prod and dev setups.
   * Caching : File based, In memory, DB based, Redis.
-  * Logging : Stream handler, file handler etc.
 * Blacklist all common (count > 50), one word responses, hero name and item responses.
 * Add support for custom responses.
 
