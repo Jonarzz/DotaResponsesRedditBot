@@ -2,6 +2,7 @@
 import os
 
 __author__ = 'Jonarzz'
+__maintainer__ = 'MePsyDuck'
 
 # App config
 CLIENT_ID = os.environ.get('CLIENT_ID')

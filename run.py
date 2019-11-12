@@ -3,6 +3,8 @@ import traceback
 from bot.worker import execute, logger
 from util.logger import setup_logger
 
+__author__ = 'MePsyDuck'
+
 if __name__ == '__main__':
     setup_logger()
     while True:

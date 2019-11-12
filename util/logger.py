@@ -3,6 +3,8 @@ import os
 
 import config
 
+__author__ = 'MePsyDuck'
+
 logger = logging.getLogger(config.BOT_LOG)
 
 

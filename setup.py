@@ -1,6 +1,8 @@
 from parsers import css_parser, wiki_parser
 from util.database.database import db_api
 
+__author__ = 'MePsyDuck'
+
 
 def first_run():
     """Method to be run first time to set up the database

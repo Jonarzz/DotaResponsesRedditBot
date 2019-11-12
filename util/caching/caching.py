@@ -1,7 +1,7 @@
-from redis import Redis
-
 from config import REDIS_URL
 from util.logger import logger
+
+__author__ = 'MePsyDuck'
 
 
 class Cache:

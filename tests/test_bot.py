@@ -7,6 +7,7 @@ from bot import account
 from bot import worker
 
 __author__ = 'Jonarzz'
+__maintainer__ = 'MePsyDuck'
 
 
 class BotWorkerTest(unittest.TestCase):

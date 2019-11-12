@@ -8,6 +8,7 @@ import praw
 import config
 
 __author__ = 'Jonarzz'
+__maintainer__ = 'MePsyDuck'
 
 
 def get_account():

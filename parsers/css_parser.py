@@ -7,6 +7,8 @@ from fuzzywuzzy import process
 from config import STYLESHEET_URL, FLAIR_REGEX, USER_AGENT
 from util.database.database import db_api
 
+__author__ = 'MePsyDuck'
+
 
 def populate_heroes():
     """Method to add heroes to the table with hero names and proper css classes names as taken
