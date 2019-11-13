@@ -28,11 +28,14 @@ FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> (<sm2>(?P<file2>[a-z0-9_.]+)</sm2> )?({{.+?}} )*(?P<text>(' \
                   r'.*)(\.|!|\?)) '
 
-# External add-on config
+# Caching config
+CACHE_PROVIDER = os.getenv('CACHE_PROVIDER', 'memory')  # valid choices : redis, memory, db
+CACHE_URL = os.environ.get('CACHE_URL',
+                           os.path.join(os.getcwd(), 'cache.json'))  # file path in case of memory/file based caching
+
+# DB config
 DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
-DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))
-CACHE_PROVIDER = os.getenv('CACHE_PROVIDER', 'db')  # valid choices : redis, memory, db, file
-REDIS_URL = os.environ.get('REDIS_URL')
+DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # file path in case of sqlite
 
 # Responses config
 COMMENT_ENDING = """

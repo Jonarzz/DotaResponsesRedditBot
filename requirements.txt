@@ -6,3 +6,4 @@ pony
 fuzzywuzzy
 requests
 python-Levenshtein
+cacheout

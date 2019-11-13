@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 from config import CACHE_PROVIDER
-from util.caching.in_memory_cache import MemoryCache
+from util.caching.db_cache import DBCache
+from util.caching.memory_cache import MemoryCache
 from util.caching.redis_cache import RedisCache
 
 __author__ = 'MePsyDuck'
@@ -37,7 +38,5 @@ def get_cache_api():
         return RedisCache()
     elif CACHE_PROVIDER == 'memory':
         return MemoryCache()
-    elif CACHE_PROVIDER == 'file':
-        return MemoryCache()  # TODO impl
     elif CACHE_PROVIDER == 'db':
-        return MemoryCache()  # TODO impl
+        return DBCache()
