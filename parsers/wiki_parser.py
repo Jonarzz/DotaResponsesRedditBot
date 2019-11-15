@@ -38,12 +38,6 @@ def populate_responses():
         # responses
         db_api.add_hero_and_responses(hero_name=hero_name, response_link_list=response_link_list)
 
-    # TODO add support for custom responses
-    # custom_responses = {}
-    #
-    # for response, link in custom_responses.items():
-    #     db.add_response_to_table(response=response, link=link)
-
 
 def pages_for_category(category_name):
     """Method that returns a list of page endings for a given Wiki category.
@@ -136,41 +130,21 @@ def create_responses_text_and_link_list(url_path):
 
     return responses_list
 
-    # TODO move to custom rules in config
-    # responses['one of my favourites'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6' \
-    #                                     '/Invo_ability_invoke_01.mp3 '
-    # responses['lolicon'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a9/Arcwar_lasthit_04.mp3'
-    # responses['ho ho ha ha'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
-    #
-    # responses['caw'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/f/f6/Phoenix_bird_last_hit.mp3'
-    # responses['skree'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/a/a5/Phoenix_bird_attack.mp3'
-    # responses['beep boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/4/4f/Wisp_Move04.mp3'
-    # responses['boop'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/5f/Wisp_Move02.mp3'
-    # responses['beep'] = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/5/54/Wisp_Move01.mp3'
-    #
-    # heroes['Phoenix'] = 'Phoenix'
-    # heroes['Wisp'] = 'Io'
-
 
 def clean_response_text(key):
     """Method that cleans the given response text.
     It:
-    * removes anything between parenthesis
     * removes trailing and leading spaces
     * removes all punctuations
+    * removes all non-ascii characters (eg. ellipsis …)
     * removes double spaces
     * changes to lowercase
 
     :param key: the key to be cleaned
     :return: cleaned key
     """
-
-    if '(' in key and ')' in key:
-        start_index = key.find('(')
-        end_index = key.rfind(')') + 1
-        key = key.replace(key[start_index:end_index], '')
-
     key = key.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
+    key = ''.join([i if ord(i) < 128 else ' ' for i in key])
 
     while '  ' in key:
         key = key.replace('  ', ' ')

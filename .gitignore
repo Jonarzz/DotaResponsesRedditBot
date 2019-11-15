@@ -170,4 +170,7 @@ venv.bak/
 .mypy_cache/
 
 # bot sqlite local db
-do.db
+bot.db
+
+# bot sqlite local db
+cache.json

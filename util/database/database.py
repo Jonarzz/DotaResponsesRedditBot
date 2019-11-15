@@ -170,7 +170,7 @@ class DatabaseAPI:
         h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
         commit()
 
-        for processed_text, original_text, link in response_link_list:
+        for original_text, processed_text, link in response_link_list:
             r = Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
 
 
