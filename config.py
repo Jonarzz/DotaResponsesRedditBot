@@ -25,8 +25,8 @@ FILES_PER_API_CALL = 25
 RESPONSES_CATEGORY = 'Responses'
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
-RESPONSES_REGEX = r'\* <sm2>(?P<file>[a-z0-9_.]+)</sm2> (<sm2>(?P<file2>[a-z0-9_.]+)</sm2> )?({{.+?}}( )?)*(\[\[' \
-                  r'File:.+?\]\] )*(?P<text>(.*)(\.|!|\?))'
+RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
+FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 
 # Caching config
 CACHE_PROVIDER = os.getenv('CACHE_PROVIDER', 'memory')  # valid choices : redis, memory, db

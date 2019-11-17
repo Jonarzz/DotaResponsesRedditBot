@@ -6,11 +6,12 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 import json
 import re
 import string
+import time
 
 import requests
 
-from config import API_PATH, RESPONSES_CATEGORY, RESPONSES_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILES_PER_API_CALL
+from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
+    FILES_PER_API_CALL, FILE_REGEX
 from util.database.database import db_api
 from util.logger import logger
 
@@ -33,7 +34,6 @@ def populate_responses():
             hero_name = path
 
         response_link_list = create_responses_text_and_link_list(url_path=path)
-
         # Note: Save all responses to the db. Apply single word and common words filter on comments, not while saving
         # responses
         db_api.add_hero_and_responses(hero_name=hero_name, response_link_list=response_link_list)
@@ -99,36 +99,71 @@ def create_responses_text_and_link_list(url_path):
     :param url_path: path for the hero's responses as string
     :return: list in the form of (original_text, processed_text, link).
     """
-
-    responses_list = []
-
     responses_source = requests.get(url=URL_DOMAIN + '/' + url_path, params={'action': 'raw'}).text
 
-    r = re.compile(RESPONSES_REGEX)
-
+    responses_list = []
     file_and_text_list = []
 
-    for response in r.finditer(responses_source):
-        original_text = response['text']
-        file = response['file']
-        file_and_text_list.append([original_text, file])
+    response_regex = re.compile(RESPONSE_REGEX)
+    file_regex = re.compile(FILE_REGEX)
 
-        # In some cases there's two links when there's arcana audio file available for the same response.
-        file2 = response['file2']
-        if file2:
-            file_and_text_list.append([original_text, file2])
+    for response in response_regex.finditer(responses_source):
+        original_text = parse_response(response['text']).strip()
+        if original_text == '':
+            pass
+
+        files_source = response['files']
+        for file in file_regex.finditer(files_source):
+            file_and_text_list.append([original_text, file['file']])
 
     file_and_link_dict = links_for_files(file_and_text_list)
 
     for original_text, file in file_and_text_list:
         processed_text = clean_response_text(original_text)
-        try:
-            link = file_and_link_dict[file]
-            responses_list.append((original_text, processed_text, link))
-        except KeyError:
-            pass
+        if processed_text != '':
+            try:
+                link = file_and_link_dict[file]
+                responses_list.append((original_text, processed_text, link))
+            except KeyError:
+                pass
 
     return responses_list
+
+
+def parse_response(text):
+    if '(broken file)' in text:
+        return ''
+    if 'versus (TI ' in text:
+        return ''
+    if 'sm2' in text:
+        return ''
+
+    regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
+                         r'{{resp\|(r|u|\d+|d\|\d+)}}',  # Remove response rarity
+                         r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
+                         r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
+                         r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
+                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>',
+                         # Remove followup links in <small> tags
+                         r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
+                         ]
+    for regex in regexps_empty_sub:
+        text = re.sub(regex, '', text, flags=re.IGNORECASE)
+
+    regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
+                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
+                        # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
+                        r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
+                        r'{{tooltip\|([a-z.!\'\-?,… ]+)\|[a-z.!\'\-?:,()/ ]+}}',  # Replace tooltips
+                        r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
+                        ]
+    for regex in regexps_sub_text:
+        text = re.sub(regex, '\\1', text, flags=re.IGNORECASE)
+
+    if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|']):
+        logger.warn('Response could not be processed : ' + text)
+
+    return text
 
 
 def clean_response_text(key):
