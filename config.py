@@ -29,16 +29,16 @@ RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
 FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 
 # Caching config
-CACHE_PROVIDER = os.getenv('CACHE_PROVIDER', 'memory')  # valid choices : redis, memory, db
+CACHE_PROVIDER = os.environ.get('CACHE_PROVIDER', 'memory')  # valid choices : redis, memory, db
 CACHE_URL = os.environ.get('CACHE_URL',
                            os.path.join(os.getcwd(), 'cache.json'))  # file path in case of memory/file based caching
 
 # DB config
-DB_PROVIDER = os.getenv('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
+DB_PROVIDER = os.environ.get('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
 DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # file path in case of sqlite
 
 # Responses config
-COMMENT_ENDING = """
+COMMENT_ENDING = '''
 
 ---
 Bleep bloop, I am a robot.
@@ -47,7 +47,7 @@ Bleep bloop, I am a robot.
 [*^(Suggestions/Issues)*](https://github.com/MePsyDuck/DotaResponsesRedditBot/issues) *^(|)* 
 [*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
 [*^(Author)*](https://www.reddit.com/user/Jonarz/)
-"""
+'''
 
 # Logging config
 BOT_LOG = 'bot'
@@ -60,17 +60,6 @@ ERROR_FILENAME = 'error.log'
 PRAW_FILENAME = 'praw.log'
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 5
-
-INVOKER_BOT_RESPONSES = ['one of my favourites', 'one of my favorites', 'r/dota2smut', '/r/dota2smut', 'dota2smut']
-INVOKER_RESPONSE = 'One of my favorites!'
-INVOKER_RESPONSE_URL = 'http://hydra-media.cursecdn.com/dota2.gamepedia.com/b/b6/Invo_ability_invoke_01.mp3'
-INVOKER_ENDING = '^^Thus ^^I ^^Invoke ^^Masturbation'
-INVOKER_IMG_DIR = '/hero-invoker'
-INVOKER_HERO_NAME = 'Dirty Invoker'
-
-SNIPER_RESPONSE_URL = 'https://hydra-media.cursecdn.com/dota2.gamepedia.com/1/17/Snip_ability_shrapnel_03.mp3'
-SNIPER_IMG_DIR = '/hero-sniper'
-SNIPER_TRIGGER_WARNING = 'trigger warning: Sniper'
 
 EXCLUDED_RESPONSES = ["thank you", "why not", "glimmer cape", "hood of defiance",
                       "mask of madness", "force staff", "armlet of mordiggian",
