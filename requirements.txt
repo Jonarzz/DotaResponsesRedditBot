@@ -7,3 +7,4 @@ fuzzywuzzy
 requests
 python-Levenshtein
 cacheout
+requests-futures

@@ -6,12 +6,13 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 import json
 import re
 import string
-import time
+from concurrent.futures import as_completed
 
 import requests
+from requests_futures.sessions import FuturesSession
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILES_PER_API_CALL, FILE_REGEX
+    FILE_REGEX, MAX_HEADER_LENGTH
 from util.database.database import db_api
 from util.logger import logger
 
@@ -114,9 +115,11 @@ def create_responses_text_and_link_list(url_path):
 
         files_source = response['files']
         for file in file_regex.finditer(files_source):
-            file_and_text_list.append([original_text, file['file']])
+            file_name = file['file'].replace('_', ' ').capitalize()
+            file_and_text_list.append([original_text, file_name])
 
-    file_and_link_dict = links_for_files(file_and_text_list)
+    files_list = [file for text, file in file_and_text_list]
+    file_and_link_dict = links_for_files(files_list)
 
     for original_text, file in file_and_text_list:
         processed_text = clean_response_text(original_text)
@@ -135,8 +138,7 @@ def parse_response(text):
         return ''
     if 'versus (TI ' in text:
         return ''
-    if 'sm2' in text:
-        return ''
+    text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
                          r'{{resp\|(r|u|\d+|d\|\d+)}}',  # Remove response rarity
@@ -153,14 +155,14 @@ def parse_response(text):
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
                         r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
                         # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
-                        r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
-                        r'{{tooltip\|([a-z.!\'\-?,… ]+)\|[a-z.!\'\-?:,()/ ]+}}',  # Replace tooltips
+                        # r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
+                        r'{{tooltip\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?:,()/ ]+}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
     for regex in regexps_sub_text:
         text = re.sub(regex, '\\1', text, flags=re.IGNORECASE)
 
-    if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|']):
+    if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
         logger.warn('Response could not be processed : ' + text)
 
     return text
@@ -192,35 +194,39 @@ def clean_response_text(key):
 def links_for_files(files_list):
     """
     Allows max 50 files(titles) at once : https://www.mediawiki.org/wiki/API:Query
-    :param files_list:  list of [original_text, file]
+    :param files_list:  list of files
     :return files_link_mapping: dict with file names and their links. dict['file'] = link
     """
+
     files_link_mapping = {}
+    futures = []
 
-    for batch in batches(files_list, FILES_PER_API_CALL):
-        files_batch_list = [file for text, file in batch]
+    with FuturesSession() as session:
 
-        files_from_to_mapping = {}
+        files_batch_list = []
+        title_length = 0
+        for file in files_list:
+            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH:
+                futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
+                title_length = len(file) + 10
+                files_batch_list = [file]
+            else:
+                files_batch_list.append(file)
+                title_length += len(file) + 10
 
-        http_response = requests.get(url=API_PATH, params=get_params_for_files_api(files_batch_list))
-        json_response = json.loads(http_response.text)
-        query = json_response['query']
+        for future in as_completed(futures):
+            json_response = future.result().json()
+            query = json_response['query']
+            pages = query['pages']
 
-        normalized = query['normalized']
-        for mapping in normalized:
-            from_file = mapping['from']
-            to_file = mapping['to']
-            files_from_to_mapping[to_file] = from_file
-
-        pages = query['pages']
-        for page_id, page in pages.items():
-            title = page['title']  # Same as 'to' in 'normalized' entry
-            try:
-                imageinfo = page['imageinfo'][0]
-                file_url = imageinfo['url'].split('?')[0]  # Remove file version
-                files_link_mapping[files_from_to_mapping[title][5:]] = file_url
-            except KeyError:
-                logger.critical('File does not have a link : ' + title)
+            for page_id, page in pages.items():
+                title = page['title']  # Same as 'to' in 'normalized' entry
+                try:
+                    imageinfo = page['imageinfo'][0]
+                    file_url = imageinfo['url'].split('?')[0]  # Remove file version
+                    files_link_mapping[title[5:]] = file_url
+                except KeyError:
+                    logger.critical('File does not have a link : ' + title)
 
     return files_link_mapping
 
