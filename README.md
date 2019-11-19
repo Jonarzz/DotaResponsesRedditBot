@@ -56,10 +56,10 @@ Config variables needed to be set in environment for running the bot:
 | REDDIT_USERNAME | None. | Username for the Reddit account being used. Required. |
 | REDDIT_PASSWORD | None. | Password for the Reddit account being used. Required. |
 | CACHE_PROVIDER | `memory` | Caching module to be used. Valid choices : `redis`, `memory`, `db`. |
-| CACHE_URL | `cache.json` | URL path to redis instance/database/file in memory.  Based on `CACHE_PROVIDER`.  |
-| DATABASE_PROVIDER | `sqlite` | DBMS to be used.  Valid choices : `sqlite`, `mysql`, `postgres` |
+| CACHE_URL | `cache.json` | URL path to redis instance/database/file in memory. Based on `CACHE_PROVIDER`.  |
+| DATABASE_PROVIDER | `sqlite` | DBMS to be used. Valid choices : `sqlite`, `mysql`, `postgres` |
 | DATABASE_URL | `bot.db` | URL to the database. |
-| LOGGING_LEVEL | `INFO` | Logging level.Valid choices : [Logging levels](https://docs.python.org/3/library/logging.html#levels) |
+| LOGGING_LEVEL | `INFO` | Logging level. Valid choices : [Logging levels](https://docs.python.org/3/library/logging.html#levels) |
 
 
 ---
