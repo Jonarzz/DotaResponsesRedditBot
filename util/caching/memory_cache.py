@@ -1,3 +1,4 @@
+import atexit
 import json
 import os
 from collections import OrderedDict
@@ -17,8 +18,9 @@ class MemoryCache(CacheAPI):
             with open(CACHE_URL) as cache_json:
                 old_cache = json.load(cache_json, object_pairs_hook=OrderedDict)
                 self.cache.set_many(old_cache)
+        atexit.register(self.cleanup)
 
-    def __del__(self):
+    def cleanup(self):
         with open(CACHE_URL, 'w+') as cache_json:
             json.dump(self.cache.copy(), cache_json)
 

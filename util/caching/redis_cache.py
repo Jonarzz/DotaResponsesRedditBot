@@ -14,13 +14,6 @@ class RedisCache(CacheAPI):
         self.redis = Redis.from_url(CACHE_URL)
         logger.info('Connected to Redis at ' + CACHE_URL)
 
-    def __del__(self):
-        """This method is not actually needed since Redis automatically handles connections, but added it anyway to
-        dereference the connection variable.
-        """
-        self.redis = None
-        logger.info('Closed connection to Redis at ' + CACHE_URL)
-
     def check(self, key):
         """Return `True` if `key` exist in redis DB.
         """
