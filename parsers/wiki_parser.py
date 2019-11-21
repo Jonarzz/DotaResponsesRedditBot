@@ -229,10 +229,3 @@ def links_for_files(files_list):
                     logger.critical('File does not have a link : ' + title)
 
     return files_link_mapping
-
-
-def batches(l, n):
-    """Yield successive n-sized chunks from l.
-    """
-    for i in range(0, len(l), n):
-        yield l[i:i + n]

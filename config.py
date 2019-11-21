@@ -17,10 +17,10 @@ PASSWORD = os.environ.get('REDDIT_PASSWORD')
 # Parser config
 URL_DOMAIN = 'http://dota2.gamepedia.com'
 API_PATH = URL_DOMAIN + '/api.php'
+RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
                        'format': 'json',
                        'cmtitle': ''}
-RESPONSES_CATEGORY = 'Responses'
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
 MAX_HEADER_LENGTH = 1975 - 100
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
@@ -61,38 +61,64 @@ PRAW_FILENAME = 'praw.log'
 
 NUMBER_OF_DAYS_TO_DELETE_COMMENT = 5
 
-EXCLUDED_RESPONSES = ["thank you", "why not", "glimmer cape", "hood of defiance",
-                      "mask of madness", "force staff", "armlet of mordiggian",
-                      "helm of the dominator", "veil of discord", "shadow blade", "blade mail",
-                      "urn of shadows", "skull basher", "battle fury", "crimson guard",
-                      "eul s scepter", "eul s scepter of divinity", "scepter of divinity",
-                      "ethereal blade", "black king bar", "diffusal blade", "lotus orb",
-                      "silver edge", "solar crest", "medallion of courage", "rod of atos",
-                      "shiva s guard", "heaven s halberd", "sange and yasha", "monkey king bar",
-                      "orchid malevolence", "drum of endurance", "aghanim s scepter",
-                      "manta style", "eye of skadi", "hand of midas", "vladimir s offering",
-                      "refresher orb", "linken s sphere", "assault cuirass", "divine rapier",
-                      "scythe of vyse", "sheep stick", "pipe of insight", "boots of travel",
-                      "blink dagger", "moon shard", "guardian greaves", "octarine core",
-                      "heart of tarrasque", "abyssal blade", "abyssal underlord",
-                      "ancient apparition", "anti mage", "bounty hunter", "centaur warrunner",
-                      "chaos knight", "crystal maiden", "dark seer", "death prophet",
-                      "dragon knight", "drow ranger", "earth spirit", "earth shaker",
-                      "elder titan", "ember spirit", "faceless void", "keeper of the light",
-                      "legion commander", "lone druid", "naga siren", "nature s prophet",
-                      "nature s prophet", "night stalker", "nyx assassin", "ogre magi",
-                      "outworld destroyer", "phantom assassin", "phantom lancer", "queen of pain",
-                      "sand king", "shadow demon", "shadow fiend", "skywrath mage",
-                      "skeleton king", "spirit breaker", "storm spirit", "templar assassin",
-                      "treant protector", "troll warlord", "vengeful spirit", "winter wyvern",
-                      "witch doctor", "wraith king", "i agree", "my bad", "ha ha", "why not",
-                      "fair enough", "no way", "you're welcome", "very nice", "of course",
-                      "well deserved", "try again", "it worked", "nice try", "seems fair",
-                      "that s right", "thank god", "thank you so much", "well said", "holy shit",
-                      "so beautiful", "try harder", "go outside", "arc warden", "he he he",
-                      "pit lord", "shut up", "how so", "hey now", "much appreciated",
-                      "i don t think so", "I know right", "it begins", "too soon", "well done",
-                      "i like it", "are you okay", "ah, nice", "about time", "very good",
-                      "are you kidding me", "at last", "got it", "what happened", "oh boy",
-                      "nice one", "i am", "exactly so", "aphotic shield", "ghost scepter",
-                      "outworld devourer", "shadow shaman"]
+# Only include responses for items, runes, heroes, > 100 count and common phrases.
+# Hardcoded because then they can tweaked according to the needs.
+# Drawback for this : need to update each time hero/item is added
+FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 'i m not ready', 'out of mana',
+                      'it s not time yet', 'ah', 'no', 'uh', 'ha ha', 'attack', 'haste', 'double damage', 'immortality',
+                      'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
+
+# Get them from here.
+# https://dota2.gamepedia.com/api.php?action=cargoquery&tables=items&fields=title&where=game+IS+NULL&limit=500&format=json
+ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape', 'aghanim s scepter', 'manta style',
+                  'battle fury', 'yasha and kaya', 'talisman of evasion', 'sentry ward', 'yasha',
+                  'mantle of intelligence', 'bracer', 'iron branch', 'guardian greaves', 'wraith band', 'phase boots',
+                  'blade mail', 'power treads', 'eaglesong', 'soul ring', 'point booster', 'satanic', 'arcane boots',
+                  'observer ward', 'aegis of the immortal', 'sacred relic', 'void stone', 'aeon disk', 'ogre axe',
+                  'echo sabre', 'demon edge', 'rod of atos', 'ring of tarrasque', 'healing salve',
+                  'armlet of mordiggian', 'headdress', 'wind lace', 'slippers of agility', 'kaya', 'perseverance',
+                  'octarine core', 'ring of regen', 'shiva s guard', 'linken s sphere', 'veil of discord',
+                  'helm of the dominator', 'gem of true sight', 'sange and yasha', 'quarterstaff', 'crown', 'lotus orb',
+                  'daedalus', 'sange', 'mekansm', 'bloodthorn', 'energy booster', 'mithril hammer', 'faerie fire',
+                  'necronomicon', 'platemail', 'stout shield', 'crystalys', 'robe of the magi', 'monkey king bar',
+                  'tome of knowledge', 'sage s mask', 'orb of venom', 'dragon lance', 'drum of endurance', 'nullifier',
+                  'kaya and sange', 'hood of defiance', 'smoke of deceit', 'urn of shadows', 'heart of tarrasque',
+                  'reaver', 'cheese', 'solar crest', 'aether lens', 'blink dagger', 'magic stick', 'hand of midas',
+                  'morbid mask', 'force staff', 'blight stone', 'mystic staff', 'quelling blade', 'refresher shard',
+                  'holy locket', 'maelstrom', 'hyperstone', 'animal courier', 'mjollnir', 'soul booster', 'buckler',
+                  'scythe of vyse', 'bottle', 'gloves of haste', 'pipe of insight', 'null talisman', 'ring of basilius',
+                  'band of elvenskin', 'spirit vessel', 'staff of wizardry', 'town portal scroll', 'orchid malevolence',
+                  'claymore', 'heaven s halberd', 'enchanted mango', 'aghanim s blessing', 'radiance', 'silver edge',
+                  'oblivion staff', 'ethereal blade', 'eye of skadi', 'eul s scepter of divinity', 'assault cuirass',
+                  'mask of madness', 'refresher orb', 'circlet', 'chainmail', 'infused raindrop', 'desolator',
+                  'magic wand', 'black king bar', 'observer and sentry wards', 'butterfly', 'clarity', 'shadow amulet',
+                  'skull basher', 'boots of speed', 'helm of iron will', 'medallion of courage', 'bloodstone',
+                  'divine rapier', 'gauntlets of strength', 'dagon', 'ghost scepter', 'boots of travel', 'moon shard',
+                  'abyssal blade', 'vitality booster', 'ring of protection', 'blade of alacrity', 'ring of health',
+                  'cloak', 'shadow blade', 'diffusal blade', 'tango', 'dust of appearance', 'belt of strength',
+                  'hurricane pike', 'vladmir s offering', 'tranquil boots', 'javelin', 'meteor hammer', 'broadsword',
+                  'ultimate orb'}
+
+# Get them from here
+# https://dota2.gamepedia.com/api.php?action=cargoquery&tables=heroes&fields=title&where=game+IS+NULL&limit=500&format=json
+HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'juggernaut', 'crystal maiden', 'pudge',
+                       'disruptor', 'queen of pain', 'wraith king', 'spectre', 'templar assassin', 'warlock',
+                       'earth spirit', 'viper', 'slark', 'weaver', 'alchemist', 'treant protector', 'axe', 'tidehunter',
+                       'invoker', 'kunkka', 'keeper of the light', 'undying', 'phoenix', 'terrorblade', 'doom',
+                       'broodmother', 'death prophet', 'earthshaker', 'mirana', 'storm spirit', 'bounty hunter',
+                       'clockwerk', 'lina', 'magnus', 'lifestealer', 'enigma', 'windranger', 'dark seer', 'drow ranger',
+                       'tiny', 'chaos knight', 'vengeful spirit', 'nyx assassin', 'ancient apparition', 'tusk',
+                       'ember spirit', 'io', 'outworld devourer', 'lion', 'underlord', 'lone druid', 'ursa', 'batrider',
+                       'riki', 'sven', 'ogre magi', 'beastmaster', 'anti mage', 'morphling', 'medusa', 'arc warden',
+                       'shadow demon', 'naga siren', 'slardar', 'bloodseeker', 'winter wyvern', 'leshrac', 'lycan',
+                       'omniknight', 'witch doctor', 'shadow shaman', 'sand king', 'necrophos', 'faceless void',
+                       'pangolier', 'grimstroke', 'dazzle', 'visage', 'spirit breaker', 'centaur warrunner',
+                       'monkey king', 'jakiro', 'dragon knight', 'abaddon', 'pugna', 'dark willow', 'night stalker',
+                       'luna', "nature s prophet", 'lich', 'bane', 'mars', 'phantom lancer', 'troll warlord', 'chen',
+                       'techies', 'skywrath mage', 'enchantress', 'razor', 'gyrocopter', 'tinker', 'zeus', 'meepo',
+                       'rubick', 'elder titan', 'brewmaster', 'venomancer', 'shadow fiend', 'puck', 'legion commander',
+                       'sniper', 'oracle', 'timbersaw', 'bristleback'}
+
+# Add responses here as people report them
+COMMON_PHRASE_RESPONSES = {''}
+EXCLUDED_RESPONSES = FREQUENT_RESPONSES | ITEM_RESPONSES | HERO_NAME_RESPONSES | COMMON_PHRASE_RESPONSES

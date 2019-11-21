@@ -20,10 +20,10 @@ The bot will try to match a response of the hero that is in the comment's author
 ---
 ## TODO:
 Priority : 
-* Blacklist all common (count > 50), one word responses, hero name and item responses.
+* Calculate max header length
+* Add support for custom responses.
 
 In Future :
-* Add support for custom responses.
 * Improve tests.
 * Update Docs.
 * (If possible) Add support for chat wheel sounds.
@@ -60,13 +60,15 @@ Config variables needed to be set in environment for running the bot:
 ## Changelog:
 
 ##### 3.0:
-Major revamp for the bot
+Major revamp for the bot.
 Things that are new:
 * Revamped parsing of responses from wiki (now directly from the sources).
+* Revamped parsing flair css and image directories from subreddit css.
 * Support sqlite, MySQL and PostgreSQL dbs via Pony-ORM.
-* Added caching for comment ids.
+* Added caching for comment ids (redis, db and in memory/file based).
 * Better parsing for comments.
-* Reply to quoted text.
+* Now bot can reply to quoted text in comments.
+* Updated excluded responses.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response

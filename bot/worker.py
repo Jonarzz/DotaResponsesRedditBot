@@ -10,7 +10,7 @@ import string
 
 import config
 from bot import account
-from util.caching.caching import get_cache_api
+from util.caching import get_cache_api
 from util.database.database import db_api
 from util.logger import logger
 
@@ -63,6 +63,10 @@ def process_comments(reddit, comments):
 
         clean_comment = parse_comment(comment.body)
         save_comment_id(comment.id)
+
+        # Don't reply to single word comments (they're mostly common phrases).
+        if ' ' not in clean_comment:
+            continue
 
         if clean_comment in config.EXCLUDED_RESPONSES:
             continue
@@ -193,38 +197,6 @@ def add_shitty_wizard_response(comment, response):
     add_regular_response(comment=comment, response=response)
 
 
-def add_invoker_response(comment):
-    comment.reply(create_reply_invoker_ending(
-        config.INVOKER_RESPONSE_URL, config.INVOKER_IMG_DIR))
-    logger.info("Added: " + comment.id)
-
-
-def create_reply_invoker_ending(response_url, img_dir):
-    return ("[]({}): [{}]({}) (sound warning: {})\n\n{}{}"
-            .format(img_dir, config.INVOKER_RESPONSE, response_url, config.INVOKER_HERO_NAME,
-                    config.INVOKER_ENDING, config.COMMENT_ENDING))
-
-
-def add_sniper_response(comment):
-    comment.reply(create_reply_sniper_ending(config.SNIPER_RESPONSE_URL, comment.body,
-                                             config.SNIPER_IMG_DIR))
-    logger.info("Added: " + comment.id)
-
-
-def create_reply_sniper_ending(response_url, original_text, img_dir):
-    return ("[]({}): [{}]({}) ({}){}"
-            .format(img_dir, original_text, response_url, config.SNIPER_TRIGGER_WARNING, config.COMMENT_ENDING))
-
-
-def prepare_specific_responses():
-    output_dict = {}
-    for response in config.INVOKER_BOT_RESPONSES:
-        output_dict[response] = add_invoker_response
-    output_dict["shitty wizard"] = add_shitty_wizard_response
-    output_dict["ho ho ha ha"] = add_sniper_response
-    return output_dict
-
-
-SPECIFIC_RESPONSES_DICT = prepare_specific_responses()
+SPECIFIC_RESPONSES_DICT = {}
 PUNCTUATION_TRANS = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
 WHITESPACE_TRANS = str.maketrans(string.whitespace, ' ' * len(string.whitespace))

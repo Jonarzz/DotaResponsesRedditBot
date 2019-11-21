@@ -28,12 +28,6 @@ class BotWorkerTest(unittest.TestCase):
         self.assertEqual(worker.parse_comment(
             "> multiple quotes \n\n > but reply to \n\n > only first one"), "multiple quotes")
 
-    def test_specific_response_dict(self):
-        worker.prepare_specific_responses()
-
-        self.assertTrue("shitty wizard" in worker.SPECIFIC_RESPONSES_DICT)
-        self.assertTrue("ho ho ha ha" in worker.SPECIFIC_RESPONSES_DICT)
-
     def test_account(self):
         reddit = account.get_account()
         self.assertEqual(reddit.user.me(), config.USERNAME)
