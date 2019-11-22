@@ -19,11 +19,7 @@ The bot will try to match a response of the hero that is in the comment's author
 
 ---
 ## TODO:
-Priority : 
-* Calculate max header length
 * Add support for custom responses.
-
-In Future :
 * Improve tests.
 * Update Docs.
 * (If possible) Add support for chat wheel sounds.
