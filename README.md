@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/96e2b3fd0dfd495f87fda7dfad5fb545)](https://app.codacy.com/app/MePsyDuck/DotaResponsesRedditBot?utm_source=github.com&utm_medium=referral&utm_content=MePsyDuck/DotaResponsesRedditBot&utm_campaign=Badge_Grade_Dashboard)
 [![codecov](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot)
+
 > This is a forked version of the original with added improvements. Can be tested on r/test.
 Bot adding reply comments with links to appropriate responses found on [/r/dota2](https://www.reddit.com/r/DotA2).
 
@@ -12,10 +13,18 @@ The bot replies only for the comments that **are** responses.
 
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
+## Comment Parsing
+* All the comment text is transformed into lowercase
+* Any puncation is replaced with spaces
+* Multiple spaces are trimmed to single space.
+* If comment has blockquote, first blockquote is considered for matching.
+
+<!-- Old behavior
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the comment is ignored.
-
+-->
+<!-- Old behavior
 The bot will try to match a response of the hero that is in the comment's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
-
+-->
 
 ---
 ## TODO:
@@ -63,8 +72,8 @@ Things that are new:
 * Support sqlite, MySQL and PostgreSQL dbs via Pony-ORM.
 * Added caching for comment ids (redis, db and in memory/file based).
 * Better parsing for comments.
-* Now bot can reply to quoted text in comments.
 * Updated excluded responses.
+* Bot can reply to responses that are in blockquotes and ingnore rest of comment.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
