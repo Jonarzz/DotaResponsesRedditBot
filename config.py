@@ -22,7 +22,8 @@ CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 
                        'format': 'json',
                        'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1975 - 100
+MAX_HEADER_LENGTH = 1975  # max header length as found by trail and error
+
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
@@ -119,6 +120,15 @@ HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'jugg
                        'rubick', 'elder titan', 'brewmaster', 'venomancer', 'shadow fiend', 'puck', 'legion commander',
                        'sniper', 'oracle', 'timbersaw', 'bristleback'}
 
-# Add responses here as people report them
-COMMON_PHRASE_RESPONSES = {''}
+# Add responses here as people report them. Taken from the old excluded responses list.
+COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
+                           'why not', 'much appreciated', 'well done', 'pit lord', 'outworld destroyer', 'I know right',
+                           'aphotic shield', 'go outside', 'vladimir s offering', 'sheep stick', 'my bad',
+                           "you're welcome", 'holy shit', 'are you okay', 'i agree', 'thank god', 'i like it', 'no way',
+                           'fair enough', 'it worked', 'well deserved', 'he he he', 'how so', 'oh boy', 'very good',
+                           'about time', 'are you kidding me', 'abyssal underlord', 'so beautiful', 'nice try',
+                           'thank you so much', 'ah, nice', 'nice one', 'eul s scepter', 'thank you',
+                           'scepter of divinity', 'at last', 'too soon', 'try again', 'i don t think so', 'try harder',
+                           'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right'}
+
 EXCLUDED_RESPONSES = FREQUENT_RESPONSES | ITEM_RESPONSES | HERO_NAME_RESPONSES | COMMON_PHRASE_RESPONSES

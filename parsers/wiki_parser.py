@@ -200,13 +200,14 @@ def links_for_files(files_list):
 
     files_link_mapping = {}
     futures = []
+    empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
 
     with FuturesSession() as session:
-
         files_batch_list = []
         title_length = 0
+
         for file in files_list:
-            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH:
+            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH - empty_api_length:
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
                 title_length = len(file) + 10
                 files_batch_list = [file]
