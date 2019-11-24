@@ -31,7 +31,6 @@ The bot will try to match a response of the hero that is in the comment's author
 * Add support for custom responses.
 * Improve tests.
 * Update Docs.
-* (If possible) Add support for chat wheel sounds.
 * (If possible) Comment on post if title is a response.
 * (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
 
@@ -73,7 +72,8 @@ Things that are new:
 * Added caching for comment ids (redis, db and in memory/file based).
 * Better parsing for comments.
 * Updated excluded responses.
-* Bot can reply to responses that are in blockquotes and ingnore rest of comment.
+* Bot can reply to responses that are in blockquotes and ignore rest of comment.
+* Added support for TI chat wheel sounds.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response

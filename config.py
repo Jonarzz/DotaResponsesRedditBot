@@ -22,11 +22,12 @@ CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 
                        'format': 'json',
                        'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1975  # max header length as found by trail and error
+MAX_HEADER_LENGTH = 1960  # max header length as found by trail and error
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
+CHAT_WHEEL_SECTION_REGEX = r'(=== (?P<event>The International \d+) ===)(?P<source>.+?)(?=\n=== [a-z0-9 ]+ ===\n)'
 FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 
 # Caching config

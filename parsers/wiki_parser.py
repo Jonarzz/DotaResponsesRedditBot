@@ -12,7 +12,7 @@ import requests
 from requests_futures.sessions import FuturesSession
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, MAX_HEADER_LENGTH
+    FILE_REGEX, MAX_HEADER_LENGTH, CHAT_WHEEL_SECTION_REGEX
 from util.database.database import db_api
 from util.logger import logger
 
@@ -24,7 +24,11 @@ def populate_responses():
     """Method that adds all the responses to database. Assumes responses and hero database are already built.
     hero_name is used commonly for both announcers, heroes and voice packs.
     """
+    populate_hero_responses()
+    populate_chat_wheel()
 
+
+def populate_hero_responses():
     paths = pages_for_category(RESPONSES_CATEGORY)
     for path in paths:
         if is_hero_type(path):
@@ -34,7 +38,9 @@ def populate_responses():
             # path points to voice pack, announcer or shopkeeper responses
             hero_name = path
 
-        response_link_list = create_responses_text_and_link_list(url_path=path)
+        responses_source = requests.get(url=URL_DOMAIN + '/' + path, params={'action': 'raw'}).text
+
+        response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
         # Note: Save all responses to the db. Apply single word and common words filter on comments, not while saving
         # responses
         db_api.add_hero_and_responses(hero_name=hero_name, response_link_list=response_link_list)
@@ -66,7 +72,10 @@ def get_params_for_category_api(category):
 
 def get_params_for_files_api(files):
     params = FILE_API_PARAMS.copy()
-    titles = 'File:' + '|File:'.join(files)
+    if files:
+        titles = 'File:' + '|File:'.join(files)
+    else:
+        titles = ''
     params['titles'] = titles
     return params
 
@@ -94,14 +103,12 @@ def get_hero_name(hero_page):
     return hero_page.split('/')[0]
 
 
-def create_responses_text_and_link_list(url_path):
+def create_responses_text_and_link_list(responses_source):
     """Method that for a given page url_path creates a list of tuple: (original_text, processed_text, link).
 
-    :param url_path: path for the hero's responses as string
+    :param responses_source: Mediawiki source
     :return: list in the form of (original_text, processed_text, link).
     """
-    responses_source = requests.get(url=URL_DOMAIN + '/' + url_path, params={'action': 'raw'}).text
-
     responses_list = []
     file_and_text_list = []
 
@@ -109,7 +116,7 @@ def create_responses_text_and_link_list(url_path):
     file_regex = re.compile(FILE_REGEX)
 
     for response in response_regex.finditer(responses_source):
-        original_text = parse_response(response['text']).strip()
+        original_text = parse_response(response['text'])
         if original_text == '':
             pass
 
@@ -134,10 +141,14 @@ def create_responses_text_and_link_list(url_path):
 
 
 def parse_response(text):
+    # Special cases
     if '(broken file)' in text:
         return ''
     if 'versus (TI ' in text:
         return ''
+    if 'Ceeeb' in text:
+        return ''
+
     text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
@@ -148,6 +159,8 @@ def parse_response(text):
                          r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>',
                          # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
+                         r'<ref>.*?</ref>',  # Remove text in <ref> tags
+                         r'<nowiki>.*?</nowiki>',  # Remove text in <nowiki> tags
                          ]
     for regex in regexps_empty_sub:
         text = re.sub(regex, '', text, flags=re.IGNORECASE)
@@ -156,7 +169,7 @@ def parse_response(text):
                         r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
                         # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
                         # r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
-                        r'{{tooltip\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?:,()/ ]+}}',  # Replace tooltips
+                        r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
     for regex in regexps_sub_text:
@@ -165,7 +178,7 @@ def parse_response(text):
     if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
         logger.warn('Response could not be processed : ' + text)
 
-    return text
+    return text.strip()
 
 
 def clean_response_text(key):
@@ -181,7 +194,6 @@ def clean_response_text(key):
     :return: cleaned key
     """
     key = key.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
-    key = ''.join([i if ord(i) < 128 else ' ' for i in key])
 
     while '  ' in key:
         key = key.replace('  ', ' ')
@@ -215,6 +227,9 @@ def links_for_files(files_list):
                 files_batch_list.append(file)
                 title_length += len(file) + 10
 
+        if files_batch_list:
+            futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
+
         for future in as_completed(futures):
             json_response = future.result().json()
             query = json_response['query']
@@ -230,3 +245,16 @@ def links_for_files(files_list):
                     logger.critical('File does not have a link : ' + title)
 
     return files_link_mapping
+
+
+def populate_chat_wheel():
+    chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
+
+    chat_wheel_regex = re.compile(CHAT_WHEEL_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
+
+    for match in chat_wheel_regex.finditer(chat_wheel_source):
+        event = match['event']
+        responses_source = match['source']
+        response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
+
+        db_api.add_hero_and_responses(hero_name=event, response_link_list=response_link_list)
