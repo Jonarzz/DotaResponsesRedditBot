@@ -6,6 +6,7 @@ from pony.orm import db_session, commit
 
 from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT, DB_URL, DB_PROVIDER
 from util.database.models import Responses, Comments, Heroes, db
+from util.logger import logger
 
 __author__ = 'MePsyDuck'
 
@@ -171,7 +172,11 @@ class DatabaseAPI:
         commit()
 
         for original_text, processed_text, link in response_link_list:
-            Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
+            existing_response = Responses.get(response_link=link)
+            if not existing_response:
+                Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
+            else:
+                logger.debug('Link already exists : ' + link + ' for response ' + existing_response.original_text)
 
 
 db_api = DatabaseAPI()
