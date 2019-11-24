@@ -72,7 +72,10 @@ def get_params_for_category_api(category):
 
 def get_params_for_files_api(files):
     params = FILE_API_PARAMS.copy()
-    titles = 'File:' + '|File:'.join(files)
+    if files:
+        titles = 'File:' + '|File:'.join(files)
+    else:
+        titles = ''
     params['titles'] = titles
     return params
 
@@ -224,7 +227,8 @@ def links_for_files(files_list):
                 files_batch_list.append(file)
                 title_length += len(file) + 10
 
-        futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
+        if files_batch_list:
+            futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
 
         for future in as_completed(futures):
             json_response = future.result().json()

@@ -41,8 +41,8 @@ class DatabaseAPI:
         :param response_link: url to the response audio file.
         :param hero_id: hero id. Should be same as id in heroes database.
         """
-        r = Responses(processed_text=processed_text, original_text=original_text, response_link=response_link,
-                      hero_id=hero_id)
+        Responses(processed_text=processed_text, original_text=original_text, response_link=response_link,
+                  hero_id=hero_id)
 
     @db_session
     def get_link_for_response(self, processed_text, hero_id=None):
@@ -70,7 +70,7 @@ class DatabaseAPI:
         """Method that adds current time and Reddit comments to comments table by their id.
         :param comment_id: The id of comment on Reddit
         """
-        c = Comments(comment_id=comment_id)
+        Comments(comment_id=comment_id)
 
     @db_session
     def delete_old_comment_ids(self):
@@ -100,7 +100,7 @@ class DatabaseAPI:
         :param img_path: path to hero's image
         :param flair_css: CSS for the flair
         """
-        h = Heroes(hero_name=hero_name, img_path=img_path, flair_css=flair_css)
+        Heroes(hero_name=hero_name, img_path=img_path, flair_css=flair_css)
 
     @db_session
     def get_hero_id_from_table(self, hero_name):
@@ -171,7 +171,7 @@ class DatabaseAPI:
         commit()
 
         for original_text, processed_text, link in response_link_list:
-            r = Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
+            Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
 
 
 db_api = DatabaseAPI()
