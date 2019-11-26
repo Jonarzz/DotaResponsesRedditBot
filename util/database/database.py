@@ -4,8 +4,8 @@ import urllib.parse as up
 
 from pony.orm import db_session, commit
 
-from config import NUMBER_OF_DAYS_TO_DELETE_COMMENT, DB_URL, DB_PROVIDER
-from util.database.models import Responses, Comments, Heroes, db
+from config import CACHE_TTL, DB_URL, DB_PROVIDER
+from util.database.models import Responses, Heroes, ThingsCache, db
 from util.logger import logger
 
 __author__ = 'MePsyDuck'
@@ -57,40 +57,43 @@ class DatabaseAPI:
         # TODO review
         responses = Responses.select(lambda r: r.processed_text == processed_text)
 
-        if hero_id is not None:
-            for response in responses:
-                if response.hero_id == hero_id:
-                    return response.response_link, response.hero_id
+        if len(responses):
+            if hero_id is not None:
+                for response in responses:
+                    if response.hero_id == hero_id:
+                        return response.response_link, response.hero_id.id
+            else:
+                response = random.choice(list(responses))
+                return response.response_link, response.hero_id.id
         else:
-            response = random.choice(responses)
-            return response.response_link, response.hero_id
+            return None, None
 
-    # Comments table queries
+    # ThingsCache table queries
     @db_session
-    def add_comment_to_table(self, comment_id):
-        """Method that adds current time and Reddit comments to comments table by their id.
-        :param comment_id: The id of comment on Reddit
+    def add_thing_to_cache(self, thing_id):
+        """Method that adds current time and Reddit thing or submission to ThingsCache table by their id(fullname).
+        :param thing_id: The fullname of thing/submission on Reddit
         """
-        Comments(comment_id=comment_id)
+        ThingsCache(thing_id=thing_id)
 
     @db_session
-    def delete_old_comment_ids(self):
-        """Method used to remove comments older than a period of time defined in the config file
+    def delete_old_thing_ids(self):
+        """Method used to remove things in cache older than a period of time defined in the config file
         (number corresponding to number of days).
         """
-        furthest_date = datetime.datetime.utcnow() - datetime.timedelta(days=NUMBER_OF_DAYS_TO_DELETE_COMMENT)
+        furthest_date = datetime.datetime.utcnow() - datetime.timedelta(days=CACHE_TTL)
 
-        Comments.select(lambda c: c.process_datetime < furthest_date).delete(bulk=True)
+        ThingsCache.select(lambda t: t.added_datetime < furthest_date).delete(bulk=True)
 
     @db_session
-    def check_if_comment_exists(self, comment_id):
-        """Method that checks if the comment id given is already present in the comments table
+    def check_if_thing_exists(self, thing_id):
+        """Method that checks if the thing id given is already present in the ThingsCache table
 
-        :param comment_id: The id of the comment on Reddit
+        :param thing_id: The id of the thing/submission on Reddit
         :return: True if the it is already present in table, else False
         """
-        comment = Comments.select(lambda c: c.comment_id == comment_id)
-        return comment is not None
+        thing = ThingsCache.select(lambda t: t.thing_id == thing_id)
+        return thing is not None
 
     # Heroes table queries
     @db_session
@@ -124,14 +127,15 @@ class DatabaseAPI:
         return h.hero_name if h is not None else None
 
     @db_session
-    def get_hero_id_by_css(self, flair_css):
+    def get_hero_id_by_flair_css(self, flair_css):
         """Method to get hero_id from the table based on the flair css
 
         :param flair_css: Hero's css as in r/DotA2 subreddit
         :return: Hero's id
         """
-        h = Heroes.get(flair_css=flair_css)
-        return h.id if h is not None else None
+        if flair_css:
+            h = Heroes.get(flair_css=flair_css)
+            return h.id if h is not None else None
 
     @db_session
     def get_img_dir_by_id(self, hero_id):
