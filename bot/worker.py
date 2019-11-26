@@ -1,12 +1,14 @@
 """Main module of the Dota 2 subreddit Heroes Responses Bot.
 
 The main body of the script is running in this file. The comments are loaded from the subreddit
-and the script checks if the comment is a response from Dota 2. If it is, a proper comment is
-prepared. The comment is posted as a reply to the original post on Reddit.
+and the script checks if the thing is a response from Dota 2. If it is, a proper thing is
+prepared. The thing is posted as a reply to the original post on Reddit.
 
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
 import string
+
+from praw.models import Comment
 
 import config
 from bot import account
@@ -20,7 +22,7 @@ __maintainer__ = 'MePsyDuck'
 cache_api = get_cache_api()
 
 
-def execute():
+def work():
     """Main method executing the script.
 
     It connects to an account, loads dictionaries from proper files (declared in config file).
@@ -28,175 +30,165 @@ def execute():
     """
 
     reddit = account.get_account()
-    logger.info('Connected to Reddit account' + config.USERNAME)
+    logger.info('Connected to Reddit account : ' + config.USERNAME)
 
-    comments = reddit.subreddit(config.SUBREDDIT).stream.comments()
-    process_comments(reddit, comments)
+    comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
+    submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
+    while True:
+        for comment in comment_stream:
+            if comment is None:
+                break
+            process_comment(reddit, comment)
+        for submission in submission_stream:
+            if submission is None:
+                break
+            process_submission(submission)
 
 
-def process_comments(reddit, comments):
+def process_comment(reddit, comment):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
-    PRAW generates past ~100 comments on the first iteration. Then the loop only runs if there is a new comment added to
+    PRAW generates past ~100 comments on the first iteration. Then the loop only runs if there is a new thing added to
     the comments stream. This also means that once PRAW is up and running, after the initial comments list it won't
     generate any duplicate comments.
 
-    However, just as a safeguard, Caching is used to store comment ids as they are processed for the first time.
-    Otherwise, when the bot is restarted it might reply twice to same comments. If comment id is in the already present
+    However, just as a safeguard, Caching is used to store thing ids as they are processed for the first time.
+    Otherwise, when the bot is restarted it might reply twice to same comments. If thing id is in the already present
     in the cache_api, then it is ignored, else processed and added to the cache_api.
     * Self comments are ignored.
     * It is prepared for comparision to the responses in dictionary.
-    * If the comment is not on the excluded responses list (loaded from config) and if it is in the responses db or
-    specific responses list, a reply comment is prepared and posted.
+    * If the thing is not on the excluded responses list (loaded from config) and if it is in the responses db or
+    specific responses list, a reply thing is prepared and posted.
     """
 
-    for comment in comments:
+    if cache_api.check(thing_id=comment.fullname):
+        return
 
-        if cache_api.check_comment(comment_id=comment.id):
-            continue
+    logger.debug("Found new thing: " + str(comment.fullname))
 
-        logger.debug("Found new comment: " + str(comment.id))
+    # Ignore thyself
+    if comment.author == reddit.user.me:
+        return
 
-        # Ignore thyself
-        if comment.author == reddit.user.me:
-            continue
+    processed_body = process_body(comment.body)
 
-        clean_comment = parse_comment(comment.body)
-        save_comment_id(comment.id)
+    # Don't reply to single word comments (they're mostly common phrases).
+    if ' ' not in processed_body:
+        return
 
-        # Don't reply to single word comments (they're mostly common phrases).
-        if ' ' not in clean_comment:
-            continue
+    if processed_body in config.EXCLUDED_RESPONSES:
+        return
 
-        if clean_comment in config.EXCLUDED_RESPONSES:
-            continue
+    if do_flair_specific_reply(comment, processed_body):
+        return
 
-        if add_flair_specific_response_and_return(comment, clean_comment):
-            continue
-
-        if clean_comment in SPECIFIC_RESPONSES_DICT:
-            SPECIFIC_RESPONSES_DICT[clean_comment](comment, clean_comment)
-            continue
-
-        add_regular_response(comment, clean_comment)
+    do_regular_reply(comment, processed_body)
 
 
-def parse_comment(comment_text):
-    """Method used to clean the comment text. Logic is similar to clean_response_text on wiki parsers.
-    * If comment contains a quote, the first quote is considered as the response_text.
-    * Punctuation marks are replaced  with space. 
+def process_submission(submission):
+    if cache_api.check(thing_id=submission.fullname):
+        return
+
+    logger.debug("Found new submission: " + str(submission.fullname))
+
+    processed_body = process_body(submission.title)
+
+    # Don't reply to single word comments (they're mostly common phrases).
+    if ' ' not in processed_body:
+        return
+
+    if processed_body in config.EXCLUDED_RESPONSES:
+        return
+
+    if do_flair_specific_reply(submission, processed_body):
+        return
+
+    do_regular_reply(submission, processed_body)
+
+
+def process_body(body_text):
+    """Method used to clean the thing text. Logic is similar to clean_response_text on wiki parsers.
+    * If thing contains a quote, the first quote is considered as the response_text.
+    * Punctuation marks are replaced with space.
     * The response_text is turned to lowercase.
     * Converts multiple spaces into single space.
 
-    Commented out code to remove repeating letters in a comment because it does more harm than good - words like 'all',
+    Removed code to remove repeating letters in a thing because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
 
-    :param comment_text: The comment body
-    :return: Processed comment body
+    :param body_text: The thing body
+    :return: Processed thing body
     """
 
-    if '>' in comment_text:
-        lines = comment_text.split('\n\n')
+    if '>' in body_text:
+        lines = body_text.split('\n\n')
         for line in lines:
             if line.startswith('>'):
-                comment_text = line
+                body_text = line
                 break
 
-    comment_text = comment_text.translate(PUNCTUATION_TRANS)
-    comment_text = comment_text.translate(WHITESPACE_TRANS)
+    body_text = body_text.translate(PUNCTUATION_TRANS)
+    body_text = body_text.translate(WHITESPACE_TRANS)
 
-    while '  ' in comment_text:
-        comment_text = comment_text.replace('  ', ' ')
+    while '  ' in body_text:
+        body_text = body_text.replace('  ', ' ')
 
-    comment_text = comment_text.strip().lower()
+    body_text = body_text.strip().lower()
 
-    # i = 1
-    # new_response = response_text
-    #
-    # try:
-    #     while not response_text[-1].isalnum() and response_text[-1] == response_text[-1 - i]:
-    #         new_response = new_response[:-1]
-    #         i += 1
-    # except IndexError:
-    #     logger.error("IndexError in " + response_text)
-
-    return comment_text
+    return body_text
 
 
-def save_comment_id(comment_id):
-    """Method that saves the comment id to the database"""
-    db_api.add_comment_to_table(comment_id=comment_id)
-
-
-def add_flair_specific_response_and_return(comment, response):
-    hero_id = db_api.get_hero_id_by_css(css=comment.author_flair_css_class)
+def do_flair_specific_reply(thing, response):
+    hero_id = db_api.get_hero_id_by_flair_css(flair_css=thing.author_flair_css_class)
     if hero_id:
         link, hero_id = db_api.get_link_for_response(
             response=response, hero_id=hero_id)
         if link:
-            comment.reply(create_reply(response_url=link,
-                                       original_text=comment.body, hero_id=hero_id))
-            logger.info("Added: " + comment.id)
+            reply = create_reply(thing=thing, response_url=link, hero_id=hero_id)
+            thing.reply(reply)
+            logger.info("Added: " + thing.fullname)
             return True
 
 
-def add_regular_response(comment, response):
-    """Method to create response for given comment.
+def do_regular_reply(thing, response):
+    """Method to create response for given thing.
     In case of multiple matches, it used to sort responses in descending order of heroes, but now it's random.
     add_shitty_wizard_response was very similar to this, and hence has been merged
 
-    :param comment: The comment on reddit
-    :param response: The plaintext processed comment body
+    :param thing: The comment/submission on reddit
+    :param response: The plaintext processed thing body
     :return: None
     """
 
-    link, hero_id = db_api.get_link_for_response(response=response)
+    link, hero_id = db_api.get_link_for_response(processed_text=response)
 
     if link and hero_id:
         img_dir = db_api.get_img_dir_by_id(hero_id=hero_id)
 
-        if img_dir:
-            comment.reply(create_reply(
-                response_url=link, original_text=comment.body, hero_id=hero_id, img=img_dir))
-        else:
-            comment.reply(create_reply(response_url=link,
-                                       original_text=comment.body, hero_id=hero_id))
+        thing.reply(create_reply(thing=thing, response_url=link, hero_id=hero_id, img=img_dir))
 
-        logger.info("Added: " + comment.id)
+        logger.info("Replied to: " + thing.id)
 
 
-def create_reply(response_url, original_text, hero_id, img=None):
+def create_reply(thing, response_url, hero_id, img=None):
     """Method that creates a reply in reddit-post format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
     and an ending added from the config file (post footer). Image is currently ignored due to new reddit not
     rendering flairs properly.
     """
-
-    hero_name = db_api.get_hero_name(hero_id)
-    logger.info(response_url + ' : ' + hero_name)
-
-    # if img:
+    original_text = thing.body if isinstance(thing, Comment) else thing.title
+    if img:
+        hero_name = db_api.get_hero_name(hero_id)
+        return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
+    else:
+        hero_name = db_api.get_hero_name(hero_id)
+        return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
     #    return (
     #        "[]({}): [{}]({}) (sound warning: {}){}"
     #        .format(img, original_text, response_url, hero_name, config.COMMENT_ENDING)
     #        )
-    # else:
-
-    return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
 
 
-def add_shitty_wizard_response(comment, response):
-    """Method that creates a reply for 'shitty wizard' comments. Currently there's nothing different from regular
-    responses.
-
-    :param comment: The comment on reddit
-    :param response: The plaintext processed comment body
-    :return: None
-    """
-    add_regular_response(comment=comment, response=response)
-
-
-SPECIFIC_RESPONSES_DICT = {}
 PUNCTUATION_TRANS = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
 WHITESPACE_TRANS = str.maketrans(string.whitespace, ' ' * len(string.whitespace))

@@ -61,7 +61,7 @@ INFO_FILENAME = 'info.log'
 ERROR_FILENAME = 'error.log'
 PRAW_FILENAME = 'praw.log'
 
-NUMBER_OF_DAYS_TO_DELETE_COMMENT = 5
+CACHE_TTL = 5
 
 # Only include responses for items, runes, heroes, > 100 count and common phrases.
 # Hardcoded because then they can tweaked according to the needs.

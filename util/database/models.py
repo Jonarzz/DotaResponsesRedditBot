@@ -11,14 +11,14 @@ class Responses(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
     processed_text = Required(str, 1000, index='idx_parsed_text')  # Stores the processed response text
     original_text = Required(str, 1000)  # Stores the original response text/ Unused currently, but may help in future.
-    response_link = Required(str, unique=False)  # Link to the response text TODO this should be unique
+    response_link = Required(str, unique=True)  # Link to the response text
     hero_id = Required('Heroes')  # The hero_id for hero whose response text this is
 
 
-class Comments(db.Entity):
+class ThingsCache(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
-    comment_id = Required(str, unique=True)  # Comment id that are already processed
-    process_datetime = Optional(datetime, default=lambda: datetime.utcnow())  # Datetime of processing the comment
+    thing_id = Required(str, unique=True)  # Comment or submission id that is already processed
+    added_datetime = Optional(datetime, default=lambda: datetime.utcnow())  # Datetime of processing the thing
 
 
 class Heroes(db.Entity):

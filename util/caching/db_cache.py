@@ -5,12 +5,15 @@ __author__ = 'MePsyDuck'
 
 
 class DBCache(CacheAPI):
-    def check(self, key):
+    """Needs manual clearing of old ids.
+    """
+
+    def _check(self, key):
         """Return `True` if `key` exist in cache_list.
         """
-        return db_api.check_if_comment_exists(key)
+        return db_api.check_if_thing_exists(key)
 
-    def set(self, key):
+    def _set(self, key):
         """Add comment_id to the cache_list
         """
-        db_api.add_comment_to_table(key)
+        db_api.add_thing_to_cache(key)

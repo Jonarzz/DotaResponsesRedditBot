@@ -18,18 +18,18 @@ class MemoryCache(CacheAPI):
             with open(CACHE_URL) as cache_json:
                 old_cache = json.load(cache_json, object_pairs_hook=OrderedDict)
                 self.cache.set_many(old_cache)
-        atexit.register(self.cleanup)
+        atexit.register(self._cleanup)
 
-    def cleanup(self):
+    def _cleanup(self):
         with open(CACHE_URL, 'w+') as cache_json:
             json.dump(self.cache.copy(), cache_json)
 
-    def check(self, key):
+    def _check(self, key):
         """Return `True` if `key` exist in cache_list.
         """
         return key in self.cache
 
-    def set(self, key):
+    def _set(self, key):
         """Add comment_id to the cache_list
         """
         self.cache.set(key, '')

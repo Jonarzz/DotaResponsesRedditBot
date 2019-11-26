@@ -1,14 +1,11 @@
-import traceback
-
-from bot.worker import execute, logger
+from bot.worker import work, logger
 from util.logger import setup_logger
 
 __author__ = 'MePsyDuck'
 
 if __name__ == '__main__':
     setup_logger()
-    while True:
-        try:
-            execute()
-        except (KeyboardInterrupt, SystemExit):
-            logger.error(traceback.format_exc())
+    try:
+        work()
+    except (KeyboardInterrupt, SystemExit):
+        logger.exception("Script stopped")
