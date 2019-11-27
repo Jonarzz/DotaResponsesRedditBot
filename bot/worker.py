@@ -38,14 +38,14 @@ def work():
         for comment in comment_stream:
             if comment is None:
                 break
-            process_comment(reddit, comment)
+            process_thing(reddit, comment)
         for submission in submission_stream:
             if submission is None:
                 break
-            process_submission(submission)
+            process_thing(reddit, submission)
 
 
-def process_comment(reddit, comment):
+def process_thing(reddit, thing):
     """Method used to check all the comments in a submission and add replies if they are responses.
 
     PRAW generates past ~100 comments on the first iteration. Then the loop only runs if there is a new thing added to
@@ -61,49 +61,31 @@ def process_comment(reddit, comment):
     specific responses list, a reply thing is prepared and posted.
     """
 
-    if cache_api.check(thing_id=comment.fullname):
+    if cache_api.check(thing_id=thing.fullname):
         return
-
-    logger.debug("Found new thing: " + str(comment.fullname))
 
     # Ignore thyself
-    if comment.author == reddit.user.me:
+    if thing.author == reddit.user.me:
         return
 
-    processed_body = process_body(comment.body)
+    logger.debug("Found new thing: " + str(thing.fullname))
 
-    # Don't reply to single word comments (they're mostly common phrases).
+    processed_body = process_body(thing.body if isinstance(thing, Comment) else thing.title)
+
+    # Don't reply to single word text (they're mostly common phrases).
     if ' ' not in processed_body:
         return
 
     if processed_body in config.EXCLUDED_RESPONSES:
         return
 
-    if do_flair_specific_reply(comment, processed_body):
+    if processed_body in config.CUSTOM_RESPONSES:
+        do_custom_reply(thing=thing, custom_response=config.CUSTOM_RESPONSES[processed_body])
+
+    if do_flair_specific_reply(thing, processed_body):
         return
 
-    do_regular_reply(comment, processed_body)
-
-
-def process_submission(submission):
-    if cache_api.check(thing_id=submission.fullname):
-        return
-
-    logger.debug("Found new submission: " + str(submission.fullname))
-
-    processed_body = process_body(submission.title)
-
-    # Don't reply to single word comments (they're mostly common phrases).
-    if ' ' not in processed_body:
-        return
-
-    if processed_body in config.EXCLUDED_RESPONSES:
-        return
-
-    if do_flair_specific_reply(submission, processed_body):
-        return
-
-    do_regular_reply(submission, processed_body)
+    do_regular_reply(thing, processed_body)
 
 
 def process_body(body_text):
@@ -155,7 +137,7 @@ def do_regular_reply(thing, response):
     In case of multiple matches, it used to sort responses in descending order of heroes, but now it's random.
     add_shitty_wizard_response was very similar to this, and hence has been merged
 
-    :param thing: The comment/submission on reddit
+    :param thing: The thing/submission on reddit
     :param response: The plaintext processed thing body
     :return: None
     """
@@ -171,13 +153,14 @@ def do_regular_reply(thing, response):
 
 
 def create_reply(thing, response_url, hero_id, img=None):
-    """Method that creates a reply in reddit-post format.
+    """Method that creates a reply in reddit format.
 
     The message consists of a link the the response, the response itself, a warning about the sound
     and an ending added from the config file (post footer). Image is currently ignored due to new reddit not
     rendering flairs properly.
     """
     original_text = thing.body if isinstance(thing, Comment) else thing.title
+
     if img:
         hero_name = db_api.get_hero_name(hero_id)
         return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
@@ -188,6 +171,13 @@ def create_reply(thing, response_url, hero_id, img=None):
     #        "[]({}): [{}]({}) (sound warning: {}){}"
     #        .format(img, original_text, response_url, hero_name, config.COMMENT_ENDING)
     #        )
+
+
+def do_custom_reply(thing, custom_response):
+    original_text = thing.body if isinstance(thing, Comment) else thing.title
+
+    reply = custom_response.format(original_text, config.COMMENT_ENDING)
+    thing.reply(reply)
 
 
 PUNCTUATION_TRANS = str.maketrans(string.punctuation, ' ' * len(string.punctuation))

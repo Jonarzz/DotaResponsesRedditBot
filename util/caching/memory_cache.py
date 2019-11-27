@@ -1,6 +1,7 @@
 import atexit
 import json
 import os
+import signal
 from collections import OrderedDict
 
 from cacheout import FIFOCache
@@ -19,6 +20,8 @@ class MemoryCache(CacheAPI):
                 old_cache = json.load(cache_json, object_pairs_hook=OrderedDict)
                 self.cache.set_many(old_cache)
         atexit.register(self._cleanup)
+        signal.signal(signal.SIGTERM, self._cleanup)
+        signal.signal(signal.SIGINT, self._cleanup)
 
     def _cleanup(self):
         with open(CACHE_URL, 'w+') as cache_json:
