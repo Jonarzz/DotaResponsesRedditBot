@@ -9,7 +9,7 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/MePsyDuck)"
+USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
@@ -22,11 +22,12 @@ CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 
                        'format': 'json',
                        'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1975  # max header length as found by trail and error
+MAX_HEADER_LENGTH = 1960  # max header length as found by trail and error
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
+CHAT_WHEEL_SECTION_REGEX = r'(=== (?P<event>The International \d+) ===)(?P<source>.+?)(?=\n=== [a-z0-9 ]+ ===\n)'
 FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 
 # Caching config
@@ -37,6 +38,18 @@ CACHE_URL = os.environ.get('CACHE_URL',
 # DB config
 DB_PROVIDER = os.environ.get('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
 DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # file path in case of sqlite
+
+# Logging config
+BOT_LOG = 'bot'
+PRAW_LOG = 'prawcore'
+LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
+LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
+LOG_DIR = 'logs'
+INFO_FILENAME = 'info.log'
+ERROR_FILENAME = 'error.log'
+PRAW_FILENAME = 'praw.log'
+
+CACHE_TTL = 5
 
 # Responses config
 COMMENT_ENDING = '''
@@ -50,17 +63,13 @@ Bleep bloop, I am a robot.
 [*^(Author)*](https://www.reddit.com/user/Jonarz/)
 '''
 
-# Logging config
-BOT_LOG = 'bot'
-PRAW_LOG = 'prawcore'
-LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
-LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
-LOG_DIR = 'logs'
-INFO_FILENAME = 'info.log'
-ERROR_FILENAME = 'error.log'
-PRAW_FILENAME = 'praw.log'
-
-NUMBER_OF_DAYS_TO_DELETE_COMMENT = 5
+# Key should be lowercase without special characters. Needs to be updated if links break (as links can be
+# non-gamepedia links too)
+# Value should have a placeholder for original text and thing ending
+CUSTOM_RESPONSES = {
+    'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
+                   ' (trigger warning: Sniper){}',
+}
 
 # Only include responses for items, runes, heroes, > 100 count and common phrases.
 # Hardcoded because then they can tweaked according to the needs.
