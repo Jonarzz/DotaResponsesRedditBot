@@ -9,8 +9,8 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = "Reddit bot that replies DotA2 hero responses in comments. (by /u/MePsyDuck)"
-SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
+USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
+SUBREDDIT = os.environ.get('SUBREDDIT', 'test')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
 
@@ -39,6 +39,18 @@ CACHE_URL = os.environ.get('CACHE_URL',
 DB_PROVIDER = os.environ.get('DATABASE_PROVIDER', 'sqlite')  # valid choices : sqlite, mysql, postgres
 DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # file path in case of sqlite
 
+# Logging config
+BOT_LOG = 'bot'
+PRAW_LOG = 'prawcore'
+LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
+LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
+LOG_DIR = 'logs'
+INFO_FILENAME = 'info.log'
+ERROR_FILENAME = 'error.log'
+PRAW_FILENAME = 'praw.log'
+
+CACHE_TTL = 5
+
 # Responses config
 COMMENT_ENDING = '''
 
@@ -51,17 +63,13 @@ Bleep bloop, I am a robot.
 [*^(Author)*](https://www.reddit.com/user/Jonarz/)
 '''
 
-# Logging config
-BOT_LOG = 'bot'
-PRAW_LOG = 'prawcore'
-LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
-LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
-LOG_DIR = 'logs'
-INFO_FILENAME = 'info.log'
-ERROR_FILENAME = 'error.log'
-PRAW_FILENAME = 'praw.log'
-
-CACHE_TTL = 5
+# Key should be lowercase without special characters. Needs to be updated if links break (as links can be
+# non-gamepedia links too)
+# Value should have a placeholder for original text and thing ending
+CUSTOM_RESPONSES = {
+    'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
+                   ' (trigger warning: Sniper){}',
+}
 
 # Only include responses for items, runes, heroes, > 100 count and common phrases.
 # Hardcoded because then they can tweaked according to the needs.
