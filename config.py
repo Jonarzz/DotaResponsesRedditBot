@@ -69,6 +69,8 @@ Bleep bloop, I am a robot.
 CUSTOM_RESPONSES = {
     'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
                    ' (trigger warning: Sniper){}',
+    'turn up this guy is crazy as fuck he s gotta be on molly or some powder or something':
+        '[{}](https://www.youtube.com/watch?v=CO3j9lUYFfo) (Donation warning: Arteezy){}'
 }
 
 # Only include responses for items, runes, heroes, > 100 count and common phrases.
