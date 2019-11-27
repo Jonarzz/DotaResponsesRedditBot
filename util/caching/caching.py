@@ -4,27 +4,27 @@ __author__ = 'MePsyDuck'
 
 
 class CacheAPI(ABC):
-    """Used to store comment ids in cache_api.
+    """Used to store thing ids (thing or submission) in cache_api.
     Currently support only three implementations : DB based, in memory, file based and redis.
     Support for more implementations can be added by extending this class.
     """
 
     @abstractmethod
-    def check(self, comment_id):
+    def _check(self, thing_id):
         pass
 
     @abstractmethod
-    def set(self, comment_id):
+    def _set(self, thing_id):
         pass
 
-    def check_comment(self, comment_id):
-        """Check if comment is already processed/replied.
-        Returns `True` if comment exists, else adds the comment to cache_api and returns `False`.
+    def check(self, thing_id):
+        """Check if thing or submission is already processed/replied.
+        Returns `True` if thing exists, else adds the thing to cache_api and returns `False`.
         """
-        if self.check(comment_id):
+        if self._check(thing_id):
             return True
         else:
-            self.set(comment_id)
+            self._set(thing_id)
             return False
 
 
