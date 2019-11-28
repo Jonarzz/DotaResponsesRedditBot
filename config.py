@@ -10,7 +10,7 @@ CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
 USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
-SUBREDDIT = os.environ.get('SUBREDDIT', 'test')
+SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
 
@@ -69,6 +69,8 @@ Bleep bloop, I am a robot.
 CUSTOM_RESPONSES = {
     'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
                    ' (trigger warning: Sniper){}',
+    'turn up this guy is crazy as fuck he s gotta be on molly or some powder or something':
+        '[{}](https://www.youtube.com/watch?v=CO3j9lUYFfo) (Donation warning: Arteezy){}'
 }
 
 # Only include responses for items, runes, heroes, > 100 count and common phrases.

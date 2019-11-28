@@ -1,3 +1,6 @@
+"""Module to test the bot and parser. All test should be placed in `tests` folder and python filename should start with
+`test_`.
+"""
 import sys
 import unittest
 

@@ -23,12 +23,11 @@ For example: `"Selemene commands"` will return a Luna response *(like on the scr
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the thing is ignored.
 -->
 <!-- Old behavior
-The bot will try to match a response of the hero that is in the thing's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
+The bot will try to match a response of the hero that is in the comment/submission's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
 -->
 
 ---
 ## TODO:
-* Add support for custom responses.
 * Improve tests.
 * Update Docs.
 * (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
@@ -74,6 +73,7 @@ Things that are new:
 * Bot can reply to responses that are in blockquotes and ignore rest of comment.
 * Added support for TI chat wheel sounds.
 * Comment on post submission if title is a response.
+* Added better support for custom responses.
 
 ##### 2.7:
 * Now hero portraits (flairs) are added before the response
