@@ -1,4 +1,4 @@
-"""Main module of the Dota 2 subreddit Heroes Responses Bot.
+"""Main module of the Dota 2 subreddit Responses Bot.
 
 The main body of the script is running in this file. The comments are loaded from the subreddit
 and the script checks if the thing is a response from Dota 2. If it is, a proper thing is

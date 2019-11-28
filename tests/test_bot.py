@@ -24,7 +24,7 @@ class BotWorkerTest(unittest.TestCase):
         self.assertEqual(worker.process_body("  WoNdErFuL  "), "wonderful")
         self.assertEqual(worker.process_body("How are you?"), "how are you")
         self.assertEqual(worker.process_body(
-            "Isn't is good to have quotes?  you can add your response in quote and bot would still \n\n> reply to them"),
+            "Isn't is good to have quotes?  you can add any response in quote and bot would still \n\n> reply to them"),
             "reply to them")
         self.assertEqual(worker.process_body(
             "> multiple quotes \n\n > but reply to \n\n > only first one"), "multiple quotes")

@@ -1,11 +1,10 @@
 """Module used to test dota_wiki_parser module methods.
 """
 
-import json
 import unittest
 
 from config import RESPONSES_CATEGORY
-from parsers import wiki_parser, requests
+from parsers import wiki_parser
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'

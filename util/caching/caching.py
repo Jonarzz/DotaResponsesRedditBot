@@ -29,5 +29,3 @@ class CacheAPI(ABC):
         else:
             self._set(thing_id)
             return False
-
-

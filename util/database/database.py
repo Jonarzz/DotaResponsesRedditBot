@@ -13,6 +13,9 @@ __author__ = 'MePsyDuck'
 
 class DatabaseAPI:
     def __init__(self):
+        """Method to initialize db connection. Binds PonyORM Database object `db` to configured database.
+        Creates the mapping between db tables and models.
+        """
         self.db = db
         if DB_PROVIDER == 'sqlite':
             self.db.bind(provider='sqlite', filename=DB_URL, create_db=True)
@@ -28,31 +31,17 @@ class DatabaseAPI:
         else:
             self.db.bind(provider='sqlite', filename='bot.db', create_db=True)
 
-        self.db.generate_mapping(create_tables=True)
+        self.db.generate_mapping()
 
     # Responses table queries
     @db_session
-    def add_response_to_table(self, processed_text, original_text, response_link, hero_id):
-        """Method that updates the responses with pairs of response-link.
-        If response already exists, update the link, else add the response to the table.
-        All parameters should be strings.
-
-        :param processed_text: processed response text.
-        :param original_text: original response text
-        :param response_link: url to the response audio file.
-        :param hero_id: hero id. Should be same as id in heroes database.
-        """
-        Responses(processed_text=processed_text, original_text=original_text, response_link=response_link,
-                  hero_id=hero_id)
-
-    @db_session
     def get_link_for_response(self, processed_text, hero_id=None):
-        """Method that returns the link to the processed response text. First tries to match with the given hero_id,
+        """Method that returns the link for the processed response text. First tries to match with the given hero_id,
         otherwise returns random result.
 
         :param processed_text: The plain processed response text.
         :param hero_id: The hero's id.
-        :return The link to the processed response text and the hero_id
+        :return The link to the response
         """
         # TODO review
         responses = Responses.select(lambda r: r.processed_text == processed_text)
@@ -72,14 +61,14 @@ class DatabaseAPI:
     @db_session
     def add_thing_to_cache(self, thing_id):
         """Method that adds current time and Reddit thing or submission to ThingsCache table by their id(fullname).
+
         :param thing_id: The fullname of thing/submission on Reddit
         """
         ThingsCache(thing_id=thing_id)
 
     @db_session
     def delete_old_thing_ids(self):
-        """Method used to remove things in cache older than a period of time defined in the config file
-        (number corresponding to number of days).
+        """Method used to remove things in cache older than a period of time `CACHE_TTL` defined in the config file.
         """
         furthest_date = datetime.datetime.utcnow() - datetime.timedelta(days=CACHE_TTL)
 
@@ -90,7 +79,7 @@ class DatabaseAPI:
         """Method that checks if the thing id given is already present in the ThingsCache table
 
         :param thing_id: The id of the thing/submission on Reddit
-        :return: True if the it is already present in table, else False
+        :return: True if the `thing_id` is already present in table, else False
         """
         thing = ThingsCache.select(lambda t: t.thing_id == thing_id)
         return thing is not None
@@ -128,9 +117,9 @@ class DatabaseAPI:
 
     @db_session
     def get_hero_id_by_flair_css(self, flair_css):
-        """Method to get hero_id from the table based on the flair css
+        """Method to get hero_id from the table based on the flair css.
 
-        :param flair_css: Hero's css as in r/DotA2 subreddit
+        :param flair_css: Hero's css class as in r/DotA2 subreddit
         :return: Hero's id
         """
         if flair_css:
@@ -139,29 +128,43 @@ class DatabaseAPI:
 
     @db_session
     def get_img_dir_by_id(self, hero_id):
-        """Method to get image directory for hero's flair
+        """Method to get image directory for hero's flair.
 
-         :param hero_id: Hero's id
-         :return: The directory path to the image
+         :param hero_id: Hero's id.
+         :return: The directory path to the image.
          """
         h = Heroes[hero_id]
         return h.img_path if h is not None else None
 
     @db_session
     def get_all_hero_names(self):
+        """Method to get all heroes' names.
+
+        :return: All heroes' names as a list.
+        """
         heroes = Heroes.select()[:]
         return [hero.hero_name for hero in heroes]
 
     @db_session
     def update_hero(self, hero_name, img_path, flair_css):
+        """Method to update hero's attributes in the Heroes table.
+
+        :param hero_name: Hero's name
+        :param img_path: Hero's img dir/path
+        :param flair_css: Hero's css class
+        """
         hero = Heroes.get(hero_name=hero_name)
         hero.img_path = img_path
         hero.flair_css = flair_css
 
     def create_all_tables(self):
+        """Method to create all tables defined in the models
+        """
         self.db.create_tables()
 
     def drop_all_tables(self):
+        """Method to drop all tables defined in the models
+        """
         self.db.drop_all_tables(with_all_data=True)
 
     @db_session
@@ -170,7 +173,6 @@ class DatabaseAPI:
 
         :param hero_name: Hero name who's responses will be inserted
         :param response_link_list: List with tuples in the form of (original_text, processed_text, link)
-        :return:
         """
         h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
         commit()
