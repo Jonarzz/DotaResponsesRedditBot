@@ -1,4 +1,4 @@
-"""Module used to create dictionaries requited for the script to work.
+"""Module used to populate responses into the Responses table in database.
 
 Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota2.gamepedia.com/
 """
@@ -22,34 +22,38 @@ __maintainer__ = 'MePsyDuck'
 
 def populate_responses():
     """Method that adds all the responses to database. Assumes responses and hero database are already built.
-    hero_name is used commonly for both announcers, heroes and voice packs.
     """
     populate_hero_responses()
     populate_chat_wheel()
 
 
 def populate_hero_responses():
-    paths = pages_for_category(RESPONSES_CATEGORY)
-    for path in paths:
-        if is_hero_type(path):
-            # path points to hero responses
-            hero_name = get_hero_name(path)
+    """Method that populates hero responses (as well as Arcana voice packs and Announcer packs) from Gamepedia.
+    First fetches all Pages in Responses category, then source for each page.
+    Populates Responses table and Hero table from processed response, original response, link and hero name.
+    """
+    pages = pages_for_category(RESPONSES_CATEGORY)
+    for page in pages:
+        if is_hero_type(page):
+            # page points to hero responses
+            hero_name = get_hero_name(page)
         else:
-            # path points to voice pack, announcer or shopkeeper responses
-            hero_name = path
+            # page points to voice pack, announcer or shopkeeper responses
+            hero_name = page
 
-        responses_source = requests.get(url=URL_DOMAIN + '/' + path, params={'action': 'raw'}).text
+        responses_source = requests.get(url=URL_DOMAIN + '/' + page, params={'action': 'raw'}).text
 
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
-        # Note: Save all responses to the db. Apply single word and common words filter on comments, not while saving
-        # responses
+        # Note: Save all responses to the db. Apply single word and common words filter on comments and submission text
+        # not while saving responses
         db_api.add_hero_and_responses(hero_name=hero_name, response_link_list=response_link_list)
 
 
 def pages_for_category(category_name):
-    """Method that returns a list of page endings for a given Wiki category.
+    """Method that returns a list of pages for a given Wiki category.
 
     :param category_name: returns all category members in json response from mediawiki API.
+    :return: list of all `pages` in the given category.
     """
     params = get_params_for_category_api(category_name)
     json_response = requests.get(url=API_PATH, params=params).text
@@ -65,12 +69,24 @@ def pages_for_category(category_name):
 
 
 def get_params_for_category_api(category):
+    """Method to get `GET` parameters for querying MediaWiki for category details.
+
+    :param category: category name to be passed in params.
+    :return: GET parameters `params`
+    """
     params = CATEGORY_API_PARAMS.copy()
     params['cmtitle'] = 'Category:' + category
     return params
 
 
 def get_params_for_files_api(files):
+    """Method to get `GET` parameters for querying MediaWiki for details for multiple files.
+    Uses pipe character `|` to include multiple files. Currently MediaWiki limits number of files to 50.
+    If files list is empty, leave `File` parameter empty.
+
+    :param files: list of file names to be passed in params.
+    :return: GET parameters `params`.
+    """
     params = FILE_API_PARAMS.copy()
     if files:
         titles = 'File:' + '|File:'.join(files)
@@ -81,9 +97,7 @@ def get_params_for_files_api(files):
 
 
 def is_hero_type(page):
-    """Method to check if page belongs to a hero, creep-hero(Warlock's Golem). There's a few inconsistencies due to
-    Gamepedia's naming such as Feast of Abscession being a hero type in spite of being voice pack same as Call of
-    Bladeform Legacy and Mercurial's Call.
+    """Method to check if page belongs to a hero, creep-hero(Warlock's Golem).
 
     :param page: Page name as string.
     :return: True if page belongs to hero else False
@@ -95,7 +109,8 @@ def is_hero_type(page):
 
 
 def get_hero_name(hero_page):
-    """Method that parses hero name from it's responses page
+    """Method that parses hero name from its responses page.
+    Pages for heroes are in the form of `Hero name/Responses`. We need only the `Hero name` part for heroes.
 
     :param hero_page: hero's responses page as string.
     :return: Hero name as parsed
@@ -104,10 +119,17 @@ def get_hero_name(hero_page):
 
 
 def create_responses_text_and_link_list(responses_source):
-    """Method that for a given page url_path creates a list of tuple: (original_text, processed_text, link).
+    """Method that for a given source of a hero's response page creates a list of tuple: (original_text, 
+    processed_text, link).
+    Steps involved:
+    * Use regex to find all lines containing mp3 files and responses.
+    * Process it to get original response text and file name.
+    * Create a list of files and get all the links for them by calling `links_for_files`.
+    * Process original text to get processed response.
+    * Add original response text, processed response text and file link to a list as a tuple.
 
     :param responses_source: Mediawiki source
-    :return: list in the form of (original_text, processed_text, link).
+    :return: list with tuples of (original_text, processed_text, link).
     """
     responses_list = []
     file_and_text_list = []
@@ -135,6 +157,7 @@ def create_responses_text_and_link_list(responses_source):
                 link = file_and_link_dict[file]
                 responses_list.append((original_text, processed_text, link))
             except KeyError:
+                # Ignore files with no links to mp3 files. Happens to broken files and files undergoing migration.
                 pass
 
     return responses_list
@@ -181,32 +204,36 @@ def parse_response(text):
     return text.strip()
 
 
-def clean_response_text(key):
-    """Method that cleans the given response text.
+def clean_response_text(response_text):
+    """Method for preprocessing the given response text.
     It:
     * removes trailing and leading spaces
     * removes all punctuations
-    * removes all non-ascii characters (eg. ellipsis …)
     * removes double spaces
     * changes to lowercase
 
-    :param key: the key to be cleaned
-    :return: cleaned key
+    :param response_text: the response text to be cleaned
+    :return: cleaned response text
     """
-    key = key.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
+    response_text = response_text.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
 
-    while '  ' in key:
-        key = key.replace('  ', ' ')
+    while '  ' in response_text:
+        response_text = response_text.replace('  ', ' ')
 
-    key = key.strip().lower()
+    response_text = response_text.strip().lower()
 
-    return key
+    return response_text
 
 
 def links_for_files(files_list):
-    """
-    Allows max 50 files(titles) at once : https://www.mediawiki.org/wiki/API:Query
-    :param files_list:  list of files
+    """Method that queries MediaWiki API used by Gamepedia to return links to the files list passed.
+    Does batch processing to avoid max number of files limit and header size limit.
+    Used asynchronous requests for faster processing.
+    Removes files version as we only need the latest one.
+
+    MediaWiki allows max 50 files(titles) at once : https://www.mediawiki.org/wiki/API:Query.
+
+    :param files_list: list of files
     :return files_link_mapping: dict with file names and their links. dict['file'] = link
     """
 
@@ -219,7 +246,8 @@ def links_for_files(files_list):
         title_length = 0
 
         for file in files_list:
-            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH - empty_api_length:
+            # If header size overflows of number of files reaches the limit specified by MediaWiki, i.e. 50.
+            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH - empty_api_length or len(files_batch_list) > 50:
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
                 title_length = len(file) + 10
                 files_batch_list = [file]
@@ -236,7 +264,7 @@ def links_for_files(files_list):
             pages = query['pages']
 
             for page_id, page in pages.items():
-                title = page['title']  # Same as 'to' in 'normalized' entry
+                title = page['title']
                 try:
                     imageinfo = page['imageinfo'][0]
                     file_url = imageinfo['url'].split('?')[0]  # Remove file version
@@ -248,6 +276,9 @@ def links_for_files(files_list):
 
 
 def populate_chat_wheel():
+    """Method that populates chat wheel responses featured in The International yearly Battle Pass.
+    Other chat wheel responses from events and Dota plus are not processed currently.
+    """
     chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
 
     chat_wheel_regex = re.compile(CHAT_WHEEL_SECTION_REGEX, re.DOTALL | re.IGNORECASE)

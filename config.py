@@ -40,8 +40,8 @@ DB_PROVIDER = os.environ.get('DATABASE_PROVIDER', 'sqlite')  # valid choices : s
 DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # file path in case of sqlite
 
 # Logging config
-BOT_LOG = 'bot'
-PRAW_LOG = 'prawcore'
+BOT_LOGGER = 'bot'
+PRAW_LOGGER = 'prawcore'
 LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
 LOG_FORMAT = '%(asctime)s %(funcName)-20s %(levelname)-8s %(message)s'
 LOG_DIR = 'logs'

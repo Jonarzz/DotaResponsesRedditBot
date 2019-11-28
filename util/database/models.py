@@ -1,3 +1,6 @@
+"""Module that defines all the models used by PonyORM for db queries.
+"""
+
 from datetime import datetime
 
 from pony.orm import *

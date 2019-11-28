@@ -13,7 +13,7 @@ The bot replies only for the comments that **are** responses.
 
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
-## Comment Parsing
+## Comment/Submission text processing
 * All the comment text is transformed into lowercase
 * Any puncation is replaced with spaces
 * Multiple spaces are trimmed to single space.
@@ -29,7 +29,6 @@ The bot will try to match a response of the hero that is in the comment/submissi
 ---
 ## TODO:
 * Improve tests.
-* Update Docs.
 * (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
 
 

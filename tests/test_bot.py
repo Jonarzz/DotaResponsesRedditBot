@@ -1,4 +1,5 @@
-"""Module used to test bot worker module methods."""
+"""Module used to test bot worker module methods.
+"""
 
 import unittest
 
@@ -29,5 +30,7 @@ class BotWorkerTest(unittest.TestCase):
             "> multiple quotes \n\n > but reply to \n\n > only first one"), "multiple quotes")
 
     def test_account(self):
+        """Method used to test the Reddit instance returned by get_account()
+        """
         reddit = account.get_account()
         self.assertEqual(reddit.user.me(), config.USERNAME)

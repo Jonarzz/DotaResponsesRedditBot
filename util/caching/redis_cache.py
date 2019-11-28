@@ -1,3 +1,7 @@
+"""Module that allows Redis to be used as cache. Useful when running on Heroku or such platforms without 
+persistent file storage.
+"""
+
 from redis import Redis
 
 from config import CACHE_URL, CACHE_TTL
@@ -15,13 +19,18 @@ class RedisCache(CacheAPI):
         logger.info('Connected to Redis at ' + CACHE_URL)
 
     def _check(self, key):
-        """Return `True` if `key` exist in redis DB.
+        """Method to check if `key` exists in redis cache.
+
+        :param key: The `key` to to be checked in redis cache.
+        :return: `True` if `key` exists in redis cache.
         """
         if self.redis.exists(key):
             return True
 
     def _set(self, key):
-        """Set ``key`` with ``value`` in redis DB.
-        Key expires after 1 day (=24*60*60 seconds)
+        """Method to set `key` with `value` in redis.
+        Key expires after CACHE_TTL days (`ex` in seconds).
+
+        :param key: The `key` (thing_id) to be added to redis cache.
         """
         self.redis.set(name=key, value='', ex=CACHE_TTL * 60 * 60)

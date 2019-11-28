@@ -1,3 +1,6 @@
+"""Module to populate hero details from DotA 2 subreddit css.
+"""
+
 import json
 import re
 
@@ -11,10 +14,10 @@ __author__ = 'MePsyDuck'
 
 
 def populate_heroes():
-    """Method to add heroes to the table with hero names and proper css classes names as taken
-    from the DotA2 subreddit and hero flair images from the reddit directory. Every hero has its
-    own id, so that it can be joined with the hero from responses table (Serves as Foreign Key).
-    Note: Unused currently since flairs don't work in comments for new Reddit redesign.
+    """Method to update heroes in the Heroes table with hero names and proper css classes names as
+    taken from the DotA2 subreddit and hero flair images from the reddit directory. 
+
+    Uses fuzzywuzzy for fuzzy matching of hero names to name found in `.flair-name` property in css.
     """
     hero_names = db_api.get_all_hero_names()
 
