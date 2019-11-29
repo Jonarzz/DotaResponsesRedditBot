@@ -1,4 +1,4 @@
-# Dota Responses Reddit Bot
+## Dota Responses Reddit Bot
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Build Status](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.com/MePsyDuck/DotaResponsesRedditBot)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/96e2b3fd0dfd495f87fda7dfad5fb545)](https://app.codacy.com/app/MePsyDuck/DotaResponsesRedditBot?utm_source=github.com&utm_medium=referral&utm_content=MePsyDuck/DotaResponsesRedditBot&utm_campaign=Badge_Grade_Dashboard)
@@ -14,10 +14,10 @@ The bot replies only for the comments that **are** responses.
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
 ### Comment/Submission text processing
-*  All the comment text is transformed into lowercase
-*  Any puncation is replaced with spaces
-*  Multiple spaces are trimmed to single space.
-*  If comment has blockquote, first blockquote is considered for matching.
+  * All the comment text is transformed into lowercase
+  * Any puncation is replaced with spaces
+  * Multiple spaces are trimmed to single space.
+  * If comment has blockquote, first blockquote is considered for matching.
 
 <!-- Old behavior
 All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the thing is ignored.
@@ -28,7 +28,7 @@ The bot will try to match a response of the hero that is in the comment/submissi
 
 ---
 ### TODO
-*  (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
+  * (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
 
 ---
 ### Some stats and general info
@@ -59,86 +59,86 @@ Config variables needed to be set in environment for running the bot:
 ##### 3.0
 Major revamp for the bot.
 Things that are new:
-*  Bot can reply to responses that are in blockquotes and ignore rest of comment.
-*  Added support for TI chat wheel sounds.
-*  Comment on post submission if title is a response.
+  * Bot can reply to responses that are in blockquotes and ignore rest of comment.
+  * Added support for TI chat wheel sounds.
+  * Comment on post submission if title is a response.
 
 Things updated:
-*  Support sqlite, MySQL and PostgreSQL dbs via Pony-ORM.
-*  Added caching for comment ids (redis, db and in memory/file based).
-*  Revamped parsing of responses from wiki (now directly from the sources).
-*  Revamped parsing flair css and image directories from subreddit css.
-*  Better parsing for comments.
-*  Added better support for custom responses.
-*  Updated excluded responses.
-*  Updated docs.
-*  Updated tests. 
+  * Support sqlite, MySQL and PostgreSQL dbs via Pony-ORM.
+  * Added caching for comment ids (redis, db and in memory/file based).
+  * Revamped parsing of responses from wiki (now directly from the sources).
+  * Revamped parsing flair css and image directories from subreddit css.
+  * Better parsing for comments.
+  * Added better support for custom responses.
+  * Updated excluded responses.
+  * Updated docs.
+  * Updated tests. 
 
 ##### 2.7
-*  Now hero portraits (flairs) are added before the response
-*  The bot tries to match the hero response with the hero in the comment's author flair first
+  * Now hero portraits (flairs) are added before the response
+  * The bot tries to match the hero response with the hero in the comment's author flair first
 
 ##### 2.6
-*  Added a few Io and Phoenix responses
+  * Added a few Io and Phoenix responses
 
 ##### 2.5
-*  Fixed random responses for the "Shitty wizard" line - now it's working properly
-*  Added special treatment for the comments related to "One of my favorites" response
-*  Moved from a dictionary for responses and a list for comment ids to databases
+  * Fixed random responses for the "Shitty wizard" line - now it's working properly
+  * Added special treatment for the comments related to "One of my favorites" response
+  * Moved from a dictionary for responses and a list for comment ids to databases
 
 ##### 2.4
-*  Added random responses for the "Shitty wizard" line (needs testing)
+  * Added random responses for the "Shitty wizard" line (needs testing)
 
 ##### 2.3
-*  Added tests
-*  Code refactoring
-*  Added Travis CI and CodeClimate checking
+  * Added tests
+  * Code refactoring
+  * Added Travis CI and CodeClimate checking
 
 ##### 2.2
-*  Code refactoring (renaming variables, deleting unnecessary methods, etc.)
-*  Response in the reply is now an exact quote of the original comment
-*  Added comments
+  * Code refactoring (renaming variables, deleting unnecessary methods, etc.)
+  * Response in the reply is now an exact quote of the original comment
+  * Added comments
 
 ##### 2.1
-*  Bot is now adding the source of the response (e.g. hero name) to the comment *(needs testing)*
+  * Bot is now adding the source of the response (e.g. hero name) to the comment *(needs testing)*
 
 ##### 2.0
-*  Added Arc Warden responses
+  * Added Arc Warden responses
 
 ##### 1.9
-*  File paths are now relative to the script file location (using os)
-*  Added dates to logging
-*  Logs are saved in respective files on the server
-*  Fixed a bug with adding same comment a few times in sticky threads that are on the subreddit for a long time (time-saving workaround)
+  * File paths are now relative to the script file location (using os)
+  * Added dates to logging
+  * Logs are saved in respective files on the server
+  * Fixed a bug with adding same comment a few times in sticky threads that are on the subreddit for a long time (time-saving workaround)
 
 ##### 1.8
-*  Change in the main loop of the script - much better efficiency (time)
+  * Change in the main loop of the script - much better efficiency (time)
 
 ##### 1.7
-*  Changed reply comment formatting
+  * Changed reply comment formatting
 
 ##### 1.6
-*  Removed keyword triggering as /r/dota2 community did not like it
+  * Removed keyword triggering as /r/dota2 community did not like it
 
 ##### 1.5
-*  Added keywords that trigger the bot: "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
-*  Code refactoring
+  * Added keywords that trigger the bot: "just do it", "beautiful", "from the ghastly eyrie", "sniper", "ppd", "leafeator", "ur/your brother"
+  * Code refactoring
 
 ##### 1.4
-*  Fixed a bug created by 1.2 changes
-*  Changed submissions number in hot to 25
-*  Added more excluded responses
+  * Fixed a bug created by 1.2 changes
+  * Changed submissions number in hot to 25
+  * Added more excluded responses
 
 ##### 1.3
-*  Removed responses such as "thank you", hero names and item names (anti-spam)
+  * Removed responses such as "thank you", hero names and item names (anti-spam)
 
 ##### 1.2
-*  Accept comments with extra letters added for emphasis
+  * Accept comments with extra letters added for emphasis
 
 ##### 1.1
-*  One word responses are no longer in the dictionary
-*  Replaced double spaces with single space
-*  Bot is now working with hot submissions
+  * One word responses are no longer in the dictionary
+  * Replaced double spaces with single space
+  * Bot is now working with hot submissions
 
 ---
 ### Treeware License

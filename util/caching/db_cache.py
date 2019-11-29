@@ -1,4 +1,4 @@
-"""Module to store thing_ids in DB. 
+"""Module to store thing_ids in DB.
 Not recommended as this needs manual clearing of old ids.
 """
 

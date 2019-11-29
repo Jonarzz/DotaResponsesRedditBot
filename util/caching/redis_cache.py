@@ -1,5 +1,5 @@
-"""Module that allows Redis to be used as cache. Useful when running on Heroku or such platforms without 
-persistent file storage.
+"""Module that allows Redis to be used as cache. Useful when running on Heroku or such platforms without persistent
+file storage.
 """
 
 from redis import Redis
