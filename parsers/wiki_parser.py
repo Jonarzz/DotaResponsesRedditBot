@@ -119,8 +119,8 @@ def get_hero_name(hero_page):
 
 
 def create_responses_text_and_link_list(responses_source):
-    """Method that for a given source of a hero's response page creates a list of tuple: (original_text, 
-    processed_text, link).
+    """Method that for a given source of a hero's response page creates a list of tuple: (original_text, processed_text,
+     link).
     Steps involved:
     * Use regex to find all lines containing mp3 files and responses.
     * Process it to get original response text and file name.

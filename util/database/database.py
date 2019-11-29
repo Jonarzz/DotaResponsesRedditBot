@@ -31,7 +31,7 @@ class DatabaseAPI:
         else:
             self.db.bind(provider='sqlite', filename='bot.db', create_db=True)
 
-        self.db.generate_mapping()
+        self.db.generate_mapping(create_tables=True)
 
     # Responses table queries
     @db_session

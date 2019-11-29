@@ -15,7 +15,7 @@ __author__ = 'MePsyDuck'
 
 def populate_heroes():
     """Method to update heroes in the Heroes table with hero names and proper css classes names as
-    taken from the DotA2 subreddit and hero flair images from the reddit directory. 
+    taken from the DotA2 subreddit and hero flair images from the reddit directory.
 
     Uses fuzzywuzzy for fuzzy matching of hero names to name found in `.flair-name` property in css.
     """
