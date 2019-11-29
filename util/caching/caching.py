@@ -10,11 +10,11 @@ __author__ = 'MePsyDuck'
 
 class CacheAPI(ABC):
     @abstractmethod
-    def _check(self, thing_id):
+    def _check(self, key):
         pass
 
     @abstractmethod
-    def _set(self, thing_id):
+    def _set(self, key):
         pass
 
     def check(self, thing_id):

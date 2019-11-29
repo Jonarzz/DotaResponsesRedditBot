@@ -3,7 +3,7 @@
 
 from datetime import datetime
 
-from pony.orm import *
+from pony.orm import Database, PrimaryKey, Required, Optional, Set
 
 __author__ = 'MePsyDuck'
 
@@ -21,7 +21,7 @@ class Responses(db.Entity):
 class ThingsCache(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
     thing_id = Required(str, unique=True)  # Comment or submission id that is already processed
-    added_datetime = Optional(datetime, default=lambda: datetime.utcnow())  # Datetime of processing the thing
+    added_datetime = Optional(datetime, default=datetime.utcnow())  # Datetime of processing the thing
 
 
 class Heroes(db.Entity):

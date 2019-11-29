@@ -124,7 +124,7 @@ def do_flair_specific_reply(thing, response):
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=thing.author_flair_css_class)
     if hero_id:
         link, hero_id = db_api.get_link_for_response(
-            response=response, hero_id=hero_id)
+            processed_text=response, hero_id=hero_id)
         if link:
             reply = create_reply(thing=thing, response_url=link, hero_id=hero_id)
             thing.reply(reply)

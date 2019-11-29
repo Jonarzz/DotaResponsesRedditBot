@@ -263,7 +263,7 @@ def links_for_files(files_list):
             query = json_response['query']
             pages = query['pages']
 
-            for page_id, page in pages.items():
+            for _, page in pages.items():
                 title = page['title']
                 try:
                     imageinfo = page['imageinfo'][0]
