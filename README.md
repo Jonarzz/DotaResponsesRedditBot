@@ -13,13 +13,13 @@ The bot replies only for the comments that **are** responses.
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
 ### Comment/Submission text processing
-*   All the comment text is transformed into lowercase
-*   Any puncation is replaced with spaces
+*   All the body text is transformed into lowercase
+*   Any punctuation is replaced with spaces
 *   Multiple spaces are trimmed to single space.
 *   If comment has blockquote, first blockquote is considered for matching.
 
 <!-- Old behavior
-All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the thing is ignored.
+All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the replyable is ignored.
 -->
 <!-- Old behavior
 The bot will try to match a response of the hero that is in the comment/submission's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
