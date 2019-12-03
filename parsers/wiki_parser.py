@@ -97,7 +97,7 @@ def get_params_for_files_api(files):
 
 
 def is_hero_type(page):
-    """Method to check if page belongs to a hero, creep-hero(Warlock's Golem).
+    """Method to check if page belongs to a hero or creep-hero(Warlock's Golem).
 
     :param page: Page name as string.
     :return: True if page belongs to hero else False
@@ -170,7 +170,8 @@ def parse_response(text):
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
-                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>', # Remove followup links in <small> tags
+                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>',
+                         # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
                          r'<ref>.*?</ref>',  # Remove text in <ref> tags
                          r'<nowiki>.*?</nowiki>',  # Remove text in <nowiki> tags
@@ -179,7 +180,8 @@ def parse_response(text):
         text = re.sub(regex, '', text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]', # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
+                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
+                        # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
@@ -208,20 +210,27 @@ def links_for_files(files_list):
     files_link_mapping = {}
     futures = []
     empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
+    max_title_list_length = 50
+    file_title_prefix_length = len('%7CFile%3A')  # url encoded file title prefix '|File:'
 
     with FuturesSession() as session:
         files_batch_list = []
-        title_length = 0
+        current_title_length = 0
 
         for file in files_list:
-            # If header size overflows of number of files reaches the limit specified by MediaWiki, i.e. 50.
-            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH - empty_api_length or len(files_batch_list) > 50:
+            file_name_len = file_title_prefix_length + len(file)
+            # If header size overflows or the number of files reaches the limit specified by MediaWiki
+            if file_name_len + current_title_length >= MAX_HEADER_LENGTH - empty_api_length or \
+                    len(files_batch_list) > max_title_list_length:
+                # Issue a request for current batch of files
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
-                title_length = len(file) + 10
-                files_batch_list = [file]
-            else:
-                files_batch_list.append(file)
-                title_length += len(file) + 10
+
+                # Reset files tracking variables
+                files_batch_list = []
+                current_title_length = 0
+
+            files_batch_list.append(file)
+            current_title_length += file_name_len
 
         if files_batch_list:
             futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
