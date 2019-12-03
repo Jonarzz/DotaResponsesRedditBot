@@ -6,7 +6,6 @@ prepared. The response is posted as a reply to the original comment/submission o
 
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
-import string
 
 from praw.models import Comment
 
@@ -15,6 +14,7 @@ from bot import account
 from util.caching import get_cache_api
 from util.database.database import db_api
 from util.logger import logger
+from util.str_utils import preprocess_text
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -93,11 +93,8 @@ def process_replyable(reddit, replyable):
 
 
 def process_body(body_text):
-    """Method used to clean the replyable text. Logic is similar to clean_response_text on wiki parsers.
-    * If body text contains a quote, the first quote is considered as the response_text.
-    * Punctuation marks are replaced with space.
-    * The response_text is turned to lowercase.
-    * Converts multiple spaces into single space.
+    """Method used to clean the replyable body text.
+    If body text contains a quote, the first quote text is considered as the body text.
 
     Removed code to remove repeating letters in a body text because it does more harm than good - words like 'all',
     'tree' are stripped to 'al' and 'tre' which dont match with any responses.
@@ -113,15 +110,7 @@ def process_body(body_text):
                 body_text = line
                 break
 
-    body_text = body_text.translate(PUNCTUATION_TRANS)
-    body_text = body_text.translate(WHITESPACE_TRANS)
-
-    body_text = body_text.strip().lower()
-
-    while '  ' in body_text:
-        body_text = body_text.replace('  ', ' ')
-
-    return body_text
+    return preprocess_text(body_text)
 
 
 def try_flair_specific_reply(replyable, processed_text):
@@ -191,7 +180,3 @@ def do_custom_reply(replyable, custom_response):
 
     reply = custom_response.format(original_text, config.COMMENT_ENDING)
     replyable.reply(reply)
-
-
-PUNCTUATION_TRANS = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
-WHITESPACE_TRANS = str.maketrans(string.whitespace, ' ' * len(string.whitespace))

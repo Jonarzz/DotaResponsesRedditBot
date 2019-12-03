@@ -5,7 +5,6 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 
 import json
 import re
-import string
 from concurrent.futures import as_completed
 
 import requests
@@ -15,6 +14,7 @@ from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PA
     FILE_REGEX, MAX_HEADER_LENGTH, CHAT_WHEEL_SECTION_REGEX
 from util.database.database import db_api
 from util.logger import logger
+from util.str_utils import preprocess_text
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -102,10 +102,7 @@ def is_hero_type(page):
     :param page: Page name as string.
     :return: True if page belongs to hero else False
     """
-    if '/Responses' in page:
-        return True
-    else:
-        return False
+    return '/Responses' in page
 
 
 def get_hero_name(hero_page):
@@ -139,19 +136,17 @@ def create_responses_text_and_link_list(responses_source):
 
     for response in response_regex.finditer(responses_source):
         original_text = parse_response(response['text'])
-        if original_text == '':
-            pass
-
-        files_source = response['files']
-        for file in file_regex.finditer(files_source):
-            file_name = file['file'].replace('_', ' ').capitalize()
-            file_and_text_list.append([original_text, file_name])
+        if original_text is not None:
+            files_source = response['files']
+            for file in file_regex.finditer(files_source):
+                file_name = file['file'].replace('_', ' ').capitalize()
+                file_and_text_list.append([original_text, file_name])
 
     files_list = [file for text, file in file_and_text_list]
     file_and_link_dict = links_for_files(files_list)
 
     for original_text, file in file_and_text_list:
-        processed_text = clean_response_text(original_text)
+        processed_text = preprocess_text(original_text)
         if processed_text != '':
             try:
                 link = file_and_link_dict[file]
@@ -165,12 +160,8 @@ def create_responses_text_and_link_list(responses_source):
 
 def parse_response(text):
     # Special cases
-    if '(broken file)' in text:
-        return ''
-    if 'versus (TI ' in text:
-        return ''
-    if 'Ceeeb' in text:
-        return ''
+    if any(excluded_case in text for excluded_case in ['(broken file)', 'versus (TI ', 'Ceeeb']):
+        return None
 
     text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
 
@@ -179,8 +170,7 @@ def parse_response(text):
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
-                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>',
-                         # Remove followup links in <small> tags
+                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>', # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
                          r'<ref>.*?</ref>',  # Remove text in <ref> tags
                          r'<nowiki>.*?</nowiki>',  # Remove text in <nowiki> tags
@@ -189,9 +179,7 @@ def parse_response(text):
         text = re.sub(regex, '', text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
-                        # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
-                        # r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
+                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]', # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
@@ -200,29 +188,9 @@ def parse_response(text):
 
     if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
         logger.warn('Response could not be processed : ' + text)
+        return None
 
     return text.strip()
-
-
-def clean_response_text(response_text):
-    """Method for preprocessing the given response text.
-    It:
-    * removes trailing and leading spaces
-    * removes all punctuations
-    * removes double spaces
-    * changes to lowercase
-
-    :param response_text: the response text to be cleaned
-    :return: cleaned response text
-    """
-    response_text = response_text.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
-
-    while '  ' in response_text:
-        response_text = response_text.replace('  ', ' ')
-
-    response_text = response_text.strip().lower()
-
-    return response_text
 
 
 def links_for_files(files_list):
