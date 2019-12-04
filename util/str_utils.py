@@ -8,10 +8,11 @@ WHITESPACE_TRANS = str.maketrans(string.whitespace, ' ' * len(string.whitespace)
 def preprocess_text(text):
     """Method for pre-processing the given response text.
     It:
-    * removes all punctuations
+    * replaces all punctuations with spaces
+    * replaces all whitespace characters (tab, newline etc) with spaces
+    * removes trailing and leading spaces
     * removes double spaces
     * changes to lowercase
-    * removes trailing and leading spaces
 
     :param text: the text to be cleaned
     :return: cleaned text
@@ -19,6 +20,6 @@ def preprocess_text(text):
 
     text = text.translate(PUNCTUATION_TRANS)
     text = text.translate(WHITESPACE_TRANS)
-    text = re.sub(' +', ' ', text)
     text = text.strip().lower()
+    text = re.sub(' +', ' ', text)
     return text
