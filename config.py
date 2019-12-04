@@ -19,10 +19,8 @@ URL_DOMAIN = 'http://dota2.gamepedia.com'
 API_PATH = URL_DOMAIN + '/api.php'
 RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
-                       'format': 'json',
-                       'cmtitle': ''}
+                       'format': 'json', 'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1960  # max header length as found by trail and error
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
