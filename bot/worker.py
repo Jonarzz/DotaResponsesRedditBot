@@ -86,9 +86,7 @@ def process_replyable(reddit, replyable):
     if processed_body in config.CUSTOM_RESPONSES:
         add_custom_reply(replyable=replyable, custom_response=config.CUSTOM_RESPONSES[processed_body])
 
-    if flair_specific_reply_added(replyable, processed_body):
-        return
-    else:
+    if not flair_specific_reply_added(replyable, processed_body):
         add_regular_reply(replyable, processed_body)
 
 
