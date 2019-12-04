@@ -152,10 +152,10 @@ def do_regular_reply(replyable, processed_text):
 
 def create_reply(replyable, response_url, hero_id, img=None):
     """Method that creates a reply in reddit format.
-
-    The message consists to a link the the response audio file, the response itself, a warning about the sound
+    The reply consists of a link to the response audio file, the response itself, a warning about the sound
     and an ending added from the config file (post footer).
-    Image is currently ignored due to new reddit redesign not rendering flairs properly.
+    
+    TODO Image is currently ignored due to new reddit redesign not rendering flairs properly.
 
     :param replyable: The comment/submission on reddit
     :param response_url: The url to the response audio file
