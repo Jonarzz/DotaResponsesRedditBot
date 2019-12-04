@@ -84,12 +84,12 @@ def process_replyable(reddit, replyable):
         return
 
     if processed_body in config.CUSTOM_RESPONSES:
-        do_custom_reply(replyable=replyable, custom_response=config.CUSTOM_RESPONSES[processed_body])
+        add_custom_reply(replyable=replyable, custom_response=config.CUSTOM_RESPONSES[processed_body])
 
-    if try_flair_specific_reply(replyable, processed_body):
+    if flair_specific_reply_added(replyable, processed_body):
         return
     else:
-        do_regular_reply(replyable, processed_body)
+        add_regular_reply(replyable, processed_body)
 
 
 def process_body(body_text):
@@ -113,7 +113,7 @@ def process_body(body_text):
     return preprocess_text(body_text)
 
 
-def try_flair_specific_reply(replyable, processed_text):
+def flair_specific_reply_added(replyable, processed_text):
     """Method that tries to add a author's flair specific reply to the comment/submission.
 
     :param replyable: The comment/submission on reddit
@@ -131,7 +131,7 @@ def try_flair_specific_reply(replyable, processed_text):
     return False
 
 
-def do_regular_reply(replyable, processed_text):
+def add_regular_reply(replyable, processed_text):
     """Method to create response for given replyable.
     In case of multiple matches, it used to sort responses in descending order of heroes, but now it's random.
 
@@ -148,6 +148,19 @@ def do_regular_reply(replyable, processed_text):
         replyable.reply(create_reply(replyable=replyable, response_url=link, hero_id=hero_id, img=img_dir))
 
         logger.info("Replied to: " + replyable.id)
+
+
+def add_custom_reply(replyable, custom_response):
+    """Method to create a custom reply for specific cases that match the custom responses set.
+
+    :param replyable: The comment/submission on reddit
+    :param custom_response: The matching custom response
+    :return: None
+    """
+    original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
+
+    reply = custom_response.format(original_text, config.COMMENT_ENDING)
+    replyable.reply(reply)
 
 
 def create_reply(replyable, response_url, hero_id, img=None):
@@ -167,16 +180,3 @@ def create_reply(replyable, response_url, hero_id, img=None):
 
     hero_name = db_api.get_hero_name(hero_id)
     return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
-
-
-def do_custom_reply(replyable, custom_response):
-    """Method to create a custom reply for specific cases that match the custom responses set.
-
-    :param replyable: The comment/submission on reddit
-    :param custom_response: The matching custom response
-    :return: None
-    """
-    original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
-
-    reply = custom_response.format(original_text, config.COMMENT_ENDING)
-    replyable.reply(reply)
