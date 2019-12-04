@@ -1,0 +1,10 @@
+beautifulsoup4
+praw
+psycopg2
+redis
+pony
+fuzzywuzzy
+requests
+python-Levenshtein
+cacheout
+requests-futures

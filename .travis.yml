@@ -1,17 +1,20 @@
 language: python
+
 python:
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.5-dev"  # 3.5 development branch
-  - "3.6"
-  - "3.6-dev"  # 3.6 development branch
-  - "3.7-dev"  # 3.7 development branch
-# command to install dependencies
+  - "3.6.1"
+
+before_install:
+  - sudo apt-get update
+
 install:
-- pip install praw
-- pip install beautifulsoup4
-# command to run tests
-script: 
-- python -m unittest test_dotaresponses.py
-- python -m unittest responses_wiki/test_dota_wiki_parser.py
+  - pip install codecov
+  - pip install -r requirements.txt
+
+virtualenv:
+  system_site_package: true
+
+script:
+  - coverage run test.py
+
+after_success:
+  - codecov
