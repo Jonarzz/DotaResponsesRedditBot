@@ -23,5 +23,5 @@ script:
 
 after_success:
   - coverage xml
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT --prefix `pwd` --input-type coverage.py coverage.xml
   - codecov
