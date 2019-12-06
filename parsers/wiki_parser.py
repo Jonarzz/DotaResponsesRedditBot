@@ -5,16 +5,16 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 
 import json
 import re
-import string
 from concurrent.futures import as_completed
 
 import requests
 from requests_futures.sessions import FuturesSession
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, MAX_HEADER_LENGTH, CHAT_WHEEL_SECTION_REGEX
+    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX
 from util.database.database import db_api
 from util.logger import logger
+from util.str_utils import preprocess_text
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -97,15 +97,12 @@ def get_params_for_files_api(files):
 
 
 def is_hero_type(page):
-    """Method to check if page belongs to a hero, creep-hero(Warlock's Golem).
+    """Method to check if page belongs to a hero or creep-hero(Warlock's Golem).
 
     :param page: Page name as string.
     :return: True if page belongs to hero else False
     """
-    if '/Responses' in page:
-        return True
-    else:
-        return False
+    return '/Responses' in page
 
 
 def get_hero_name(hero_page):
@@ -139,19 +136,17 @@ def create_responses_text_and_link_list(responses_source):
 
     for response in response_regex.finditer(responses_source):
         original_text = parse_response(response['text'])
-        if original_text == '':
-            pass
-
-        files_source = response['files']
-        for file in file_regex.finditer(files_source):
-            file_name = file['file'].replace('_', ' ').capitalize()
-            file_and_text_list.append([original_text, file_name])
+        if original_text is not None:
+            files_source = response['files']
+            for file in file_regex.finditer(files_source):
+                file_name = file['file'].replace('_', ' ').capitalize()
+                file_and_text_list.append([original_text, file_name])
 
     files_list = [file for text, file in file_and_text_list]
     file_and_link_dict = links_for_files(files_list)
 
     for original_text, file in file_and_text_list:
-        processed_text = clean_response_text(original_text)
+        processed_text = preprocess_text(original_text)
         if processed_text != '':
             try:
                 link = file_and_link_dict[file]
@@ -165,12 +160,8 @@ def create_responses_text_and_link_list(responses_source):
 
 def parse_response(text):
     # Special cases
-    if '(broken file)' in text:
-        return ''
-    if 'versus (TI ' in text:
-        return ''
-    if 'Ceeeb' in text:
-        return ''
+    if any(excluded_case in text for excluded_case in ['(broken file)', 'versus (TI ', 'Ceeeb']):
+        return None
 
     text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
 
@@ -191,7 +182,6 @@ def parse_response(text):
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
                         r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
                         # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
-                        # r'{{h\|([a-zé().:\' ]+)}}',  # Replace hero names
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
@@ -200,29 +190,9 @@ def parse_response(text):
 
     if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
         logger.warn('Response could not be processed : ' + text)
+        return None
 
     return text.strip()
-
-
-def clean_response_text(response_text):
-    """Method for preprocessing the given response text.
-    It:
-    * removes trailing and leading spaces
-    * removes all punctuations
-    * removes double spaces
-    * changes to lowercase
-
-    :param response_text: the response text to be cleaned
-    :return: cleaned response text
-    """
-    response_text = response_text.translate(str.maketrans(string.punctuation, ' ' * len(string.punctuation)))
-
-    while '  ' in response_text:
-        response_text = response_text.replace('  ', ' ')
-
-    response_text = response_text.strip().lower()
-
-    return response_text
 
 
 def links_for_files(files_list):
@@ -237,23 +207,33 @@ def links_for_files(files_list):
     :return files_link_mapping: dict with file names and their links. dict['file'] = link
     """
 
+    # Method level constants
+    max_title_list_length = 50
+    file_title_prefix_length = len('%7CFile%3A')  # url encoded file title prefix '|File:'
+    max_header_length = 1960  # max header length as found by trial and error
+
     files_link_mapping = {}
     futures = []
     empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
 
     with FuturesSession() as session:
         files_batch_list = []
-        title_length = 0
+        current_title_length = 0
 
         for file in files_list:
-            # If header size overflows of number of files reaches the limit specified by MediaWiki, i.e. 50.
-            if len(file) + 10 + title_length >= MAX_HEADER_LENGTH - empty_api_length or len(files_batch_list) > 50:
+            file_name_len = file_title_prefix_length + len(file)
+            # If header size overflows or the number of files reaches the limit specified by MediaWiki
+            if file_name_len + current_title_length >= max_header_length - empty_api_length or \
+                    len(files_batch_list) > max_title_list_length:
+                # Issue a request for current batch of files
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
-                title_length = len(file) + 10
-                files_batch_list = [file]
-            else:
-                files_batch_list.append(file)
-                title_length += len(file) + 10
+
+                # Reset files tracking variables
+                files_batch_list = []
+                current_title_length = 0
+
+            files_batch_list.append(file)
+            current_title_length += file_name_len
 
         if files_batch_list:
             futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))

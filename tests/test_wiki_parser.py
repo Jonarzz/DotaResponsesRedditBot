@@ -24,9 +24,3 @@ class WikiParserTest(unittest.TestCase):
         self.assertTrue(len(pages) > 150)
         self.assertTrue('Abaddon/Responses' in pages)
         self.assertTrue('Zeus/Responses' in pages)
-
-    def test_clean_response_text(self):
-        """Method testing clean_response_text method from wiki_parser module.
-        Check docs for clean_response_text method for further information about the expected results.
-        """
-        self.assertEqual(wiki_parser.clean_response_text('   Earthshaker\'s     here  !  '), 'earthshaker s here')

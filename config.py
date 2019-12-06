@@ -19,10 +19,8 @@ URL_DOMAIN = 'http://dota2.gamepedia.com'
 API_PATH = URL_DOMAIN + '/api.php'
 RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
-                       'format': 'json',
-                       'cmtitle': ''}
+                       'format': 'json', 'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1960  # max header length as found by trail and error
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
@@ -66,7 +64,7 @@ Bleep bloop, I am a robot.
 
 # Key should be lowercase without special characters. Needs to be updated if links break (as links can be
 # non-gamepedia links too)
-# Value should have a placeholder for original text and thing ending
+# Value should have a placeholder for original text and replyable ending
 CUSTOM_RESPONSES = {
     'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
                    ' (trigger warning: Sniper){}',
@@ -81,7 +79,7 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'it s not time yet', 'ah', 'no', 'uh', 'ha ha', 'attack', 'haste', 'double damage', 'immortality',
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
-# Get them from here.
+# TODO Get them from here.
 # https://dota2.gamepedia.com/api.php?action=cargoquery&tables=items&fields=title&where=game+IS+NULL&limit=500&format=json
 ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape', 'aghanim s scepter', 'manta style',
                   'battle fury', 'yasha and kaya', 'talisman of evasion', 'sentry ward', 'yasha',
@@ -112,7 +110,7 @@ ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape
                   'hurricane pike', 'vladmir s offering', 'tranquil boots', 'javelin', 'meteor hammer', 'broadsword',
                   'ultimate orb'}
 
-# Get them from here
+# TODO Get them from here
 # https://dota2.gamepedia.com/api.php?action=cargoquery&tables=heroes&fields=title&where=game+IS+NULL&limit=500&format=json
 HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'juggernaut', 'crystal maiden', 'pudge',
                        'disruptor', 'queen of pain', 'wraith king', 'spectre', 'templar assassin', 'warlock',

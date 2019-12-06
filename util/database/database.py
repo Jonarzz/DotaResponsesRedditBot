@@ -5,7 +5,7 @@ import urllib.parse as up
 from pony.orm import db_session, commit
 
 from config import CACHE_TTL, DB_URL, DB_PROVIDER
-from util.database.models import Responses, Heroes, ThingsCache, db
+from util.database.models import Responses, Heroes, RedditCache, db
 from util.logger import logger
 
 __author__ = 'MePsyDuck'
@@ -57,14 +57,14 @@ class DatabaseAPI:
         else:
             return None, None
 
-    # ThingsCache table queries
+    # RedditCache table queries
     @db_session
     def add_thing_to_cache(self, thing_id):
-        """Method that adds current time and Reddit thing or submission to ThingsCache table by their id(fullname).
+        """Method that adds current time and Reddit replyable or submission to RedditCache table by their id(fullname).
 
-        :param thing_id: The fullname of thing/submission on Reddit
+        :param thing_id: The fullname of replyable/submission on Reddit
         """
-        ThingsCache(thing_id=thing_id)
+        RedditCache(thing_id=thing_id)
 
     @db_session
     def delete_old_thing_ids(self):
@@ -72,16 +72,16 @@ class DatabaseAPI:
         """
         furthest_date = datetime.datetime.utcnow() - datetime.timedelta(days=CACHE_TTL)
 
-        ThingsCache.select(lambda t: t.added_datetime < furthest_date).delete(bulk=True)
+        RedditCache.select(lambda t: t.added_datetime < furthest_date).delete(bulk=True)
 
     @db_session
     def check_if_thing_exists(self, thing_id):
-        """Method that checks if the thing id given is already present in the ThingsCache table
+        """Method that checks if the replyable id given is already present in the RedditCache table
 
-        :param thing_id: The id of the thing/submission on Reddit
+        :param thing_id: The id of the replyable/submission on Reddit
         :return: True if the `thing_id` is already present in table, else False
         """
-        thing = ThingsCache.select(lambda t: t.thing_id == thing_id)
+        thing = RedditCache.select(lambda t: t.thing_id == thing_id)
         return thing is not None
 
     # Heroes table queries
