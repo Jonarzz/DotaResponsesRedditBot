@@ -2,7 +2,7 @@
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Build Status](https://api.travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/de2c724018076b34064f/maintainability)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/maintainability)
-[![codecov](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/MePsyDuck/DotaResponsesRedditBot)<!-- TODO update this with new codecov link for base repo. -->
+[![codecov](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot)
 
 > Bot adding reply comments with links to appropriate responses found on [/r/dota2](https://www.reddit.com/r/DotA2).
 
