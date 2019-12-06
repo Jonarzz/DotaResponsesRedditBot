@@ -18,10 +18,10 @@ class Responses(db.Entity):
     hero_id = Required('Heroes')  # The hero_id for hero whose response text this is
 
 
-class ThingsCache(db.Entity):
+class RedditCache(db.Entity):
     id = PrimaryKey(int, auto=True)  # Default db id column for pk
     thing_id = Required(str, unique=True)  # Comment or submission id that is already processed
-    added_datetime = Optional(datetime, default=datetime.utcnow())  # Datetime of processing the thing
+    added_datetime = Optional(datetime, default=datetime.utcnow())  # Datetime of processing the replyable
 
 
 class Heroes(db.Entity):
