@@ -11,7 +11,7 @@ import requests
 from requests_futures.sessions import FuturesSession
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, MAX_HEADER_LENGTH, CHAT_WHEEL_SECTION_REGEX
+    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX
 from util.database.database import db_api
 from util.logger import logger
 from util.str_utils import preprocess_text
@@ -207,11 +207,14 @@ def links_for_files(files_list):
     :return files_link_mapping: dict with file names and their links. dict['file'] = link
     """
 
+    # Method level constants
+    max_title_list_length = 50
+    file_title_prefix_length = len('%7CFile%3A')  # url encoded file title prefix '|File:'
+    max_header_length = 1960  # max header length as found by trial and error
+
     files_link_mapping = {}
     futures = []
     empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
-    max_title_list_length = 50
-    file_title_prefix_length = len('%7CFile%3A')  # url encoded file title prefix '|File:'
 
     with FuturesSession() as session:
         files_batch_list = []
@@ -220,7 +223,7 @@ def links_for_files(files_list):
         for file in files_list:
             file_name_len = file_title_prefix_length + len(file)
             # If header size overflows or the number of files reaches the limit specified by MediaWiki
-            if file_name_len + current_title_length >= MAX_HEADER_LENGTH - empty_api_length or \
+            if file_name_len + current_title_length >= max_header_length - empty_api_length or \
                     len(files_batch_list) > max_title_list_length:
                 # Issue a request for current batch of files
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))

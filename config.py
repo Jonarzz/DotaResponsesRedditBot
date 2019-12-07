@@ -9,7 +9,7 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
+USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarz, maintained by /u/MePsyDuck'
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
@@ -19,10 +19,8 @@ URL_DOMAIN = 'http://dota2.gamepedia.com'
 API_PATH = URL_DOMAIN + '/api.php'
 RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
-                       'format': 'json',
-                       'cmtitle': ''}
+                       'format': 'json', 'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
-MAX_HEADER_LENGTH = 1960  # max header length as found by trail and error
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
@@ -57,10 +55,11 @@ COMMENT_ENDING = '''
 ---
 Bleep bloop, I am a robot.
 
-[*^(Source)*](https://github.com/MePsyDuck/DotaResponsesRedditBot) *^(|)* 
-[*^(Suggestions/Issues)*](https://github.com/MePsyDuck/DotaResponsesRedditBot/issues) *^(|)* 
+[*^(Source)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* 
+[*^(Suggestions/Issues)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues/new/choose) *^(|)* 
 [*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
-[*^(Author)*](https://www.reddit.com/user/Jonarz/)
+[*^(Author)*](https://www.reddit.com/user/Jonarz/) *^(|)* 
+[*^(Host)*](https://www.reddit.com/user/iggys_reddit_account/)
 '''
 
 # Key should be lowercase without special characters. Needs to be updated if links break (as links can be
@@ -129,7 +128,7 @@ HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'jugg
                        'luna', "nature s prophet", 'lich', 'bane', 'mars', 'phantom lancer', 'troll warlord', 'chen',
                        'techies', 'skywrath mage', 'enchantress', 'razor', 'gyrocopter', 'tinker', 'zeus', 'meepo',
                        'rubick', 'elder titan', 'brewmaster', 'venomancer', 'shadow fiend', 'puck', 'legion commander',
-                       'sniper', 'oracle', 'timbersaw', 'bristleback'}
+                       'sniper', 'oracle', 'timbersaw', 'bristleback', 'snapfire', 'void spirit'}
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
