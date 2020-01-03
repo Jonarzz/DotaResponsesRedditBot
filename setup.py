@@ -8,6 +8,8 @@ from util.database.database import db_api
 
 __author__ = 'MePsyDuck'
 
+from util.logger import setup_logger
+
 
 def first_run():
     db_api.drop_all_tables()
@@ -17,4 +19,5 @@ def first_run():
 
 
 if __name__ == '__main__':
+    setup_logger()
     first_run()

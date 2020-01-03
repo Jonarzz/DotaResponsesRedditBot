@@ -22,7 +22,7 @@ def setup_logger():
         os.mkdir(LOG_DIR)
 
     log_formatter = logging.Formatter(LOG_FORMAT)
-    log_level = logging.getLevelName(level=LOG_LEVEL)
+    log_level = logging.getLevelName(LOG_LEVEL)
 
     # Handlers
     info_log_file = os.path.join(LOG_DIR, INFO_FILENAME)
