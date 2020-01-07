@@ -8,7 +8,9 @@ import re
 from concurrent.futures import as_completed
 
 import requests
+from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
+from urllib3 import Retry
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
     FILE_REGEX, CHAT_WHEEL_SECTION_REGEX
@@ -166,7 +168,7 @@ def parse_response(text):
     text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
-                         r'{{resp\|(r|u|\d+|d\|\d+)}}',  # Remove response rarity
+                         r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
@@ -217,6 +219,21 @@ def links_for_files(files_list):
     empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
 
     with FuturesSession() as session:
+        # To add retry login in case of Status 429 : Too many requests
+        retries = 5
+        status_forcelist = [429]
+        retry = Retry(
+            total=retries,
+            read=retries,
+            connect=retries,
+            respect_retry_after_header=True,
+            status_forcelist=status_forcelist,
+        )
+
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+
         files_batch_list = []
         current_title_length = 0
 
@@ -224,7 +241,7 @@ def links_for_files(files_list):
             file_name_len = file_title_prefix_length + len(file)
             # If header size overflows or the number of files reaches the limit specified by MediaWiki
             if file_name_len + current_title_length >= max_header_length - empty_api_length or \
-                    len(files_batch_list) > max_title_list_length:
+                    len(files_batch_list) >= max_title_list_length:
                 # Issue a request for current batch of files
                 futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
 
