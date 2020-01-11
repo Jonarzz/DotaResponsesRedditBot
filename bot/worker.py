@@ -90,6 +90,20 @@ def process_replyable(reddit, replyable):
         add_regular_reply(replyable, processed_body)
 
 
+def get_quoted_text(body_text):
+    """Method used to get quoted text.
+    If body text contains a quote, the first quote text is considered as the body text.
+
+    :param body_text: The replyable body text
+    :return: The first quote in the body text. If no quotes are found, then the entire body text
+    """
+    lines = body_text.split('\n\n')
+    for line in lines:
+        if line.startswith('>'):
+            return line
+    return body_text
+
+
 def process_body(body_text):
     """Method used to clean the replyable body text.
     If body text contains a quote, the first quote text is considered as the body text.
@@ -102,11 +116,7 @@ def process_body(body_text):
     """
 
     if '>' in body_text:
-        lines = body_text.split('\n\n')
-        for line in lines:
-            if line.startswith('>'):
-                body_text = line
-                break
+        body_text = get_quoted_text(body_text)
 
     return preprocess_text(body_text)
 
@@ -175,6 +185,9 @@ def create_reply(replyable, response_url, hero_id, img=None):
     :return: The text for the comment reply.
     """
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
+    original_text = original_text.strip()
+    if '>' in original_text:
+        original_text = get_quoted_text(original_text).strip()
 
     hero_name = db_api.get_hero_name(hero_id)
     return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
