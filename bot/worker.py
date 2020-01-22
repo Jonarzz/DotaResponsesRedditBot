@@ -6,8 +6,10 @@ prepared. The response is posted as a reply to the original comment/submission o
 
 Proper logging is provided - saved to 2 files as standard output and errors.
 """
+import time
 
 from praw.models import Comment
+from prawcore import ServerError
 
 import config
 from bot import account
@@ -35,14 +37,18 @@ def work():
     comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
     submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
     while True:
-        for comment in comment_stream:
-            if comment is None:
-                break
-            process_replyable(reddit, comment)
-        for submission in submission_stream:
-            if submission is None:
-                break
-            process_replyable(reddit, submission)
+        try:
+            for comment in comment_stream:
+                if comment is None:
+                    break
+                process_replyable(reddit, comment)
+            for submission in submission_stream:
+                if submission is None:
+                    break
+                process_replyable(reddit, submission)
+        except ServerError:
+            logger.critical("Reddit server is down")
+            time.sleep(60)
 
 
 def process_replyable(reddit, replyable):
