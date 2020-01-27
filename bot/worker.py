@@ -34,8 +34,8 @@ def work():
     reddit = account.get_account()
     logger.info('Connected to Reddit account : ' + config.USERNAME)
 
-    comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
-    submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
+    comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1, skip_existing=True)
+    submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1, skip_existing=True)
     while True:
         try:
             for comment in comment_stream:
@@ -46,8 +46,8 @@ def work():
                 if submission is None:
                     break
                 process_replyable(reddit, submission)
-        except ServerError:
-            logger.critical("Reddit server is down")
+        except ServerError as e:
+            logger.critical("Reddit server is down" + str(e))
             time.sleep(60)
 
 
