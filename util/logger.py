@@ -45,7 +45,7 @@ def setup_logger():
 
     # PRAW logging
     praw_logger = logging.getLogger(PRAW_LOGGER)
-    praw_logger.setLevel(logging.WARNING)
+    praw_logger.setLevel(log_level)
     praw_logger.addHandler(stream_handler)
     praw_logger.addHandler(praw_handler)
 
