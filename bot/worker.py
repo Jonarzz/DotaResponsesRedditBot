@@ -79,7 +79,7 @@ def process_replyable(reddit, replyable):
     if replyable.author == reddit.user.me:
         return
 
-    logger.debug("Found new replyable: " + str(replyable.fullname))
+    logger.info("Found new replyable: " + str(replyable.fullname))
 
     processed_body = process_body(replyable.body if isinstance(replyable, Comment) else replyable.title)
 
