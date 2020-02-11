@@ -36,8 +36,8 @@ def work():
 
     while True:
         # Streams need to be restarted when they throw exception
-        comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1, skip_existing=True)
-        submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1, skip_existing=True)
+        comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
+        submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
         try:
             for comment in comment_stream:
                 if comment is None:
