@@ -57,9 +57,8 @@ Bleep bloop, I am a robot.
 
 [*^(Source)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* 
 [*^(Suggestions/Issues)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues/new/choose) *^(|)* 
-[*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
-[*^(Author)*](https://www.reddit.com/user/Jonarz/) *^(|)* 
-[*^(Host)*](https://www.reddit.com/user/iggys_reddit_account/)
+[*^(Maintainer)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
+[*^(Author)*](https://www.reddit.com/user/Jonarz/) *^(|)*
 '''
 
 # Key should be lowercase without special characters. Needs to be updated if links break (as links can be
