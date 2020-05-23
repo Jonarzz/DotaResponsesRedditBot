@@ -172,7 +172,7 @@ class DatabaseAPI:
         """Method to add hero and it's responses to the db.
 
         :param hero_name: Hero name who's responses will be inserted
-        :param response_link_list: List with tuples in the form of (original_text, processed_text, link)
+        :param response_link_list: List with tuples in the form of (original_text, text, link)
         """
         h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
         commit()

@@ -3,8 +3,6 @@
 The main body of the script is running in this file. The comments are loaded from the subreddit
 and the script checks if the comment or submission is a response from Dota 2. If it is, a proper reply for response is
 prepared. The response is posted as a reply to the original comment/submission on Reddit.
-
-Proper logging is provided - saved to 2 files as standard output and errors.
 """
 import time
 
@@ -72,113 +70,141 @@ def process_replyable(reddit, replyable):
     :return: None
     """
 
-    if cache_api.check(thing_id=replyable.fullname):
+    if cache_api.exists(thing_id=replyable.fullname):
         return
 
     # Ignore thyself
     if replyable.author == reddit.user.me:
         return
 
-    logger.info("Found new replyable: " + str(replyable.fullname))
+    logger.info("Found new replyable: " + replyable.fullname)
 
-    processed_body = process_body(replyable.body if isinstance(replyable, Comment) else replyable.title)
+    processed_text = process_text(replyable.body if isinstance(replyable, Comment) else replyable.title)
 
-    # Don't reply to single word text (they're mostly common phrases).
-    if ' ' not in processed_body:
-        return
-
-    if processed_body in config.EXCLUDED_RESPONSES:
-        return
-
-    if processed_body in config.CUSTOM_RESPONSES:
-        add_custom_reply(replyable=replyable, custom_response=config.CUSTOM_RESPONSES[processed_body])
-
-    if not flair_specific_reply_added(replyable, processed_body):
-        add_regular_reply(replyable, processed_body)
+    if is_excluded_response(processed_text):
+        pass
+    elif is_custom_response(processed_text):
+        add_custom_reply(replyable, processed_text)
+    elif is_flair_specific_response(replyable, processed_text):
+        add_flair_specific_reply(replyable, processed_text)
+    else:
+        add_regular_reply(replyable, processed_text)
 
 
-def get_quoted_text(body_text):
-    """Method used to get quoted text.
-    If body text contains a quote, the first quote text is considered as the body text.
+def process_text(text):
+    """Method used to clean the replyable body/title text.
+    If text contains a quote, the first quote text is considered as the text.
 
-    :param body_text: The replyable body text
-    :return: The first quote in the body text. If no quotes are found, then the entire body text
+    Removed code to remove repeating letters in a text because it does more harm than good - words like 'all', 'tree'
+    are stripped to 'al' and 'tre' which dont match with any responses.
+
+    :param text: The replyable body/title text
+    :return: Processed text
     """
-    lines = body_text.split('\n\n')
+    if '>' in text:
+        text = get_quoted_text(text)
+
+    return preprocess_text(text)
+
+
+def get_quoted_text(text):
+    """Method used to get quoted text.
+    If body/title text contains a quote, the first quote is considered as the text.
+
+    :param text: The replyable text
+    :return: The first quote in the text. If no quotes are found, then the entire text is returned
+    """
+    lines = text.split('\n\n')
     for line in lines:
         if line.startswith('>'):
-            return line
-    return body_text
+            return line[1:]
+    return text
 
 
-def process_body(body_text):
-    """Method used to clean the replyable body text.
-    If body text contains a quote, the first quote text is considered as the body text.
+def is_excluded_response(text):
+    """Method to check if the given body/title is in excluded responses set.
+    Also return False for single word text (they're mostly common phrases).
 
-    Removed code to remove repeating letters in a body text because it does more harm than good - words like 'all',
-    'tree' are stripped to 'al' and 'tre' which dont match with any responses.
-
-    :param body_text: The replyable body text
-    :return: Processed body text
+    :param text: The processed body/title text
+    :return: True if text is an excluded response, else False
     """
-
-    if '>' in body_text:
-        body_text = get_quoted_text(body_text)
-
-    return preprocess_text(body_text)
+    return ' ' not in text or text in config.EXCLUDED_RESPONSES
 
 
-def flair_specific_reply_added(replyable, processed_text):
-    """Method that tries to add a author's flair specific reply to the comment/submission.
+def is_custom_response(text):
+    """Method to check if given body/title text is in custom response set.
 
-    :param replyable: The comment/submission on reddit
-    :param processed_text: The processed body text
-    :return: True if the replyable was replied to, else False.
+    :param text: The body/title text
+    :return: True if text is a custom response, else False
     """
-    hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
-    if hero_id:
-        link, hero_id = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
-        if link:
-            reply = create_reply(replyable=replyable, response_url=link, hero_id=hero_id)
-            replyable.reply(reply)
-            logger.info("Added: " + replyable.fullname)
-            return True
-    return False
+    return text in config.CUSTOM_RESPONSES
 
 
-def add_regular_reply(replyable, processed_text):
-    """Method to create response for given replyable.
-    In case of multiple matches, it used to sort responses in descending order of heroes, but now it's random.
-
-    :param replyable: The comment/submission on reddit
-    :param processed_text: The processed body text
-    :return: None
-    """
-
-    link, hero_id = db_api.get_link_for_response(processed_text=processed_text)
-
-    if link and hero_id:
-        img_dir = db_api.get_img_dir_by_id(hero_id=hero_id)
-
-        replyable.reply(create_reply(replyable=replyable, response_url=link, hero_id=hero_id, img=img_dir))
-
-        logger.info("Replied to: " + replyable.id)
-
-
-def add_custom_reply(replyable, custom_response):
+def add_custom_reply(replyable, body):
     """Method to create a custom reply for specific cases that match the custom responses set.
 
     :param replyable: The comment/submission on reddit
-    :param custom_response: The matching custom response
+    :param body: The processed body/title text
     :return: None
     """
+    custom_response = config.CUSTOM_RESPONSES[body]
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
 
     reply = custom_response.format(original_text, config.COMMENT_ENDING)
     replyable.reply(reply)
+    logger.info("Replied to: " + replyable.fullname)
 
 
-def create_reply(replyable, response_url, hero_id, img=None):
+def is_flair_specific_response(replyable, text):
+    """Method that tries to add a author's flair specific reply to the comment/submission.
+
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: True if the response for author's flair's hero was found, else False
+    """
+    hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
+    if hero_id:
+        link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+        if link:
+            return True
+    return False
+
+
+def add_flair_specific_reply(replyable, text):
+    """Method to add a author's flair specific reply to the comment/submission.
+
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: None
+    """
+    hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
+    if hero_id:
+        link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+        if link:
+            reply = create_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+            replyable.reply(reply)
+            logger.info("Replied to: " + replyable.fullname)
+
+
+def add_regular_reply(replyable, text):
+    """Method to create response for given replyable.
+    In case of multiple matches, it used to sort responses in descending order of heroes and get the first one,
+    but now it's random.
+
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: None
+    """
+
+    link, hero_id = db_api.get_link_for_response(processed_text=text)
+
+    if link and hero_id:
+        reply = create_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+        replyable.reply(reply)
+        logger.info("Replied to: " + replyable.fullname)
+
+
+def create_reply(replyable, response_url, hero_id):
     """Method that creates a reply in reddit format.
     The reply consists of a link to the response audio file, the response itself, a warning about the sound
     and an ending added from the config file (post footer).
@@ -188,7 +214,6 @@ def create_reply(replyable, response_url, hero_id, img=None):
     :param replyable: The comment/submission on reddit
     :param response_url: The url to the response audio file
     :param hero_id: The hero_id to which the response belongs to.
-    :param img: The img path to be used for reply.
     :return: The text for the comment reply.
     """
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title

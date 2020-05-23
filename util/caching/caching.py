@@ -10,21 +10,21 @@ __author__ = 'MePsyDuck'
 
 class CacheAPI(ABC):
     @abstractmethod
-    def _check(self, key):
+    def _exists(self, key):
         pass
 
     @abstractmethod
     def _set(self, key):
         pass
 
-    def check(self, thing_id):
+    def exists(self, thing_id):
         """Check if Reddit thing (currently comment/submission) is already processed/replied.
         If it is not in the cache, it adds the thing_id to cache.
 
         :param thing_id: They id of comment/submission to be cached.
         :returns: `True` if replyable exists, else `False`.
         """
-        if self._check(thing_id):
+        if self._exists(thing_id):
             return True
         else:
             self._set(thing_id)

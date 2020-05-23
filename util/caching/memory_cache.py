@@ -36,7 +36,7 @@ class MemoryCache(CacheAPI):
         with open(CACHE_URL, 'w+') as cache_json:
             json.dump(self.cache.copy(), cache_json)
 
-    def _check(self, key):
+    def _exists(self, key):
         """Method to check if key exists in cache.
 
         :param key: The `key` to to be checked in cache.

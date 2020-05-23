@@ -18,7 +18,7 @@ class RedisCache(CacheAPI):
         self.redis = Redis.from_url(CACHE_URL)
         logger.info('Connected to Redis at ' + CACHE_URL)
 
-    def _check(self, key):
+    def _exists(self, key):
         """Method to check if `key` exists in redis cache.
 
         :param key: The `key` to to be checked in redis cache.
