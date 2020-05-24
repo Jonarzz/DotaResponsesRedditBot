@@ -85,6 +85,8 @@ def process_replyable(reddit, replyable):
         pass
     elif is_custom_response(processed_text):
         add_custom_reply(replyable, processed_text)
+    elif is_hero_specific_response(processed_text):
+        add_hero_specific_reply(replyable, processed_text)
     elif is_flair_specific_response(replyable, processed_text):
         add_flair_specific_reply(replyable, processed_text)
     else:
@@ -101,10 +103,14 @@ def process_text(text):
     :param text: The replyable body/title text
     :return: Processed text
     """
+    hero_name = None
     if '>' in text:
         text = get_quoted_text(text)
+    if '::' in text:
+        hero_name, text = text.split('::', 1)
+        hero_name = hero_name.strip() + '::'
 
-    return preprocess_text(text)
+    return (hero_name or '') + preprocess_text(text)
 
 
 def get_quoted_text(text):
@@ -155,8 +161,37 @@ def add_custom_reply(replyable, body):
     logger.info("Replied to: " + replyable.fullname)
 
 
+def is_hero_specific_response(text):
+    """Method that checks if response for specified hero name and text exists.
+
+    :param text: The processed body/title text
+    :return: True if the response for specified hero was found, else False
+    """
+    if '::' in text:
+        hero_name, text = text.split('::', 1)
+        hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
+        if hero_id:
+            link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+            if link:
+                return True
+    return False
+
+
+def add_hero_specific_reply(replyable, text):
+    """Method to add a hero specific reply to the comment/submission.
+
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: None
+    """
+    hero_name, text = text.split('::', 1)
+    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
+    link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+    create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+
+
 def is_flair_specific_response(replyable, text):
-    """Method that tries to add a author's flair specific reply to the comment/submission.
+    """Method that checks if response for hero in author's flair and text exists.
 
     :param replyable: The comment/submission on reddit
     :param text: The processed body/title text
@@ -178,12 +213,8 @@ def add_flair_specific_reply(replyable, text):
     :return: None
     """
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
-    if hero_id:
-        link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
-        if link:
-            reply = create_reply(replyable=replyable, response_url=link, hero_id=hero_id)
-            replyable.reply(reply)
-            logger.info("Replied to: " + replyable.fullname)
+    link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+    create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
 
 
 def add_regular_reply(replyable, text):
@@ -199,17 +230,15 @@ def add_regular_reply(replyable, text):
     link, hero_id = db_api.get_link_for_response(processed_text=text)
 
     if link and hero_id:
-        reply = create_reply(replyable=replyable, response_url=link, hero_id=hero_id)
-        replyable.reply(reply)
-        logger.info("Replied to: " + replyable.fullname)
+        create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
 
 
-def create_reply(replyable, response_url, hero_id):
-    """Method that creates a reply in reddit format.
+def create_and_add_reply(replyable, response_url, hero_id):
+    """Method that creates a reply in reddit format and adds the reply to comment/submission.
     The reply consists of a link to the response audio file, the response itself, a warning about the sound
     and an ending added from the config file (post footer).
     
-    TODO Image is currently ignored due to new reddit redesign not rendering flairs properly.
+    Image is currently ignored due to new reddit redesign not rendering flairs properly.
 
     :param replyable: The comment/submission on reddit
     :param response_url: The url to the response audio file
@@ -218,8 +247,13 @@ def create_reply(replyable, response_url, hero_id):
     """
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
     original_text = original_text.strip()
+
     if '>' in original_text:
         original_text = get_quoted_text(original_text).strip()
+    if '::' in original_text:
+        original_text = original_text.split('::', 1)[1].strip()
 
     hero_name = db_api.get_hero_name(hero_id)
-    return "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
+    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
+    replyable.reply(reply)
+    logger.info("Replied to: " + replyable.fullname)

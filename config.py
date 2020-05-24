@@ -58,7 +58,7 @@ Bleep bloop, I am a robot.
 [*^(Source)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* 
 [*^(Suggestions/Issues)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues/new/choose) *^(|)* 
 [*^(Maintainer)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
-[*^(Author)*](https://www.reddit.com/user/Jonarz/) *^(|)*
+[*^(Author)*](https://www.reddit.com/user/Jonarz/)
 '''
 
 # Key should be lowercase without special characters. Needs to be updated if links break (as links can be
@@ -138,6 +138,7 @@ COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begin
                            'about time', 'are you kidding me', 'abyssal underlord', 'so beautiful', 'nice try',
                            'thank you so much', 'ah, nice', 'nice one', 'eul s scepter', 'thank you',
                            'scepter of divinity', 'at last', 'too soon', 'try again', 'i don t think so', 'try harder',
-                           'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right'}
+                           'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right',
+                           'all pick'}
 
 EXCLUDED_RESPONSES = FREQUENT_RESPONSES | ITEM_RESPONSES | HERO_NAME_RESPONSES | COMMON_PHRASE_RESPONSES
