@@ -6,6 +6,7 @@ prepared. The response is posted as a reply to the original comment/submission o
 """
 import time
 
+from praw.exceptions import APIException
 from praw.models import Comment
 from prawcore import ServerError
 
@@ -47,6 +48,9 @@ def work():
                 process_replyable(reddit, submission)
         except ServerError as e:
             logger.critical("Reddit server is down : " + str(e))
+            time.sleep(120)
+        except APIException as e:
+            logger.critical("API Exception occurred : " + str(e))
             time.sleep(60)
 
 
