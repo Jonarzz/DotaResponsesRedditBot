@@ -172,7 +172,7 @@ def parse_response(text):
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
-                         r'<small>\[\[#[a-z_\-\' ]+\|\'\'followup\'\']]</small>',
+                         r'<small>\[\[#[a-z0-9_\-\' ]+\|\'\'followup\'\']]</small>',
                          # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
                          r'<ref>.*?</ref>',  # Remove text in <ref> tags
@@ -182,8 +182,8 @@ def parse_response(text):
         text = re.sub(regex, '', text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9().:\'/ ]+\|([a-zé().:\' ]+)]]',
-                        # Replace links such as  [[Ancient (Building)|Ancients]] and [[:File:Axe|Axe]]
+                        r'\[\[[a-zé0-9().:\'/# ]+\|([a-zé().:\' ]+)]]',
+                        # Replace links such as [[Ancient (Building)|Ancients]], [[:File:Axe|Axe]] and [[Terrorblade#Sunder|sundering]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         ]
@@ -216,10 +216,10 @@ def links_for_files(files_list):
 
     files_link_mapping = {}
     futures = []
-    empty_api_length = len(requests.get(url=API_PATH, params=get_params_for_files_api([])).url)
+    empty_api_length = len(requests.Request('get', url=API_PATH, params=get_params_for_files_api([])).prepare().url)
 
+    # To add retry in case of Status 429 : Too many requests
     with FuturesSession() as session:
-        # To add retry login in case of Status 429 : Too many requests
         retries = 5
         status_forcelist = [429]
         retry = Retry(
@@ -264,7 +264,7 @@ def links_for_files(files_list):
                 title = page['title']
                 try:
                     imageinfo = page['imageinfo'][0]
-                    file_url = imageinfo['url'].split('?')[0]  # Remove file version
+                    file_url = imageinfo['url'][:imageinfo['url'].index('.mp3') + len('.mp3')]  # Remove file version and trailing path
                     files_link_mapping[title[5:]] = file_url
                 except KeyError:
                     logger.critical('File does not have a link : ' + title)
