@@ -56,7 +56,7 @@ Config variables needed to be set in environment for running the bot:
 ### Changelog
 
 #### 3.1
-*   Users can now request for a hero specific response by adding ```hero_name ::``` prefix to the response.
+*   Users can now request for a hero specific response by adding ```<hero_name> ::``` prefix to the response.
     Has more priority than user's flair.
 
 #### 3.0

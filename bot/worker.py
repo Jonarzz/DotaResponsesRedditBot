@@ -65,7 +65,7 @@ def process_replyable(reddit, replyable):
     Otherwise, when the bot is restarted it might reply twice to same comments. If replyable id is in the already present
     in the cache_api, then it is ignored, else processed and added to the cache_api.
     * Self comments are ignored.
-    * It is prepared for comparision to the responses in dictionary.
+    * It is prepared for comparison to the responses in dictionary.
     * If the replyable is not on the excluded responses list (loaded from config) and if it is in the responses db or
     specific responses list, a reply replyable is prepared and posted.
 
@@ -78,13 +78,14 @@ def process_replyable(reddit, replyable):
         return
 
     # Ignore thyself
-    if replyable.author == reddit.user.me:
+    if replyable.author == reddit.user.me():
         return
 
     logger.info("Found new replyable: " + replyable.fullname)
 
     processed_text = process_text(replyable.body if isinstance(replyable, Comment) else replyable.title)
 
+    # TODO make use of assignment expression for all below
     if is_excluded_response(processed_text):
         pass
     elif is_custom_response(processed_text):
