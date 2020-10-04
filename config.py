@@ -53,7 +53,7 @@ CACHE_TTL = 5
 COMMENT_ENDING = '''
 
 ---
-Bleep bloop, I am a robot.
+Bleep bloop, I am a robot. *OP can reply with "Try hero_name" to update this with new hero*
 
 [*^(Source)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* 
 [*^(Suggestions/Issues)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues/new/choose) *^(|)* 

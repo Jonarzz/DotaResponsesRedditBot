@@ -94,6 +94,8 @@ def process_replyable(reddit, replyable):
         add_hero_specific_reply(replyable, processed_text)
     elif is_flair_specific_response(replyable, processed_text):
         add_flair_specific_reply(replyable, processed_text)
+    elif is_update_request(reddit, replyable, processed_text):
+        update_reply(replyable, processed_text)
     else:
         add_regular_reply(replyable, processed_text)
 
@@ -224,6 +226,99 @@ def add_flair_specific_reply(replyable, text):
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
     link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
     create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+
+
+def is_update_request(reddit, replyable, text):
+    """Method to check whether the comment in a request to update existing response.
+    Only works if
+    * Comment beings with "try"
+    * Comment ends with valid hero name
+    * Comment was made as a reply to bot's comment
+    * Given hero has the original response
+    * Comment was added by OP, who made the original request for the response.
+    * Root/Original comment/submission was not hero specific response.
+
+    The comment tree would look something like below, where root(original) replyable can be Comment or Submission.
+    Only valid case is c3.
+    c1/s1 user: Foo
+        c2 bot: "Foo" response by Bar hero
+           c3 user: Try Bar2
+           c4 other_user: Try Bar2
+
+    :param reddit: The reddit account instance
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: True if this is a valid request, else False
+    """
+    # TODO confirm this keyword
+    if not text.startswith('try '):
+        return False
+
+    hero_name = text.split('try ')[1].strip()
+    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
+    if hero_id is None:
+        return False
+
+    if not isinstance(replyable, Comment):
+        return False
+
+    op = replyable.author
+    parent_comment = replyable.parent()
+
+    if not isinstance(parent_comment, Comment):
+        return False
+
+    if not parent_comment.author == reddit.user.me():
+        return False
+
+    root_replyable = parent_comment.parent()
+
+    if not root_replyable.author == op:
+        return False
+
+    processed_text = process_text(root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title)
+
+    if is_hero_specific_response(processed_text):
+        return False
+
+    link, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
+
+    return link is not None
+
+
+def update_reply(replyable, text):
+    """Method to edit and update existing response comment by the bot with a new hero as requested.
+
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: None
+    """
+    bot_comment = replyable.parent()
+    root_replyable = bot_comment.parent()
+
+    # TODO maybe get original text from bot's command, rather than the original post, as it might be edited by the time this command is called
+    original_text = root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title
+    original_text = original_text.strip()
+
+    if '>' in original_text:
+        original_text = get_quoted_text(original_text).strip()
+
+    hero_name = text.split('try ')[1].strip()
+    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
+
+    processed_text = process_text(original_text)
+
+    response_url, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
+
+    # Getting name with Proper formatting
+    hero_name = db_api.get_hero_name(hero_id)
+
+    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
+
+    # TODO to update or to delete and add new comment?
+    bot_comment.edit(reply)
+
+    logger.info("Updated Reply: " + replyable.fullname)
 
 
 def add_regular_reply(replyable, text):

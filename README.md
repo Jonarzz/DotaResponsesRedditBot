@@ -55,6 +55,10 @@ Config variables needed to be set in environment for running the bot:
 ---
 ### Changelog
 
+#### 3.2
+*   User(OP) can now request to update the response using another comment under bot's comment.
+    The comment should be in format ```No, I want <hero_name>``` 
+
 #### 3.1
 *   Users can now request for a hero specific response by adding ```<hero_name> ::``` prefix to the response.
     Has more priority than user's flair.
