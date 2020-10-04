@@ -173,6 +173,10 @@ def is_hero_specific_response(text):
     """
     if '::' in text:
         hero_name, text = text.split('::', 1)
+
+        if not hero_name or not text:
+            return False
+
         hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
         if hero_id:
             link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)

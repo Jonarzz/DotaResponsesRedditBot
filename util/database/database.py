@@ -99,7 +99,7 @@ class DatabaseAPI:
         :param hero_name: Hero's name
         :return: Hero's id
         """
-        h = Heroes.get(hero_name=hero_name)
+        h = Heroes.get(lambda hero: hero.hero_name.lower() == hero_name)
         return h.id if h is not None else None
 
     @db_session
