@@ -33,10 +33,8 @@ def work():
     reddit = account.get_account()
     logger.info('Connected to Reddit account : ' + config.USERNAME)
 
+    comment_stream, submission_stream = get_reddit_stream(reddit)
     while True:
-        # Streams need to be restarted when they throw exception
-        comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
-        submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
         try:
             for comment in comment_stream:
                 if comment is None:
@@ -47,11 +45,25 @@ def work():
                     break
                 process_replyable(reddit, submission)
         except ServerError as e:
+            comment_stream, submission_stream = get_reddit_stream(reddit)
             logger.critical("Reddit server is down : " + str(e))
             time.sleep(120)
         except APIException as e:
+            comment_stream, submission_stream = get_reddit_stream(reddit)
             logger.critical("API Exception occurred : " + str(e))
             time.sleep(60)
+
+
+def get_reddit_stream(reddit):
+    """Returns the comment and submission stream.
+    Streams need to be restarted/re-obtained when they throw exception.
+
+    :param reddit: The reddit account instance
+    :return: The comment and subreddit stream
+    """
+    comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
+    submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
+    return comment_stream, submission_stream
 
 
 def process_replyable(reddit, replyable):
@@ -103,9 +115,6 @@ def process_replyable(reddit, replyable):
 def process_text(text):
     """Method used to clean the replyable body/title text.
     If text contains a quote, the first quote text is considered as the text.
-
-    Removed code to remove repeating letters in a text because it does more harm than good - words like 'all', 'tree'
-    are stripped to 'al' and 'tre' which dont match with any responses.
 
     :param text: The replyable body/title text
     :return: Processed text
@@ -229,16 +238,48 @@ def add_flair_specific_reply(replyable, text):
 
 
 def is_update_request(reddit, replyable, text):
-    """Method to check whether the comment in a request to update existing response.
+    """Method to check whether the comment is a request to update existing response.
     Only works if
-    * Comment beings with "try"
+    * Comment begins with "try"
     * Comment ends with valid hero name
-    * Comment was made as a reply to bot's comment
     * Given hero has the original response
-    * Comment was added by OP, who made the original request for the response.
     * Root/Original comment/submission was not hero specific response.
 
-    The comment tree would look something like below, where root(original) replyable can be Comment or Submission.
+    :param reddit: The reddit account instance
+    :param replyable: The comment/submission on reddit
+    :param text: The processed body/title text
+    :return: True if this is a valid request, else False
+    """
+
+    if not text.startswith(config.UPDATE_REQUEST_KEYWORD):
+        return False
+
+    if not is_update_request_comment_tree_valid(reddit, replyable):
+        return False
+
+    hero_name = text.replace(config.UPDATE_REQUEST_KEYWORD, '', 1)
+    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
+    if hero_id is None:
+        return False
+
+    root_replyable = replyable.parent().parent()
+    processed_text = process_text(root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title)
+
+    if is_hero_specific_response(processed_text):
+        return False
+
+    link, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
+
+    return link is not None
+
+
+def is_update_request_comment_tree_valid(reddit, replyable):
+    """Method to check whether the comment in the request to update existing response is valid.
+    A valid comment tree is when:
+    * Comment was made as a reply to bot's comment
+    * Comment was added by OP, who made the original request(Response/Comment) for the response.
+
+    The comment tree should look something like below, where root(original) replyable can be Comment or Submission.
     Only valid case is c3.
     c1/s1 user: Foo
         c2 bot: "Foo" response by Bar hero
@@ -247,18 +288,8 @@ def is_update_request(reddit, replyable, text):
 
     :param reddit: The reddit account instance
     :param replyable: The comment/submission on reddit
-    :param text: The processed body/title text
-    :return: True if this is a valid request, else False
+    :return: True if this is a valid comment tree, else False
     """
-    # TODO confirm this keyword
-    if not text.startswith('try '):
-        return False
-
-    hero_name = text.split('try ')[1].strip()
-    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
-    if hero_id is None:
-        return False
-
     if not isinstance(replyable, Comment):
         return False
 
@@ -276,14 +307,7 @@ def is_update_request(reddit, replyable, text):
     if not root_replyable.author == op:
         return False
 
-    processed_text = process_text(root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title)
-
-    if is_hero_specific_response(processed_text):
-        return False
-
-    link, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
-
-    return link is not None
+    return True
 
 
 def update_reply(replyable, text):
@@ -315,7 +339,6 @@ def update_reply(replyable, text):
 
     reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
 
-    # TODO to update or to delete and add new comment?
     bot_comment.edit(reply)
 
     logger.info("Updated Reply: " + replyable.fullname)

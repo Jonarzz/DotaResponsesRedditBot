@@ -19,7 +19,7 @@ For example: `"Selemene commands"` will return a Luna response *(like on the scr
 *   If comment has blockquote, first blockquote is considered for matching.
 
 <!-- Old behavior
-All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the replyable is ignored.
+All the responses are in lowercase in the dictionary, before comparison the comments are parsed to lowercase as well. Dot or exclamation mark ending the replyable is ignored.
 -->
 <!-- Old behavior
 The bot will try to match a response of the hero that is in the comment/submission's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
@@ -55,11 +55,9 @@ Config variables needed to be set in environment for running the bot:
 ---
 ### Changelog
 
-#### 3.2
-*   User(OP) can now request to update the response using another comment under bot's comment.
-    The comment should be in format ```No, I want <hero_name>``` 
-
 #### 3.1
+*   User(OP) can now request to update the response using another comment under bot's comment.
+    The comment should be in the format ```Try <hero_name>``` 
 *   Users can now request for a hero specific response by adding ```<hero_name> ::``` prefix to the response.
     Has more priority than user's flair.
 

@@ -50,6 +50,8 @@ PRAW_FILENAME = 'praw.log'
 CACHE_TTL = 5
 
 # Responses config
+# TODO confirm this keyword
+UPDATE_REQUEST_KEYWORD = 'try '
 COMMENT_ENDING = '''
 
 ---
