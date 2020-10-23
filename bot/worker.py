@@ -15,6 +15,7 @@ from bot import account
 from util.caching import get_cache_api
 from util.database.database import db_api
 from util.logger import logger
+from util.response_info import ResponseInfo
 from util.str_utils import preprocess_text
 
 __author__ = 'Jonarzz'
@@ -102,14 +103,14 @@ def process_replyable(reddit, replyable):
         pass
     elif is_custom_response(processed_text):
         add_custom_reply(replyable, processed_text)
-    elif is_hero_specific_response(processed_text):
-        add_hero_specific_reply(replyable, processed_text)
-    elif is_flair_specific_response(replyable, processed_text):
-        add_flair_specific_reply(replyable, processed_text)
-    elif is_update_request(reddit, replyable, processed_text):
-        update_reply(replyable, processed_text)
-    else:
-        add_regular_reply(replyable, processed_text)
+    elif (response_info := is_hero_specific_response(processed_text)) is not None:
+        add_hero_specific_reply(replyable, response_info)
+    elif (response_info := is_flair_specific_response(replyable, processed_text)) is not None:
+        add_flair_specific_reply(replyable, response_info)
+    elif (response_info := is_update_request(reddit, replyable, processed_text)) is not None:
+        update_reply(replyable, response_info)
+    elif (response_info := is_hero_response(processed_text)) is not None:
+        add_regular_reply(replyable, response_info)
 
 
 def process_text(text):
@@ -181,33 +182,30 @@ def is_hero_specific_response(text):
     """Method that checks if response for specified hero name and text exists.
 
     :param text: The processed body/title text
-    :return: True if the response for specified hero was found, else False
+    :return: ResponseInfo containing hero_id and link for response if the response for specified hero was found, otherwise None
     """
     if '::' in text:
         hero_name, text = text.split('::', 1)
 
         if not hero_name or not text:
-            return False
+            return None
 
         hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
         if hero_id:
             link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
             if link:
-                return True
-    return False
+                return ResponseInfo(hero_id=hero_id, link=link)
+    return None
 
 
-def add_hero_specific_reply(replyable, text):
+def add_hero_specific_reply(replyable, response_info):
     """Method to add a hero specific reply to the comment/submission.
 
     :param replyable: The comment/submission on reddit
-    :param text: The processed body/title text
+    :param response_info: ResponseInfo containing hero_id and link for response
     :return: None
     """
-    hero_name, text = text.split('::', 1)
-    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
-    link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
-    create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+    create_and_add_reply(replyable=replyable, response_url=response_info.link, hero_id=response_info.hero_id)
 
 
 def is_flair_specific_response(replyable, text):
@@ -215,26 +213,24 @@ def is_flair_specific_response(replyable, text):
 
     :param replyable: The comment/submission on reddit
     :param text: The processed body/title text
-    :return: True if the response for author's flair's hero was found, else False
+    :return: ResponseInfo containing hero_id and link for response if the response for author's flair's hero was found, otherwise None
     """
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
     if hero_id:
         link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
         if link:
-            return True
-    return False
+            return ResponseInfo(hero_id=hero_id, link=link)
+    return None
 
 
-def add_flair_specific_reply(replyable, text):
+def add_flair_specific_reply(replyable, response_info):
     """Method to add a author's flair specific reply to the comment/submission.
 
     :param replyable: The comment/submission on reddit
-    :param text: The processed body/title text
+    :param response_info: ResponseInfo containing hero_id and link for response
     :return: None
     """
-    hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
-    link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
-    create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+    create_and_add_reply(replyable=replyable, response_url=response_info.link, hero_id=response_info.hero_id)
 
 
 def is_update_request(reddit, replyable, text):
@@ -245,35 +241,44 @@ def is_update_request(reddit, replyable, text):
     * Given hero has the original response
     * Root/Original comment/submission was not hero specific response.
 
+    Examples:
+    "Try legion commander" : Valid
+    "Try leGiOn ComManDer" : Valid - case does not matter
+    "legion commander" : Invalid - does not begin with `try`
+    "Try legion" : Invalid - invalid hero name
+
     :param reddit: The reddit account instance
     :param replyable: The comment/submission on reddit
     :param text: The processed body/title text
-    :return: True if this is a valid request, else False
+    :return: ResponseInfo containing hero_id and link for response if this is a valid update request, otherwise None
     """
 
     if not text.startswith(config.UPDATE_REQUEST_KEYWORD):
-        return False
+        return None
 
-    if not is_update_request_comment_tree_valid(reddit, replyable):
-        return False
+    if not validate_update_request_comment_tree(reddit, replyable):
+        return None
 
     hero_name = text.replace(config.UPDATE_REQUEST_KEYWORD, '', 1)
     hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
     if hero_id is None:
-        return False
+        return None
 
     root_replyable = replyable.parent().parent()
     processed_text = process_text(root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title)
 
     if is_hero_specific_response(processed_text):
-        return False
+        return None
 
     link, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
 
-    return link is not None
+    if link is None:
+        return None
+
+    return ResponseInfo(hero_id=hero_id, link=link)
 
 
-def is_update_request_comment_tree_valid(reddit, replyable):
+def validate_update_request_comment_tree(reddit, replyable):
     """Method to check whether the comment in the request to update existing response is valid.
     A valid comment tree is when:
     * Comment was made as a reply to bot's comment
@@ -310,11 +315,11 @@ def is_update_request_comment_tree_valid(reddit, replyable):
     return True
 
 
-def update_reply(replyable, text):
+def update_reply(replyable, response_info):
     """Method to edit and update existing response comment by the bot with a new hero as requested.
 
     :param replyable: The comment/submission on reddit
-    :param text: The processed body/title text
+    :param response_info: ResponseInfo containing hero_id and link for response
     :return: None
     """
     bot_comment = replyable.parent()
@@ -327,37 +332,42 @@ def update_reply(replyable, text):
     if '>' in original_text:
         original_text = get_quoted_text(original_text).strip()
 
-    hero_name = text.split('try ')[1].strip()
-    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
-
-    processed_text = process_text(original_text)
-
-    response_url, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
-
     # Getting name with Proper formatting
-    hero_name = db_api.get_hero_name(hero_id)
+    hero_name = db_api.get_hero_name(response_info.hero_id)
 
-    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
-
+    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_info.link, hero_name, config.COMMENT_ENDING)
     bot_comment.edit(reply)
 
     logger.info("Updated Reply: " + replyable.fullname)
 
 
-def add_regular_reply(replyable, text):
+def is_hero_response(text):
     """Method to create response for given replyable.
     In case of multiple matches, it used to sort responses in descending order of heroes and get the first one,
     but now it's random.
 
-    :param replyable: The comment/submission on reddit
     :param text: The processed body/title text
-    :return: None
+    :return: ResponseInfo containing hero_id and link for response if this is a valid update request, otherwise None
     """
 
     link, hero_id = db_api.get_link_for_response(processed_text=text)
 
     if link and hero_id:
-        create_and_add_reply(replyable=replyable, response_url=link, hero_id=hero_id)
+        return ResponseInfo(hero_id=hero_id, link=link)
+
+    return None
+
+
+def add_regular_reply(replyable, response_info):
+    """Method to create response for given replyable.
+    In case of multiple matches, it used to sort responses in descending order of heroes and get the first one,
+    but now it's random.
+
+    :param replyable: The comment/submission on reddit
+    :param response_info: ResponseInfo containing hero_id and link for response
+    :return: None
+    """
+    create_and_add_reply(replyable=replyable, response_url=response_info.link, hero_id=response_info.hero_id)
 
 
 def create_and_add_reply(replyable, response_url, hero_id):
@@ -381,6 +391,8 @@ def create_and_add_reply(replyable, response_url, hero_id):
         original_text = original_text.split('::', 1)[1].strip()
 
     hero_name = db_api.get_hero_name(hero_id)
+
     reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
     replyable.reply(reply)
+
     logger.info("Replied to: " + replyable.fullname)
