@@ -12,6 +12,9 @@ The bot replies only for the comments that **are** responses.
 
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*. 
 
+### Active maintainer
+[MePsyDuck](https://github.com/MePsyDuck)
+
 ### Comment/Submission text processing
 *   All the body text is transformed into lowercase
 *   Any punctuation is replaced with spaces

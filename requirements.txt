@@ -4,8 +4,7 @@ praw
 psycopg2
 redis
 pony
-fuzzywuzzy
+rapidfuzz
 requests
-python-Levenshtein
 cacheout
 requests-futures
