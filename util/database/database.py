@@ -36,16 +36,20 @@ class DatabaseAPI:
 
     # Responses table queries
     @db_session
-    def get_link_for_response(self, processed_text, hero_id=None):
+    def get_link_for_response(self, processed_text, hero_ids=None):
         """Method that returns the link for the processed response text and given optional hero_id. If multiple matching
         entries are found, returns a random result.
 
         :param processed_text: The plain processed response text.
-        :param hero_id: The hero's id(s). Optional.
+        :param hero_ids: The hero's id(s). Optional.
        :return The link to the response, hero_id, or else None, None if no matching response is found.
         """
-        if hero_id:
-            responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id in hero_id)
+        if hero_ids:
+            # Raise Issue PonyORM not supporting IN for single value
+            if isinstance(hero_ids, list):
+                responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id in hero_ids)
+            else:
+                responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id == hero_ids)
         else:
             responses = Responses.select(lambda r: r.processed_text == processed_text)
 

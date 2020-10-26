@@ -193,7 +193,7 @@ def is_hero_specific_response(text):
 
         hero_ids = db_api.get_hero_id_by_name_loose_match(hero_name=hero_name)
         if hero_ids:
-            link, hero_id = db_api.get_link_for_response(processed_text=text, hero_id=hero_ids)
+            link, hero_id = db_api.get_link_for_response(processed_text=text, hero_ids=hero_ids)
             if link:
                 return ResponseInfo(hero_id=hero_id, link=link)
     return None
@@ -218,7 +218,7 @@ def is_flair_specific_response(replyable, text):
     """
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
     if hero_id:
-        link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+        link, _ = db_api.get_link_for_response(processed_text=text, hero_ids=hero_id)
         if link:
             return ResponseInfo(hero_id=hero_id, link=link)
     return None
@@ -278,7 +278,7 @@ def is_update_request(reddit, replyable, text):
     if is_hero_specific_response(processed_text):
         return None
 
-    link, hero_id = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_ids)
+    link, hero_id = db_api.get_link_for_response(processed_text=processed_text, hero_ids=hero_ids)
 
     if link is None:
         return None
