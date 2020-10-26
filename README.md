@@ -1,5 +1,5 @@
 ## Dota Responses Reddit Bot
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![Python 3.6.4](https://img.shields.io/badge/python-3.6.4-blue.svg)](https://www.python.org/downloads/release/python-364/)
 [![Build Status](https://api.travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/de2c724018076b34064f/maintainability)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/maintainability)
 [![codecov](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot)
@@ -22,7 +22,7 @@ For example: `"Selemene commands"` will return a Luna response *(like on the scr
 *   If comment has blockquote, first blockquote is considered for matching.
 
 <!-- Old behavior
-All the responses are in lowercase in the dictionary, before comparision the comments are parsed to lowercase as well. Dot or exclamation mark ending the replyable is ignored.
+All the responses are in lowercase in the dictionary, before comparison the comments are parsed to lowercase as well. Dot or exclamation mark ending the replyable is ignored.
 -->
 <!-- Old behavior
 The bot will try to match a response of the hero that is in the comment/submission's author flair. If it does not find an appropriate one, it takes the one of the first hero that has such a response (alphabetically).
@@ -57,6 +57,12 @@ Config variables needed to be set in environment for running the bot:
 
 ---
 ### Changelog
+
+#### 3.1
+*   User(OP) can now request to update the response using another comment under bot's comment.
+    The comment should be in the format ```Try <hero_name>``` 
+*   Users can now request for a hero specific response by adding ```<hero_name> ::``` prefix to the response.
+    Has more priority than user's flair.
 
 #### 3.0
 Major revamp for the bot.

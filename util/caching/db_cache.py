@@ -9,7 +9,7 @@ __author__ = 'MePsyDuck'
 
 
 class DBCache(CacheAPI):
-    def _check(self, key):
+    def _exists(self, key):
         """Method to check if key exists in DB cache.
 
         :param key: The `key` to to be checked in DB cache.

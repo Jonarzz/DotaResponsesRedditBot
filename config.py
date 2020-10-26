@@ -50,16 +50,17 @@ PRAW_FILENAME = 'praw.log'
 CACHE_TTL = 5
 
 # Responses config
+# TODO confirm this keyword
+UPDATE_REQUEST_KEYWORD = 'try '
 COMMENT_ENDING = '''
 
 ---
-Bleep bloop, I am a robot.
+Bleep bloop, I am a robot. *OP can reply with "Try hero_name" to update this with new hero*
 
 [*^(Source)*](https://github.com/Jonarzz/DotaResponsesRedditBot) *^(|)* 
 [*^(Suggestions/Issues)*](https://github.com/Jonarzz/DotaResponsesRedditBot/issues/new/choose) *^(|)* 
-[*^(Contact)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
-[*^(Author)*](https://www.reddit.com/user/Jonarz/) *^(|)* 
-[*^(Host)*](https://www.reddit.com/user/iggys_reddit_account/)
+[*^(Maintainer)*](https://www.reddit.com/user/MePsyDuck/) *^(|)* 
+[*^(Author)*](https://www.reddit.com/user/Jonarz/)
 '''
 
 # Key should be lowercase without special characters. Needs to be updated if links break (as links can be
@@ -79,7 +80,7 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'it s not time yet', 'ah', 'no', 'uh', 'ha ha', 'attack', 'haste', 'double damage', 'immortality',
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
-# TODO Get them from here.
+# Note: Get them from here.
 # https://dota2.gamepedia.com/api.php?action=cargoquery&tables=items&fields=title&where=game+IS+NULL&limit=500&format=json
 ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape', 'aghanim s scepter', 'manta style',
                   'battle fury', 'yasha and kaya', 'talisman of evasion', 'sentry ward', 'yasha',
@@ -110,7 +111,7 @@ ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape
                   'hurricane pike', 'vladmir s offering', 'tranquil boots', 'javelin', 'meteor hammer', 'broadsword',
                   'ultimate orb'}
 
-# TODO Get them from here
+# Note: Get them from here
 # https://dota2.gamepedia.com/api.php?action=cargoquery&tables=heroes&fields=title&where=game+IS+NULL&limit=500&format=json
 HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'juggernaut', 'crystal maiden', 'pudge',
                        'disruptor', 'queen of pain', 'wraith king', 'spectre', 'templar assassin', 'warlock',
@@ -139,6 +140,7 @@ COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begin
                            'about time', 'are you kidding me', 'abyssal underlord', 'so beautiful', 'nice try',
                            'thank you so much', 'ah, nice', 'nice one', 'eul s scepter', 'thank you',
                            'scepter of divinity', 'at last', 'too soon', 'try again', 'i don t think so', 'try harder',
-                           'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right'}
+                           'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right',
+                           'all pick'}
 
 EXCLUDED_RESPONSES = FREQUENT_RESPONSES | ITEM_RESPONSES | HERO_NAME_RESPONSES | COMMON_PHRASE_RESPONSES
