@@ -1,5 +1,8 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
 import os
+import json
+import urllib.request
+
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -80,56 +83,17 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'it s not time yet', 'ah', 'no', 'uh', 'ha ha', 'attack', 'haste', 'double damage', 'immortality',
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
-# Note: Get them from here.
-# https://dota2.gamepedia.com/api.php?action=cargoquery&tables=items&fields=title&where=game+IS+NULL&limit=500&format=json
-ITEM_RESPONSES = {'crimson guard', 'vanguard', 'blades of attack', 'glimmer cape', 'aghanim s scepter', 'manta style',
-                  'battle fury', 'yasha and kaya', 'talisman of evasion', 'sentry ward', 'yasha',
-                  'mantle of intelligence', 'bracer', 'iron branch', 'guardian greaves', 'wraith band', 'phase boots',
-                  'blade mail', 'power treads', 'eaglesong', 'soul ring', 'point booster', 'satanic', 'arcane boots',
-                  'observer ward', 'aegis of the immortal', 'sacred relic', 'void stone', 'aeon disk', 'ogre axe',
-                  'echo sabre', 'demon edge', 'rod of atos', 'ring of tarrasque', 'healing salve',
-                  'armlet of mordiggian', 'headdress', 'wind lace', 'slippers of agility', 'kaya', 'perseverance',
-                  'octarine core', 'ring of regen', 'shiva s guard', 'linken s sphere', 'veil of discord',
-                  'helm of the dominator', 'gem of true sight', 'sange and yasha', 'quarterstaff', 'crown', 'lotus orb',
-                  'daedalus', 'sange', 'mekansm', 'bloodthorn', 'energy booster', 'mithril hammer', 'faerie fire',
-                  'necronomicon', 'platemail', 'stout shield', 'crystalys', 'robe of the magi', 'monkey king bar',
-                  'tome of knowledge', 'sage s mask', 'orb of venom', 'dragon lance', 'drum of endurance', 'nullifier',
-                  'kaya and sange', 'hood of defiance', 'smoke of deceit', 'urn of shadows', 'heart of tarrasque',
-                  'reaver', 'cheese', 'solar crest', 'aether lens', 'blink dagger', 'magic stick', 'hand of midas',
-                  'morbid mask', 'force staff', 'blight stone', 'mystic staff', 'quelling blade', 'refresher shard',
-                  'holy locket', 'maelstrom', 'hyperstone', 'animal courier', 'mjollnir', 'soul booster', 'buckler',
-                  'scythe of vyse', 'bottle', 'gloves of haste', 'pipe of insight', 'null talisman', 'ring of basilius',
-                  'band of elvenskin', 'spirit vessel', 'staff of wizardry', 'town portal scroll', 'orchid malevolence',
-                  'claymore', 'heaven s halberd', 'enchanted mango', 'aghanim s blessing', 'radiance', 'silver edge',
-                  'oblivion staff', 'ethereal blade', 'eye of skadi', 'eul s scepter of divinity', 'assault cuirass',
-                  'mask of madness', 'refresher orb', 'circlet', 'chainmail', 'infused raindrop', 'desolator',
-                  'magic wand', 'black king bar', 'observer and sentry wards', 'butterfly', 'clarity', 'shadow amulet',
-                  'skull basher', 'boots of speed', 'helm of iron will', 'medallion of courage', 'bloodstone',
-                  'divine rapier', 'gauntlets of strength', 'dagon', 'ghost scepter', 'boots of travel', 'moon shard',
-                  'abyssal blade', 'vitality booster', 'ring of protection', 'blade of alacrity', 'ring of health',
-                  'cloak', 'shadow blade', 'diffusal blade', 'tango', 'dust of appearance', 'belt of strength',
-                  'hurricane pike', 'vladmir s offering', 'tranquil boots', 'javelin', 'meteor hammer', 'broadsword',
-                  'ultimate orb'}
+with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?' +
+                            'action=cargoquery&tables=heroes&fields=title&where=game'+
+                            '+IS+NULL&limit=500&format=json') as url:
+    HERO_NAME_RESPONSES = set()
+    for i in json.loads(url.read().decode())['cargoquery'] : HERO_NAME_RESPONSES.add(i['title']['title'])
 
-# Note: Get them from here
-# https://dota2.gamepedia.com/api.php?action=cargoquery&tables=heroes&fields=title&where=game+IS+NULL&limit=500&format=json
-HERO_NAME_RESPONSES = {'silencer', 'phantom assassin', 'clinkz', 'huskar', 'juggernaut', 'crystal maiden', 'pudge',
-                       'disruptor', 'queen of pain', 'wraith king', 'spectre', 'templar assassin', 'warlock',
-                       'earth spirit', 'viper', 'slark', 'weaver', 'alchemist', 'treant protector', 'axe', 'tidehunter',
-                       'invoker', 'kunkka', 'keeper of the light', 'undying', 'phoenix', 'terrorblade', 'doom',
-                       'broodmother', 'death prophet', 'earthshaker', 'mirana', 'storm spirit', 'bounty hunter',
-                       'clockwerk', 'lina', 'magnus', 'lifestealer', 'enigma', 'windranger', 'dark seer', 'drow ranger',
-                       'tiny', 'chaos knight', 'vengeful spirit', 'nyx assassin', 'ancient apparition', 'tusk',
-                       'ember spirit', 'io', 'outworld devourer', 'lion', 'underlord', 'lone druid', 'ursa', 'batrider',
-                       'riki', 'sven', 'ogre magi', 'beastmaster', 'anti mage', 'morphling', 'medusa', 'arc warden',
-                       'shadow demon', 'naga siren', 'slardar', 'bloodseeker', 'winter wyvern', 'leshrac', 'lycan',
-                       'omniknight', 'witch doctor', 'shadow shaman', 'sand king', 'necrophos', 'faceless void',
-                       'pangolier', 'grimstroke', 'dazzle', 'visage', 'spirit breaker', 'centaur warrunner',
-                       'monkey king', 'jakiro', 'dragon knight', 'abaddon', 'pugna', 'dark willow', 'night stalker',
-                       'luna', "nature s prophet", 'lich', 'bane', 'mars', 'phantom lancer', 'troll warlord', 'chen',
-                       'techies', 'skywrath mage', 'enchantress', 'razor', 'gyrocopter', 'tinker', 'zeus', 'meepo',
-                       'rubick', 'elder titan', 'brewmaster', 'venomancer', 'shadow fiend', 'puck', 'legion commander',
-                       'sniper', 'oracle', 'timbersaw', 'bristleback', 'snapfire', 'void spirit'}
+with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?'+
+                            'action=cargoquery&tables=items&fields='+
+                            'title&where=game+IS+NULL&limit=500&format=json') as url:
+    ITEM_RESPONSES = set()
+    for i in json.loads(url.read().decode())['cargoquery'] : ITEM_RESPONSES.add(i['title']['title'])
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
