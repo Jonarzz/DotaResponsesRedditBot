@@ -87,13 +87,13 @@ with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?' +
                             'action=cargoquery&tables=heroes&fields=title&where=game'+
                             '+IS+NULL&limit=500&format=json') as url:
     HERO_NAME_RESPONSES = set()
-    for i in json.loads(url.read().decode())['cargoquery'] : HERO_NAME_RESPONSES.add(i['title']['title'])
+    for i in json.loads(url.read().decode())['cargoquery'] : HERO_NAME_RESPONSES.add(i['title']['title'].lower())
 
 with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?'+
                             'action=cargoquery&tables=items&fields='+
                             'title&where=game+IS+NULL&limit=500&format=json') as url:
     ITEM_RESPONSES = set()
-    for i in json.loads(url.read().decode())['cargoquery'] : ITEM_RESPONSES.add(i['title']['title'])
+    for i in json.loads(url.read().decode())['cargoquery'] : ITEM_RESPONSES.add(i['title']['title'].lower())
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
