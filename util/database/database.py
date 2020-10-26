@@ -123,7 +123,7 @@ class DatabaseAPI:
         if h is not None:
             return h.id
 
-        heroes = Heroes.select(processed_name=get_processed_hero_name(hero_name))
+        heroes = Heroes.select(lambda hero: hero.processed_name == get_processed_hero_name(hero_name))
         if heroes.count() == 1:
             return heroes.first().id
         elif heroes.count() > 1:
