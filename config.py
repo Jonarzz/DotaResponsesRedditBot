@@ -84,24 +84,30 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
 
 #Hero and item responses not hardcoded here
 # Drawbacks: Can't be tweaked
-#TODO incorperate an exclusion set
+#TODO incorperate an  better exclusion set and populate it with the difference of responses from main
+SPECIAL_CHARACTERS = ["'", "(", ")", ":", ",", "-", "."]
+
 with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?' +
                             'action=cargoquery&tables=heroes&fields=title&where=game'+
                             '+IS+NULL&limit=500&format=json') as url:
+    SELECTED_HERO_RESPONSES = {}
     HERO_NAME_RESPONSES = set()
     for i in json.loads(url.read().decode())['cargoquery']:
-        i = i['title']['title']
-        for c in ["'", "(", ")", ":", ",", "-"]: i = i.replace(c, " ")
-        HERO_NAME_RESPONSES.add(i.lower())
+        i = i['title']['title'].lower()
+        for c in SPECIAL_CHARACTERS: i = i.replace(c, " ")
+        if i in SELECTED_HERO_RESPONSES: continue
+        HERO_NAME_RESPONSES.add(i)
 
 with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?'+
                             'action=cargoquery&tables=items&fields='+
                             'title&where=game+IS+NULL&limit=500&format=json') as url:
+    SELECTED_ITEM_RESPONSES = {}
     ITEM_RESPONSES = set()
     for i in json.loads(url.read().decode())['cargoquery']:
-        i = i['title']['title']
-        for c in ["'", "(", ")", ":", ",", "-"]: i = i.replace(c, " ")
-        ITEM_RESPONSES.add(i.lower())
+        i = i['title']['title'].lower()
+        for c in SPECIAL_CHARACTERS: i = i.replace(c, " ")
+        if i in SELECTED_ITEM_RESPONSES: continue
+        ITEM_RESPONSES.add(i)
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
