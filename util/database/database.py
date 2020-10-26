@@ -7,6 +7,7 @@ from pony.orm import db_session, commit
 from config import CACHE_TTL, DB_URL, DB_PROVIDER
 from util.database.models import Responses, Heroes, RedditCache, db
 from util.logger import logger
+from util.str_utils import get_processed_hero_name
 
 __author__ = 'MePsyDuck'
 
@@ -31,7 +32,7 @@ class DatabaseAPI:
         else:
             self.db.bind(provider='sqlite', filename='bot.db', create_db=True)
 
-        self.db.generate_mapping(create_tables=True)
+        self.db.generate_mapping(check_tables=False)
 
     # Responses table queries
     @db_session
@@ -40,17 +41,20 @@ class DatabaseAPI:
         entries are found, returns a random result.
 
         :param processed_text: The plain processed response text.
-        :param hero_id: The hero's id.
+        :param hero_id: The hero's id(s). Optional.
        :return The link to the response, hero_id, or else None, None if no matching response is found.
         """
         if hero_id:
-            responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero_id.id == hero_id)
+            responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id in hero_id)
         else:
             responses = Responses.select(lambda r: r.processed_text == processed_text)
 
-        if len(responses):
+        if responses.count() == 1:
+            response = responses.first()
+            return response.response_link, response.hero.id
+        elif responses.count() > 1:
             response = random.choice(list(responses))
-            return response.response_link, response.hero_id.id
+            return response.response_link, response.hero.id
         else:
             return None, None
 
@@ -93,14 +97,39 @@ class DatabaseAPI:
         Heroes(hero_name=hero_name, img_path=img_path, flair_css=flair_css)
 
     @db_session
-    def get_hero_id_by_name(self, hero_name):
-        """Method to get hero's id from table.
+    def get_hero_id_by_name_exact_match(self, hero_name):
+        """Method to get hero's id from table based on matching hero name.
+
+        If there is exact match for that hero's name, return that hero's id
 
         :param hero_name: Hero's name
-        :return: Hero's id
+        :return: Hero's id if hero is found with same name, otherwise None
         """
-        h = Heroes.get(lambda hero: hero.hero_name.lower() == hero_name)
+        h = Heroes.get(hero_name=hero_name)
         return h.id if h is not None else None
+
+    @db_session
+    def get_hero_id_by_name_loose_match(self, hero_name):
+        """Method to get hero's id from table based on matching hero name.
+
+        If there is exact match for that hero's name, return that hero's id
+        If there is single match for that hero's processed name, return first hero's id
+        If there are multiple matches for that hero's processed name, return all heroes' ids
+
+        :param hero_name: Hero's name
+        :return: Hero's id (ids in case of multiple matches) if match is found, otherwise None
+        """
+        h = Heroes.get(hero_name=hero_name)
+        if h is not None:
+            return h.id
+
+        heroes = Heroes.select(processed_name=get_processed_hero_name(hero_name))
+        if heroes.count() == 1:
+            return heroes.first().id
+        elif heroes.count() > 1:
+            return [hero.id for hero in heroes]
+        else:
+            return None
 
     @db_session
     def get_hero_name(self, hero_id):
@@ -171,13 +200,14 @@ class DatabaseAPI:
         :param hero_name: Hero name who's responses will be inserted
         :param response_link_list: List with tuples in the form of (original_text, text, link)
         """
-        h = Heroes(hero_name=hero_name, img_path=None, flair_css=None)
+        h = Heroes(hero_name=hero_name, processed_name=get_processed_hero_name(hero_name), img_path=None,
+                   flair_css=None)
         commit()
 
         for original_text, processed_text, link in response_link_list:
             existing_response = Responses.get(response_link=link)
             if not existing_response:
-                Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero_id=h.id)
+                Responses(processed_text=processed_text, original_text=original_text, response_link=link, hero=h.id)
             else:
                 logger.debug('Link already exists : ' + link + ' for response ' + existing_response.original_text)
 

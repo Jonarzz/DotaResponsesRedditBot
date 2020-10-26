@@ -1,10 +1,7 @@
-urllib3
-beautifulsoup4
 praw
-psycopg2
 redis
-pony
-rapidfuzz
-requests
 cacheout
-requests-futures
+pony
+requests
+urllib3
+rapidfuzz
