@@ -3,7 +3,6 @@ import os
 import json
 import urllib.request
 
-
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
 
@@ -83,21 +82,25 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'it s not time yet', 'ah', 'no', 'uh', 'ha ha', 'attack', 'haste', 'double damage', 'immortality',
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
+#Hero and item responses not hardcoded here
+# Drawbacks: Can't be tweaked
+#TODO incorperate an exclusion set
 with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?' +
                             'action=cargoquery&tables=heroes&fields=title&where=game'+
                             '+IS+NULL&limit=500&format=json') as url:
     HERO_NAME_RESPONSES = set()
-    for i in json.loads(url.read().decode())['cargoquery'] : HERO_NAME_RESPONSES.add(i['title']['title'].lower())
+    for i in json.loads(url.read().decode())['cargoquery']:
+        i = i['title']['title']
+        for c in ["'", "(", ")", ":", ",", "-"]: i = i.replace(c, " ")
+        HERO_NAME_RESPONSES.add(i.lower())
 
 with urllib.request.urlopen('https://dota2.gamepedia.com/api.php?'+
                             'action=cargoquery&tables=items&fields='+
                             'title&where=game+IS+NULL&limit=500&format=json') as url:
     ITEM_RESPONSES = set()
-    special_characters = ["'", "(", ")", ":", ","]
-    for i in json.loads(url.read().decode())['cargoquery'] :
+    for i in json.loads(url.read().decode())['cargoquery']:
         i = i['title']['title']
-        for c in special_characters:
-            i = i.replace(c, " ")
+        for c in ["'", "(", ")", ":", ",", "-"]: i = i.replace(c, " ")
         ITEM_RESPONSES.add(i.lower())
 
 # Add responses here as people report them. Taken from the old excluded responses list.
