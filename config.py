@@ -1,6 +1,6 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
 import os
-from util.response_request import request_hero_name_set, request_item_name_set
+from util.response_request import request_cargo_set
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -82,9 +82,13 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
 # Hero and item responses not hardcoded here
-# Drawbacks: Can't be tweaked
-HERO_NAME_RESPONSES = request_hero_name_set()
-ITEM_RESPONSES = request_item_name_set()
+HERO_NAME_RESPONSES = request_cargo_set('https://dota2.gamepedia.com/api.php?'+
+                                        'action=cargoquery&tables=heroes&fields=title&where=game'+
+                                        '+IS+NULL&limit=500&format=json')
+
+ITEM_RESPONSES = request_cargo_set('https://dota2.gamepedia.com/api.php?'+
+                                   'action=cargoquery&tables=items&fields='+
+                                   'title&where=game+IS+NULL&limit=500&format=json')
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
