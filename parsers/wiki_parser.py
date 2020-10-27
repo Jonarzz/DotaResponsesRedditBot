@@ -5,6 +5,7 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 
 import json
 import re
+import time
 from concurrent.futures import as_completed
 
 import requests
@@ -257,6 +258,20 @@ def links_for_files(files_list):
 
         for future in as_completed(futures):
             json_response = future.result().json()
+
+            # Even though response code maybe 200, the response may contain query execution error, hence another level of retries
+            if 'error' in json_response:
+                current_retry = 1
+                while current_retry < retries and 'error' in json_response:
+                    time.sleep(5)
+                    json_response = requests.get(future.result().url).json()
+
+                if current_retry == retries and 'error' in json_response:
+                    logger.critical('MediaWiki API failed, max retries exceeded exiting ## last response : %s ## url : %s', current_retry, future.result().url, json_response)
+                    return
+                else:
+                    logger.warn('MediaWiki API failed %s times ## url : %s', current_retry, future.result().url)
+
             query = json_response['query']
             pages = query['pages']
 

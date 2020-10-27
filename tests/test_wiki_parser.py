@@ -16,7 +16,7 @@ class WikiParserTest(unittest.TestCase):
     """
 
     def test_pages_to_parse(self):
-        """Method testing pages_to_ppages_for_categoryarse method from wiki_parser module.
+        """Method testing pages_to_pages_for_category parse method from wiki_parser module.
         The method checks if the requested response is consists of pages as expected.
         """
         pages = wiki_parser.pages_for_category(RESPONSES_CATEGORY)

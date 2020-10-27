@@ -4,6 +4,7 @@ The main body of the script is running in this file. The comments are loaded fro
 and the script checks if the comment or submission is a response from Dota 2. If it is, a proper reply for response is
 prepared. The response is posted as a reply to the original comment/submission on Reddit.
 """
+import re
 import time
 
 from praw.exceptions import APIException
@@ -190,9 +191,9 @@ def is_hero_specific_response(text):
         if not hero_name or not text:
             return None
 
-        hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
-        if hero_id:
-            link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+        hero_ids = db_api.get_hero_id_by_name_loose_match(hero_name=hero_name)
+        if hero_ids:
+            link, hero_id = db_api.get_link_for_response(processed_text=text, hero_ids=hero_ids)
             if link:
                 return ResponseInfo(hero_id=hero_id, link=link)
     return None
@@ -217,7 +218,7 @@ def is_flair_specific_response(replyable, text):
     """
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
     if hero_id:
-        link, _ = db_api.get_link_for_response(processed_text=text, hero_id=hero_id)
+        link, _ = db_api.get_link_for_response(processed_text=text, hero_ids=hero_id)
         if link:
             return ResponseInfo(hero_id=hero_id, link=link)
     return None
@@ -260,19 +261,29 @@ def is_update_request(reddit, replyable, text):
         return None
 
     hero_name = text.replace(config.UPDATE_REQUEST_KEYWORD, '', 1)
-    hero_id = db_api.get_hero_id_by_name(hero_name=hero_name)
-    if hero_id is None:
+    hero_ids = db_api.get_hero_id_by_name_loose_match(hero_name=hero_name)
+    if hero_ids is None:
         return None
 
-    root_replyable = replyable.parent().parent()
+    parent_comment = replyable.parent()  # Bot's comment
+    if not (match := re.search(r'\(sound warning: (.*?)\)', parent_comment.body)):
+        return None
+
+    og_hero_name = match.group()
+    og_hero_id = db_api.get_hero_id_by_name_exact_match(og_hero_name)
+
+    root_replyable = parent_comment.parent()
     processed_text = process_text(root_replyable.body if isinstance(root_replyable, Comment) else root_replyable.title)
 
     if is_hero_specific_response(processed_text):
         return None
 
-    link, _ = db_api.get_link_for_response(processed_text=processed_text, hero_id=hero_id)
+    link, hero_id = db_api.get_link_for_response(processed_text=processed_text, hero_ids=hero_ids)
 
     if link is None:
+        return None
+
+    if og_hero_id == hero_id:
         return None
 
     return ResponseInfo(hero_id=hero_id, link=link)
@@ -304,7 +315,8 @@ def validate_update_request_comment_tree(reddit, replyable):
     if not isinstance(parent_comment, Comment):
         return False
 
-    if not parent_comment.author == reddit.user.me():
+    # Added myself just to demonstrate people that this can be done
+    if parent_comment.author not in (reddit.user.me(), reddit.redditor('MePsyDuck')):
         return False
 
     root_replyable = parent_comment.parent()

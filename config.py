@@ -9,7 +9,7 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarz, maintained by /u/MePsyDuck'
+USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')

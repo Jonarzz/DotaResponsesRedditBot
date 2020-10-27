@@ -1,5 +1,5 @@
 ## Dota Responses Reddit Bot
-[![Python 3.6.4](https://img.shields.io/badge/python-3.6.4-blue.svg)](https://www.python.org/downloads/release/python-364/)
+[![Python 3.8.5](https://img.shields.io/badge/python-3.8.5-blue.svg)](https://www.python.org/downloads/release/python-364/)
 [![Build Status](https://api.travis-ci.org/Jonarzz/DotaResponsesRedditBot.svg?branch=master)](https://travis-ci.org/Jonarzz/DotaResponsesRedditBot)
 [![Maintainability](https://api.codeclimate.com/v1/badges/de2c724018076b34064f/maintainability)](https://codeclimate.com/github/Jonarzz/DotaResponsesRedditBot/maintainability)
 [![codecov](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot/branch/master/graph/badge.svg)](https://codecov.io/gh/Jonarzz/DotaResponsesRedditBot)
@@ -31,6 +31,11 @@ The bot will try to match a response of the hero that is in the comment/submissi
 ---
 ### TODO
 *   (If possible) Add hero flair in responses (Waiting on reddit to support this in reddit redesign).
+*   Log query stats on shutdown
+*   Log bot usage stats in DB
+*   Make config excluded responses to be populated on startup 
+*   Add new command to show usage stats
+*   Add more test cases
 
 ---
 ### Some stats and general info
