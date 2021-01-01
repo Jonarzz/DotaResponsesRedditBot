@@ -59,11 +59,9 @@ def pages_for_category(category_name):
     :return: list of all `pages` in the given category.
     """
     params = get_params_for_category_api(category_name)
-    json_response = requests.get(url=API_PATH, params=params).text
+    parsed_json = requests.get(url=API_PATH, params=params).json()
 
     pages = []
-
-    parsed_json = json.loads(json_response)
     for category_members in parsed_json['query']['categorymembers']:
         title = category_members['title']
         pages.append(title)

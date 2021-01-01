@@ -1,6 +1,6 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
 import os
-from util.response_request import request_cargo_set
+from util.cargoquery_utils import get_titles_from_cargo_tables
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -10,7 +10,7 @@ CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 # Account config
-USER_AGENT = 'Python:dota2_responses_bot:v3.0 by /u/Jonarzz, maintained by /u/MePsyDuck'
+USER_AGENT = 'Python:dota2_responses_bot:v3.1 by /u/Jonarzz, maintained by /u/MePsyDuck'
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
@@ -22,6 +22,8 @@ RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
                        'format': 'json', 'cmtitle': ''}
 FILE_API_PARAMS = {'action': 'query', 'titles': '', 'prop': 'imageinfo', 'iiprop': 'url', 'format': 'json'}
+CARGO_API_PARAMS = {'action': 'cargoquery', 'tables': '', 'fields': 'title', 'where': 'game IS NULL', 'limit': '500',
+                    'format': 'json'}
 
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
@@ -51,7 +53,6 @@ PRAW_FILENAME = 'praw.log'
 CACHE_TTL = 5
 
 # Responses config
-# TODO confirm this keyword
 UPDATE_REQUEST_KEYWORD = 'try '
 COMMENT_ENDING = '''
 
@@ -82,13 +83,9 @@ FREQUENT_RESPONSES = {'denied', 'yes', 'not yet', 'no mana', 'not enough mana', 
                       'invisibility', 'illusion', 'regeneration', 'uh uh', 'ha', }
 
 # Hero and item responses not hardcoded here
-HERO_NAME_RESPONSES = request_cargo_set('https://dota2.gamepedia.com/api.php?'+
-                                        'action=cargoquery&tables=heroes&fields=title&where=game'+
-                                        '+IS+NULL&limit=500&format=json')
+HERO_NAMES = get_titles_from_cargo_tables('heroes')
 
-ITEM_RESPONSES = request_cargo_set('https://dota2.gamepedia.com/api.php?'+
-                                   'action=cargoquery&tables=items&fields='+
-                                   'title&where=game+IS+NULL&limit=500&format=json')
+ITEM_NAMES = get_titles_from_cargo_tables('items')
 
 # Add responses here as people report them. Taken from the old excluded responses list.
 COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begins', 'i am', 'exactly so', 'very nice',
@@ -102,4 +99,4 @@ COMMON_PHRASE_RESPONSES = {'earth shaker', 'shut up', 'skeleton king', 'it begin
                            'well said', 'of course', 'got it', 'what happened', 'hey now', 'seems fair', 'that s right',
                            'all pick'}
 
-EXCLUDED_RESPONSES = FREQUENT_RESPONSES | ITEM_RESPONSES | HERO_NAME_RESPONSES | COMMON_PHRASE_RESPONSES
+EXCLUDED_RESPONSES = FREQUENT_RESPONSES | HERO_NAMES | ITEM_NAMES | COMMON_PHRASE_RESPONSES
