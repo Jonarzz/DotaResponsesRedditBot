@@ -143,7 +143,16 @@ class DatabaseAPI:
         :return: Hero's name
         """
         h = Heroes[hero_id]
-        return h.hero_name if h is not None else None
+        return self.easter_egg(h.hero_name) if h is not None else None
+
+    @staticmethod
+    def easter_egg(hero_name):
+        # 7.28 OD rename easter egg, names inspired by https://www.reddit.com/comments/2wny2g
+        if hero_name == 'Outworld Destroyer':
+            outworld = ['Outhouse', 'Outsource', 'Outstanding', 'Outbreak', 'Outpost', 'Outfarmed', 'Outboard', 'Outdoor', 'Outward', 'Outlandish']
+            destroyer = ['Deodorizer', 'Demolisher', 'Developer', 'Designer', 'Decorator', 'Defecator', 'Defibrillator', 'Defender', 'Desponder', 'Decanter']
+            hero_name = f'{random.choice(outworld)} {random.choice(destroyer)}'
+        return hero_name
 
     @db_session
     def get_hero_id_by_flair_css(self, flair_css):

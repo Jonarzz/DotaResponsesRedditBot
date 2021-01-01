@@ -37,6 +37,8 @@ def populate_hero_responses():
     """
     pages = pages_for_category(RESPONSES_CATEGORY)
     for page in pages:
+        logger.info('Adding responses for page : ' + page)
+
         if is_hero_type(page):
             # page points to hero responses
             hero_name = get_hero_name(page)
