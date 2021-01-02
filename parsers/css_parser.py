@@ -12,6 +12,8 @@ from util.database.database import db_api
 
 __author__ = 'MePsyDuck'
 
+from util.logger import logger
+
 
 def populate_heroes():
     """Method to update heroes in the Heroes table with hero names and proper css classes names as
@@ -19,6 +21,7 @@ def populate_heroes():
 
     Uses rapidfuzz for fuzzy matching of hero names to name found in `.flair-name` property in css.
     """
+    logger.info('Populating hero data from r/dota2 css')
     hero_names = db_api.get_all_hero_names()
 
     response = requests.get(STYLESHEET_URL, headers={'User-Agent': USER_AGENT})

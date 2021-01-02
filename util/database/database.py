@@ -199,11 +199,13 @@ class DatabaseAPI:
     def create_all_tables(self):
         """Method to create all tables defined in the models
         """
+        logger.info('Creating all tables')
         self.db.create_tables()
 
     def drop_all_tables(self):
         """Method to drop all tables defined in the models
         """
+        logger.info('Dropping all tables')
         self.db.drop_all_tables(with_all_data=True)
 
     @db_session

@@ -291,6 +291,7 @@ def populate_chat_wheel():
     """Method that populates chat wheel responses featured in The International yearly Battle Pass.
     Other chat wheel responses from events and Dota plus are not processed currently.
     """
+    logger.info('Populating chat wheel responses')
     chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
 
     chat_wheel_regex = re.compile(CHAT_WHEEL_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
