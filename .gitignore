@@ -169,6 +169,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# VSCode settings
+.vscode/
+
 # bot sqlite local db
 bot.db
 
