@@ -1,9 +1,15 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
 import os
+
+from dotenv import load_dotenv
+
 from util.cargoquery_utils import get_titles_from_cargo_tables
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
+
+# Load env variables from `.env` file to be used by `os.environ.get()`
+load_dotenv()
 
 # App config
 CLIENT_ID = os.environ.get('CLIENT_ID')
