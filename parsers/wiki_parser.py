@@ -3,7 +3,6 @@
 Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota2.gamepedia.com/
 """
 
-import json
 import re
 import time
 from concurrent.futures import as_completed
@@ -14,7 +13,7 @@ from requests_futures.sessions import FuturesSession
 from urllib3 import Retry
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX
+    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX
 from util.database.database import db_api
 from util.logger import logger
 from util.str_utils import preprocess_text
@@ -28,6 +27,7 @@ def populate_responses():
     """
     populate_hero_responses()
     populate_chat_wheel()
+    populate_supporters_club_voice_lines()
 
 
 def populate_hero_responses():
@@ -302,3 +302,20 @@ def populate_chat_wheel():
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
 
         db_api.add_hero_and_responses(hero_name=event, response_link_list=response_link_list)
+
+
+def populate_supporters_club_voice_lines():
+    """Method that populates each team's supporters club voice lines.
+    """
+    logger.info('Populating supporters club voice lines')
+
+    supporters_club_source = requests.get(url=URL_DOMAIN + '/' + 'Supporters_Club', params={'action': 'raw'}).text
+
+    supporters_club_regex = re.compile(SUPPORTERS_CLUB_TEAM_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
+
+    for match in supporters_club_regex.finditer(supporters_club_source):
+        team = match['team']
+        responses_source = match['source']
+        response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
+
+        db_api.add_hero_and_responses(hero_name=team, response_link_list=response_link_list)

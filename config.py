@@ -22,7 +22,7 @@ USERNAME = os.environ.get('REDDIT_USERNAME')
 PASSWORD = os.environ.get('REDDIT_PASSWORD')
 
 # Parser config
-URL_DOMAIN = 'http://dota2.gamepedia.com'
+URL_DOMAIN = 'https://dota2.gamepedia.com'
 API_PATH = URL_DOMAIN + '/api.php'
 RESPONSES_CATEGORY = 'Responses'
 CATEGORY_API_PARAMS = {'action': 'query', 'list': 'categorymembers', 'cmlimit': 'max', 'cmprop': 'title',
@@ -35,6 +35,7 @@ STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
 CHAT_WHEEL_SECTION_REGEX = r'(=== (?P<event>The International \d+) ===)(?P<source>.+?)(?=\n=== [a-z0-9 ]+ ===\n)'
+SUPPORTERS_CLUB_TEAM_SECTION_REGEX = r'(==\ {{Team\|(?P<team>.*?)}}\s==(?P<source>.+?)(?=(==\s{{Team\|.*?}}\s==)|({{TeamNav}})))'
 FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 
 # Caching config
