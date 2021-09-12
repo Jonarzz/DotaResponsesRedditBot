@@ -110,12 +110,13 @@ def is_hero_type(page):
 
 def get_hero_name(hero_page):
     """Method that parses hero name from its responses page.
-    Pages for heroes are in the form of `Hero name/Responses`. We need only the `Hero name` part for heroes.
+    Pages for heroes are in the form of generally `Hero name/Responses` with a few exceptions such as 'Hero name/Responses/Hero form'
+    We need only the `Hero name` part for heroes.
 
     :param hero_page: hero's responses page as string.
     :return: Hero name as parsed
     """
-    return hero_page.split('/')[0]
+    return hero_page.replace('/Responses', '')
 
 
 def create_responses_text_and_link_list(responses_source):

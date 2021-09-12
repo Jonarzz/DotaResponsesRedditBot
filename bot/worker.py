@@ -9,7 +9,7 @@ import time
 
 from praw.exceptions import APIException
 from praw.models import Comment
-from prawcore import ServerError
+from prawcore import ServerError, ResponseException
 
 import config
 from bot import account
@@ -17,7 +17,7 @@ from util.caching import get_cache_api
 from util.database.database import db_api
 from util.logger import logger
 from util.response_info import ResponseInfo
-from util.str_utils import preprocess_text
+from util.str_utils import preprocess_text, get_formatted_text_for_reply
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -46,7 +46,7 @@ def work():
                 if submission is None:
                     break
                 process_replyable(reddit, submission)
-        except ServerError as e:
+        except (ResponseException, ServerError) as e:
             comment_stream, submission_stream = get_reddit_stream(reddit)
             logger.critical("Reddit server is down : " + str(e))
             time.sleep(120)
@@ -173,6 +173,7 @@ def add_custom_reply(replyable, body):
     """
     custom_response = config.CUSTOM_RESPONSES[body]
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
+    original_text = get_formatted_text_for_reply(original_text)
 
     reply = custom_response.format(original_text, config.COMMENT_ENDING)
     replyable.reply(reply)
@@ -344,6 +345,8 @@ def update_reply(replyable, response_info):
     if '>' in original_text:
         original_text = get_quoted_text(original_text).strip()
 
+    original_text = get_formatted_text_for_reply(original_text)
+
     # Getting name with Proper formatting
     hero_name = db_api.get_hero_name(response_info.hero_id)
 
@@ -401,6 +404,8 @@ def create_and_add_reply(replyable, response_url, hero_id):
         original_text = get_quoted_text(original_text).strip()
     if '::' in original_text:
         original_text = original_text.split('::', 1)[1].strip()
+
+    original_text = get_formatted_text_for_reply(original_text)
 
     hero_name = db_api.get_hero_name(hero_id)
 
