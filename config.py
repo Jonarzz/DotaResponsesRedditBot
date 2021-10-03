@@ -76,7 +76,7 @@ Bleep bloop, I am a robot. *OP can reply with "Try hero_name" to update this wit
 # non-gamepedia links too)
 # Value should have a placeholder for original text and replyable ending
 CUSTOM_RESPONSES = {
-    'ho ho ha ha': '[{}](https://gamepedia.cursecdn.com/dota2_gamepedia/1/17/Snip_ability_shrapnel_03.mp3)'
+    'ho ho ha ha': '[{}](https://static.wikia.nocookie.net/dota2_gamepedia/images/2/2f/Vo_sniper_snip_ability_shrapnel_03.mp3)'
                    ' (trigger warning: Sniper){}',
     'turn up this guy is crazy as fuck he s gotta be on molly or some powder or something':
         '[{}](https://www.youtube.com/watch?v=CO3j9lUYFfo) (Donation warning: Arteezy){}'
