@@ -184,7 +184,7 @@ def parse_response(text):
         text = re.sub(regex, '', text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9().:\'/# ]+\|([a-zé().:\' ]+)]]',
+                        r'\[\[[a-zé0-9()-.:\'/# ]+\|([a-zé().:\' ]+)]]',
                         # Replace links such as [[Ancient (Building)|Ancients]], [[:File:Axe|Axe]] and [[Terrorblade#Sunder|sundering]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
@@ -193,7 +193,7 @@ def parse_response(text):
         text = re.sub(regex, '\\1', text, flags=re.IGNORECASE)
 
     if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
-        logger.warn('Response could not be processed : ' + text)
+        logger.error('Response could not be processed : ' + text)
         return None
 
     return text.strip()
@@ -268,7 +268,8 @@ def links_for_files(files_list):
                     json_response = requests.get(future.result().url).json()
 
                 if current_retry == retries and 'error' in json_response:
-                    logger.critical('MediaWiki API failed, max retries exceeded exiting ## last response : %s ## url : %s', current_retry, future.result().url, json_response)
+                    logger.critical('MediaWiki API failed, max retries exceeded exiting ## last response : %s ## url : %s', current_retry, future.result().url,
+                                    json_response)
                     return
                 else:
                     logger.warn('MediaWiki API failed %s times ## url : %s', current_retry, future.result().url)
@@ -317,6 +318,8 @@ def populate_supporters_club_voice_lines():
     for match in supporters_club_regex.finditer(supporters_club_source):
         team = match['team']
         responses_source = match['source']
+        logger.info('Adding responses for team : ' + team)
+
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
 
         db_api.add_hero_and_responses(hero_name=team, response_link_list=response_link_list)

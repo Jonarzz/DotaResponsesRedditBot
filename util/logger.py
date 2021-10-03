@@ -33,7 +33,7 @@ def setup_logger():
     error_log_file = os.path.join(LOG_DIR, ERROR_FILENAME)
     error_file_handler = logging.FileHandler(error_log_file, mode='a')
     error_file_handler.setFormatter(log_formatter)
-    error_file_handler.setLevel(logging.ERROR)
+    error_file_handler.setLevel(logging.WARNING)
 
     praw_log_file = os.path.join(LOG_DIR, PRAW_FILENAME)
     praw_handler = logging.FileHandler(praw_log_file, mode='a')
@@ -54,4 +54,4 @@ def setup_logger():
     bot_logger.setLevel(log_level)
     bot_logger.addHandler(info_file_handler)  # This should be commented out if running on Heroku
     bot_logger.addHandler(error_file_handler)  # This should be commented out if running on Heroku
-    bot_logger.addHandler(stream_handler)
+    # bot_logger.addHandler(stream_handler)
