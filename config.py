@@ -34,9 +34,12 @@ CARGO_API_PARAMS = {'action': 'cargoquery', 'tables': '', 'fields': 'title', 'wh
 STYLESHEET_URL = r'https://www.reddit.com/r/dota2/about/stylesheet.json'
 FLAIR_REGEX = r'(?P<css_class>.flair-\w+),a\[href="(?P<img_path>/hero-\w+)"\]'
 RESPONSE_REGEX = r'\*(?P<files>( <sm2>.*?</sm2>)+)(?P<text>(.*))'
+FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
 CHAT_WHEEL_SECTION_REGEX = r'(=== (?P<event>The International \d+) ===)(?P<source>.+?)(?=\n=== [a-z0-9 ]+ ===\n)'
 SUPPORTERS_CLUB_TEAM_SECTION_REGEX = r'(==\s*{{Team\|(?P<team>.*?)}}\s*==(?P<source>.+?)(?=(==\s*{{Team\|.*?}}\s*==)|({{TeamNav}})))'
-FILE_REGEX = r'( <sm2>(?P<file>[a-zA-Z0-9_. ]+)</sm2>)'
+TI_TALENT_SECTION_REGEX = r'(==\s*Talents\s*==(?P<source>.+?)==\s*(.*?)\s*==)'
+TI_TALENT_REGEX = r"\|\s*'''(?P<talent_tag>.*?)'''\s*\|\|\s*(?P<name>.*?)\s*\|\|\s*(?P<portrait>.*?)\s*\|\|\s*(?P<autograph>.*?)\s*\|\|" \
+                  r"\s*<sm2>(?P<file>.*?)</sm2>(?P<text>.*)"
 
 # Caching config
 CACHE_PROVIDER = os.environ.get('CACHE_PROVIDER', 'memory')  # valid choices : redis, memory, db

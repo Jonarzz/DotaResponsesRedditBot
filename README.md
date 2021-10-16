@@ -62,6 +62,10 @@ Config variables needed to be set in environment for running the bot:
 
 ---
 ### Changelog
+#### 3.2
+*   Formatting fixes for comments.
+*   Added supported club voice lines.
+*   Added TI Talent voice lines.
 
 #### 3.1
 *   User(OP) can now request to update the response using another comment under bot's comment.

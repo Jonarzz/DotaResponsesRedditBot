@@ -13,7 +13,7 @@ from requests_futures.sessions import FuturesSession
 from urllib3 import Retry
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX
+    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX, TI_TALENT_SECTION_REGEX, TI_TALENT_REGEX
 from util.database.database import db_api
 from util.logger import logger
 from util.str_utils import preprocess_text
@@ -28,6 +28,7 @@ def populate_responses():
     populate_hero_responses()
     populate_chat_wheel()
     populate_supporters_club_voice_lines()
+    populate_ti_talent_voice_lines()
 
 
 def populate_hero_responses():
@@ -156,8 +157,8 @@ def create_responses_text_and_link_list(responses_source):
                 link = file_and_link_dict[file]
                 responses_list.append((original_text, processed_text, link))
             except KeyError:
-                # Ignore files with no links to mp3 files. Happens to broken files and files undergoing migration.
-                pass
+                # Files with no links to mp3 files. Happens to broken files and files undergoing migration.
+                logger.warn(f'{file} has no link')
 
     return responses_list
 
@@ -323,3 +324,35 @@ def populate_supporters_club_voice_lines():
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
 
         db_api.add_hero_and_responses(hero_name=team, response_link_list=response_link_list)
+
+
+def populate_ti_talent_voice_lines():
+    """Method that populates Dota personalities' chat wheel voice lines obtained by leveling-up Autographs in TI10 compendium.
+    """
+    logger.info('Populating TI10 Talent voice lines')
+
+    compendium_source = requests.get(url=URL_DOMAIN + '/' + 'The_International_2021_Compendium', params={'action': 'raw'}).text
+
+    talent_section_regex = re.compile(TI_TALENT_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
+    responses_source = talent_section_regex.search(compendium_source)['source']
+
+    talent_voice_lines = []
+
+    talent_regex = re.compile(TI_TALENT_REGEX)
+    for match in talent_regex.finditer(responses_source):
+        talent_tag = match['talent_tag'].strip()
+        text = match['text'].strip()
+        file_name = match['file'].replace('_', ' ').capitalize()
+        talent_voice_lines.append([talent_tag, text, file_name])
+
+    files_list = [file_name for talent_tag, text, file_name in talent_voice_lines]
+    file_and_link_dict = links_for_files(files_list)
+
+    for talent_tag, original_text, file_name in talent_voice_lines:
+        processed_text = preprocess_text(original_text)
+        try:
+            link = file_and_link_dict[file_name]
+            db_api.add_hero_and_responses(hero_name=talent_tag, response_link_list=[(original_text, processed_text, link)])
+        except KeyError:
+            # Files with no links to mp3 files. Happens to broken files and files undergoing migration.
+            logger.warn(f'{file_name} has no link')
