@@ -13,7 +13,7 @@ from requests_futures.sessions import FuturesSession
 from urllib3 import Retry
 
 from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, CHAT_WHEEL_SECTION_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX, TI_TALENT_SECTION_REGEX, TI_TALENT_REGEX
+    FILE_REGEX, TI_SECTION_CHAT_WHEEL_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX, TI_TALENT_SECTION_REGEX, TI_TALENT_REGEX, AGHS_LAB_SECTION_CHAT_WHEEL_REGEX
 from util.database.database import db_api
 from util.logger import logger
 from util.str_utils import preprocess_text
@@ -26,7 +26,7 @@ def populate_responses():
     """Method that adds all the responses to database. Assumes responses and hero database are already built.
     """
     populate_hero_responses()
-    populate_chat_wheel()
+    populate_chat_wheel_voice_lines()
     populate_supporters_club_voice_lines()
     populate_ti_talent_voice_lines()
 
@@ -163,48 +163,55 @@ def create_responses_text_and_link_list(responses_source):
     return responses_list
 
 
-def parse_response(text):
+def parse_response(og_text):
+    parsed_text = og_text
     # Special cases
-    if any(excluded_case in text for excluded_case in ['(broken file)', 'versus (TI ', 'Ceeeb']):
+    if any(excluded_case in parsed_text for excluded_case in ['(broken file)', 'versus (TI ', 'Ceeeb']):
         return None
 
-    text = re.sub(r'…', '...', text)  # Replace ellipsis with three dots
+    parsed_text = re.sub(r'…', '...', parsed_text)  # Replace ellipsis with three dots
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
                          r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
-                         r'<small>\[\[#[a-z0-9_\-\' ]+\|\'\'followup\'\']]</small>',
-                         # Remove followup links in <small> tags
+                         r'<small>\[\[#[a-z0-9_\-\' ]+\|\'\'followup\'\']]</small>',  # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
-                         r'<ref>.*?</ref>',  # Remove text in <ref> tags
+                         r'<ref.*?>.*?</ref>',  # Remove text in <ref> tags
+                         r'<ref.*?/>',  # Remove <ref /> tag
+                         r'<br\s+/>',  # Remove <br /> tag
                          r'<nowiki>.*?</nowiki>',  # Remove text in <nowiki> tags
+                         r'(?<!\[)\[[a-z?, ]+]',  # Remove [All] and verbs such as [singsing], [wailing], [?] etc
                          ]
     for regex in regexps_empty_sub:
-        text = re.sub(regex, '', text, flags=re.IGNORECASE)
+        parsed_text = re.sub(regex, '', parsed_text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9()-.:\'/# ]+\|([a-zé().:\' ]+)]]',
+                        r'\[\[[a-zé0-9()-_.:\'/# ]+\|([a-zé().:\' ]+)]]',
                         # Replace links such as [[Ancient (Building)|Ancients]], [[:File:Axe|Axe]] and [[Terrorblade#Sunder|sundering]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
+                        r'\'\'(.*?)\'\'',  # Replace italics
                         ]
     for regex in regexps_sub_text:
-        text = re.sub(regex, '\\1', text, flags=re.IGNORECASE)
+        parsed_text = re.sub(regex, '\\1', parsed_text, flags=re.IGNORECASE)
 
-    if any(escape in text for escape in ['[[', ']]', '{{', '}}', '|', 'sm2']):
-        logger.error('Response could not be processed : ' + text)
-        return None
+    if any(escape in parsed_text for escape in ['[', ']', '{', '}', '|', 'sm2']):
+        if og_text != parsed_text:
+            return parse_response(parsed_text)
+        else:
+            logger.warn('Response could not be processed : ' + parsed_text)
+            return None
 
-    return text.strip()
+    return parsed_text.strip()
 
 
 def links_for_files(files_list):
     """Method that queries MediaWiki API used by Gamepedia to return links to the files list passed.
     Does batch processing to avoid max number of files limit and header size limit.
     Used asynchronous requests for faster processing.
-    Removes files version as we only need the latest one.
+    Removes version from file's as we only need the latest one.
 
     MediaWiki allows max 50 files(titles) at once : https://www.mediawiki.org/wiki/API:Query.
 
@@ -290,21 +297,30 @@ def links_for_files(files_list):
     return files_link_mapping
 
 
-def populate_chat_wheel():
+def populate_chat_wheel_voice_lines():
     """Method that populates chat wheel responses featured in The International yearly Battle Pass.
     Other chat wheel responses from events and Dota plus are not processed currently.
     """
     logger.info('Populating chat wheel responses')
-    chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
 
-    chat_wheel_regex = re.compile(CHAT_WHEEL_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
+    ti_chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
+    ti_chat_wheel_regex = re.compile(TI_SECTION_CHAT_WHEEL_REGEX, re.DOTALL | re.IGNORECASE)
 
-    for match in chat_wheel_regex.finditer(chat_wheel_source):
+    for match in ti_chat_wheel_regex.finditer(ti_chat_wheel_source):
         event = match['event']
         responses_source = match['source']
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
 
         db_api.add_hero_and_responses(hero_name=event, response_link_list=response_link_list)
+
+    aghs_lab_chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Aghanim\'s_Labyrinth_Battle_Pass', params={'action': 'raw'}).text
+    aghs_lab_chat_wheel_regex = re.compile(AGHS_LAB_SECTION_CHAT_WHEEL_REGEX, re.DOTALL | re.IGNORECASE)
+
+    for match in aghs_lab_chat_wheel_regex.finditer(aghs_lab_chat_wheel_source):
+        responses_source = match['source']
+        response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
+
+        db_api.add_hero_and_responses(hero_name='Aghanim\'s Labyrinth', response_link_list=response_link_list)
 
 
 def populate_supporters_club_voice_lines():
