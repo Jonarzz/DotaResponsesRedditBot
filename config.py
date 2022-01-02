@@ -11,6 +11,8 @@ __maintainer__ = 'MePsyDuck'
 # Load env variables from `.env` file to be used by `os.environ.get()`
 load_dotenv()
 
+DEBUG = os.environ.get('DEBUG', False)
+
 # App config
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
@@ -57,6 +59,7 @@ LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
 LOG_FORMAT = '%(asctime)s %(funcName)-25s %(levelname)-8s %(message)s'
 LOG_DIR = 'logs'
 INFO_FILENAME = 'info.log'
+WARN_FILENAME = 'warn.log'
 ERROR_FILENAME = 'error.log'
 PRAW_FILENAME = 'praw.log'
 
