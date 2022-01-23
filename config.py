@@ -1,23 +1,18 @@
 """Module in which the constants that are used by Dota Responses Bot are declared."""
 import os
 
-from dotenv import load_dotenv
-
 from util.cargoquery_utils import get_titles_from_cargo_tables
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
 
-# Load env variables from `.env` file to be used by `os.environ.get()`
-load_dotenv()
-
-DEBUG = os.environ.get('DEBUG', False)
-
 # App config
-CLIENT_ID = os.environ.get('CLIENT_ID')
-CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+EXCEPTION_TIMEOUT = 120
 
 # Account config
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 USER_AGENT = 'Python:dota2_responses_bot:v3.1 by /u/Jonarzz, maintained by /u/MePsyDuck'
 SUBREDDIT = os.environ.get('SUBREDDIT', 'dota2')
 USERNAME = os.environ.get('REDDIT_USERNAME')
@@ -57,7 +52,7 @@ DB_URL = os.environ.get('DATABASE_URL', os.path.join(os.getcwd(), 'bot.db'))  # 
 BOT_LOGGER = 'bot'
 PRAW_LOGGER = 'prawcore'
 LOG_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
-LOG_FORMAT = '%(asctime)s %(funcName)-25s %(levelname)-8s %(message)s'
+LOG_FORMAT = '%(asctime)s %(levelname)-8s %(funcName)-25s %(message)s'
 LOG_DIR = 'logs'
 INFO_FILENAME = 'info.log'
 WARN_FILENAME = 'warn.log'

@@ -36,6 +36,7 @@ The bot will try to match a response of the hero that is in the comment/submissi
 *   Make config excluded responses to be populated on startup 
 *   Add new command to show usage stats
 *   Add more test cases
+*   Add Io, Phoenix, Marci Dota Plus Chat Wheel lines
 
 ---
 ### Some stats and general info

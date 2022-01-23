@@ -9,7 +9,7 @@ import time
 
 from praw.exceptions import APIException
 from praw.models import Comment
-from prawcore import ServerError, ResponseException
+from prawcore import ServerError, ResponseException, RequestException
 
 import config
 from bot import account
@@ -46,14 +46,15 @@ def work():
                 if submission is None:
                     break
                 process_replyable(reddit, submission)
-        except (ResponseException, ServerError) as e:
-            comment_stream, submission_stream = get_reddit_stream(reddit)
-            logger.critical("Reddit server is down : " + str(e))
-            time.sleep(120)
+        except ResponseException as e:
+            logger.critical(f'Reddit server is down : {e}')
+        except RequestException as e:
+            logger.critical(f'Bot server network issue : {e}')
         except APIException as e:
+            logger.critical(f'API Exception occurred : {e}')
+        finally:
+            time.sleep(config.EXCEPTION_TIMEOUT)
             comment_stream, submission_stream = get_reddit_stream(reddit)
-            logger.critical("API Exception occurred : " + str(e))
-            time.sleep(60)
 
 
 def get_reddit_stream(reddit):
