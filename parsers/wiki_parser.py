@@ -111,7 +111,7 @@ def is_hero_type(page):
 
 def get_hero_name(hero_page):
     """Method that parses hero name from its responses page.
-    Pages for heroes are in the form of generally `Hero name/Responses` with a few exceptions such as 'Hero name/Responses/Hero form'
+    Pages for heroes are in the form of `Hero name/Responses` and `Bundle/Responses/Hero.
     We need only the `Hero name` part for heroes.
 
     :param hero_page: hero's responses page as string.
@@ -175,7 +175,7 @@ def parse_response(og_text):
                          r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
                          r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
-                         r'\[\[File:[a-z.,!\'() ]+\|\d+px\|link=[a-z,!\'() ]+]]',  # Remove Files
+                         r'\[\[File:[a-z.,!\'() ]+\|\d+px(\|link=[a-z,!\'() ]+)?(\|class=[a-z]+)?]]',  # Remove Files
                          r'<small>\[\[#[a-z0-9_\-\' ]+\|\'\'followup\'\']]</small>',  # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
                          r'<ref.*?>.*?</ref>',  # Remove text in <ref> tags
@@ -188,11 +188,12 @@ def parse_response(og_text):
         parsed_text = re.sub(regex, '', parsed_text, flags=re.IGNORECASE)
 
     regexps_sub_text = [r'\[\[([a-zé().:\',\- ]+)]]',  # Replace links such as [[Shitty Wizard]]
-                        r'\[\[[a-zé0-9()-_.:\'/# ]+\|([a-zé().:\' ]+)]]',
+                        r'\[\[[a-zé0-9()-_.:\'/#-_ ]+\|([a-zé0-9().:\'/#-_ ]+)]]',
                         # Replace links such as [[Ancient (Building)|Ancients]], [[:File:Axe|Axe]] and [[Terrorblade#Sunder|sundering]]
                         r'{{tooltip\|(.*?)\|.*?}}',  # Replace tooltips
                         r'{{note\|([a-z.!\'\-?, ]+)\|[a-z.!\'\-?,()/ ]+}}',  # Replace notes
                         r'\'\'(.*?)\'\'',  # Replace italics
+                        r'{{H\|([a-z.!\'\-?,()/ ]+)}}',  # Replace heroes
                         ]
     for regex in regexps_sub_text:
         parsed_text = re.sub(regex, '\\1', parsed_text, flags=re.IGNORECASE)
