@@ -170,6 +170,7 @@ def parse_response(og_text):
         return None
 
     parsed_text = re.sub(r'…', '...', parsed_text)  # Replace ellipsis with three dots
+    parsed_text = re.sub(r'―', '-', parsed_text)  # Replace bar with hyphen
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
                          r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
