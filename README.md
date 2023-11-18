@@ -12,7 +12,8 @@ The bot replies only for the comments that **are** responses.
 
 For example: `"Selemene commands"` will return a Luna response *(like on the screenshot above)*.
 
-**The bot is no longer active, but over 4 years of running [it gained over 100,000 karma points on Reddit](https://www.reddit.com/user/dota_responses_bot/comments/?t=all&sort=top)**. 
+**The original bot account is no longer active, but over 4 years of running [it gained over 100,000 karma points on Reddit](https://www.reddit.com/user/dota_responses_bot/comments/?t=all&sort=top)**.
+**Currently the bot's account is [dota2_responses_bot](https://www.reddit.com/user/dota2_responses_bot)**.
 
 ### Active maintainer
 [MePsyDuck](https://github.com/MePsyDuck)
