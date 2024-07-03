@@ -9,8 +9,9 @@ import time
 
 from praw.exceptions import APIException
 from praw.models import Comment
-from prawcore import ServerError, ResponseException, RequestException
+from prawcore import ResponseException, RequestException
 
+from bot import bot_config
 import config
 from bot import account
 from util.caching import get_cache_api
@@ -33,7 +34,7 @@ def work():
     """
 
     reddit = account.get_account()
-    logger.info('Connected to Reddit account : ' + config.USERNAME)
+    logger.info('Connected to Reddit account : ' + bot_config.USERNAME)
 
     comment_stream, submission_stream = get_reddit_stream(reddit)
     while True:
@@ -64,8 +65,8 @@ def get_reddit_stream(reddit):
     :param reddit: The reddit account instance
     :return: The comment and subreddit stream
     """
-    comment_stream = reddit.subreddit(config.SUBREDDIT).stream.comments(pause_after=-1)
-    submission_stream = reddit.subreddit(config.SUBREDDIT).stream.submissions(pause_after=-1)
+    comment_stream = reddit.subreddit(bot_config.SUBREDDIT).stream.comments(pause_after=-1)
+    submission_stream = reddit.subreddit(bot_config.SUBREDDIT).stream.submissions(pause_after=-1)
     return comment_stream, submission_stream
 
 
@@ -153,7 +154,7 @@ def is_excluded_response(text):
     :param text: The processed body/title text
     :return: True if text is an excluded response, else False
     """
-    return ' ' not in text or text in config.EXCLUDED_RESPONSES
+    return ' ' not in text or text in bot_config.EXCLUDED_RESPONSES
 
 
 def is_custom_response(text):
@@ -162,7 +163,7 @@ def is_custom_response(text):
     :param text: The body/title text
     :return: True if text is a custom response, else False
     """
-    return text in config.CUSTOM_RESPONSES
+    return text in bot_config.CUSTOM_RESPONSES
 
 
 def add_custom_reply(replyable, body):
@@ -172,11 +173,11 @@ def add_custom_reply(replyable, body):
     :param body: The processed body/title text
     :return: None
     """
-    custom_response = config.CUSTOM_RESPONSES[body]
+    custom_response = bot_config.CUSTOM_RESPONSES[body]
     original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
     original_text = get_formatted_text_for_reply(original_text)
 
-    reply = custom_response.format(original_text, config.COMMENT_ENDING)
+    reply = custom_response.format(original_text, bot_config.COMMENT_ENDING)
     replyable.reply(reply)
     logger.info("Replied to: " + replyable.fullname)
 
@@ -256,13 +257,13 @@ def is_update_request(reddit, replyable, text):
     :return: ResponseInfo containing hero_id and link for response if this is a valid update request, otherwise None
     """
 
-    if not text.startswith(config.UPDATE_REQUEST_KEYWORD):
+    if not text.startswith(bot_config.UPDATE_REQUEST_KEYWORD):
         return None
 
     if not validate_update_request_comment_tree(reddit, replyable):
         return None
 
-    hero_name = text.replace(config.UPDATE_REQUEST_KEYWORD, '', 1)
+    hero_name = text.replace(bot_config.UPDATE_REQUEST_KEYWORD, '', 1)
     hero_ids = db_api.get_hero_id_by_name_loose_match(hero_name=hero_name)
     if hero_ids is None:
         return None
@@ -351,7 +352,8 @@ def update_reply(replyable, response_info):
     # Getting name with Proper formatting
     hero_name = db_api.get_hero_name(response_info.hero_id)
 
-    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_info.link, hero_name, config.COMMENT_ENDING)
+    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_info.link, hero_name,
+                                                    bot_config.COMMENT_ENDING)
     bot_comment.edit(reply)
 
     logger.info("Updated Reply: " + replyable.fullname)
@@ -410,7 +412,8 @@ def create_and_add_reply(replyable, response_url, hero_id):
 
     hero_name = db_api.get_hero_name(hero_id)
 
-    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name, config.COMMENT_ENDING)
+    reply = "[{}]({}) (sound warning: {}){}".format(original_text, response_url, hero_name,
+                                                    bot_config.COMMENT_ENDING)
     replyable.reply(reply)
 
     logger.info("Replied to: " + replyable.fullname)

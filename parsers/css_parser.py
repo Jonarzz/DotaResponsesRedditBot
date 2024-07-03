@@ -7,7 +7,8 @@ import re
 import requests
 from rapidfuzz import process
 
-from config import STYLESHEET_URL, FLAIR_REGEX, USER_AGENT
+from config import USER_AGENT
+from parsers.parser_config import STYLESHEET_URL, FLAIR_REGEX
 from util.database.database import db_api
 
 __author__ = 'MePsyDuck'

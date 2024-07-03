@@ -1,15 +1,18 @@
+from parsers import parser_config
 from util.str_utils import preprocess_text
-import requests
+from util.wiki_api import get_wiki_data
 
 
+# TODO move away from cargoquery
 def get_titles_from_cargo_tables(table):
-    from config import API_PATH, CARGO_API_PARAMS
-
-    params = CARGO_API_PARAMS.copy()
+    params = parser_config.CARGO_API_PARAMS.copy()
     params['tables'] = table
 
-    json_response = requests.get(url=API_PATH, params=params).json()
+    json_response = get_wiki_data(params).json()
     cargo_set = set()
-    for item in json_response['cargoquery']:
-        cargo_set.add(preprocess_text(item['title']['title']))
+    try:
+        for item in json_response['cargoquery']:
+            cargo_set.add(preprocess_text(item['title']['title']))
+    except KeyError:
+        pass
     return cargo_set

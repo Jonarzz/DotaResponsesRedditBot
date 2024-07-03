@@ -4,19 +4,16 @@ Responses and urls to responses as mp3s are parsed from Dota 2 Wiki: http://dota
 """
 
 import re
-import time
-from concurrent.futures import as_completed
 
 import requests
-from requests.adapters import HTTPAdapter
-from requests_futures.sessions import FuturesSession
-from urllib3 import Retry
 
-from config import API_PATH, RESPONSES_CATEGORY, RESPONSE_REGEX, CATEGORY_API_PARAMS, URL_DOMAIN, FILE_API_PARAMS, \
-    FILE_REGEX, TI_SECTION_CHAT_WHEEL_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX, TI_TALENT_SECTION_REGEX, TI_TALENT_REGEX, AGHS_LAB_SECTION_CHAT_WHEEL_REGEX
+from parsers.parser_config import API_PATH, RESPONSES_CATEGORY, CATEGORY_API_PARAMS, FILE_API_PARAMS, RESPONSE_REGEX, \
+    FILE_REGEX, TI_SECTION_CHAT_WHEEL_REGEX, AGHS_LAB_SECTION_CHAT_WHEEL_REGEX, SUPPORTERS_CLUB_TEAM_SECTION_REGEX, \
+    TI_TALENT_SECTION_REGEX, TI_TALENT_REGEX
 from util.database.database import db_api
 from util.logger import logger
 from util.str_utils import preprocess_text
+from util.wiki_api import get_wiki_data, get_page_source
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -27,7 +24,7 @@ def populate_responses():
     """
     populate_hero_responses()
     populate_chat_wheel_voice_lines()
-    populate_supporters_club_voice_lines()
+    # populate_supporters_club_voice_lines()
     populate_ti_talent_voice_lines()
 
 
@@ -47,7 +44,7 @@ def populate_hero_responses():
             # page points to voice pack, announcer or shopkeeper responses
             hero_name = page
 
-        responses_source = requests.get(url=URL_DOMAIN + '/' + page, params={'action': 'raw'}).text
+        responses_source = get_page_source(page)
 
         response_link_list = create_responses_text_and_link_list(responses_source=responses_source)
         # Note: Save all responses to the db. Apply single word and common words filter on comments and submission text
@@ -62,7 +59,7 @@ def pages_for_category(category_name):
     :return: list of all `pages` in the given category.
     """
     params = get_params_for_category_api(category_name)
-    parsed_json = requests.get(url=API_PATH, params=params).json()
+    parsed_json = get_wiki_data(params).json()
 
     pages = []
     for category_members in parsed_json['query']['categorymembers']:
@@ -174,16 +171,17 @@ def parse_response(og_text):
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
                          r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
-                         r'{{hero icon\|[a-z- \']+\|\d+px}}',  # Remove hero icon
+                         r'{{hero icon\|[a-z-_() \']+\|\d+px}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
-                         r'\[\[File:[a-z.,!\'() ]+\|\d+px(\|link=[a-z,!\'() ]+)?(\|class=[a-z]+)?]]',  # Remove Files
+                         r'{{I\|([a-z.!-\'?,()/ ]+)}}',  # Replace items
+                         r'\[\[File:[a-z0-9.,!\'() ]+\|\d+px(\|link=[a-z,!\'() ]+)?(\|class=[a-z]+)?]]',  # Remove Files
                          r'<small>\[\[#[a-z0-9_\-\' ]+\|\'\'followup\'\']]</small>',  # Remove followup links in <small> tags
                          r'<small>\'\'[a-z0-9 /]+\'\'</small>',  # Remove text in <small> tags
                          r'<ref.*?>.*?</ref>',  # Remove text in <ref> tags
                          r'<ref.*?/>',  # Remove <ref /> tag
                          r'<br\s+/>',  # Remove <br /> tag
                          r'<nowiki>.*?</nowiki>',  # Remove text in <nowiki> tags
-                         r'(?<!\[)\[[a-z?, ]+]',  # Remove [All] and verbs such as [singsing], [wailing], [?] etc
+                         r'(?<!\[)\[[a-z?, ]+]',  # Remove [All] and verbs such as [singing], [wailing], [?] etc
                          ]
     for regex in regexps_empty_sub:
         parsed_text = re.sub(regex, '', parsed_text, flags=re.IGNORECASE)
@@ -221,80 +219,51 @@ def links_for_files(files_list):
     :return files_link_mapping: dict with file names and their links. dict['file'] = link
     """
 
+    files_link_mapping = {}
+
+    def update_files_link_mapping(files_names):
+        params = get_params_for_files_api(files_names)
+        json_response = get_wiki_data(params).json()
+        query = json_response['query']
+        pages = query['pages']
+
+        for _, page in pages.items():
+            title = page['title']
+            try:
+                imageinfo = page['imageinfo'][0]
+                file_url = imageinfo['url'][
+                           :imageinfo['url'].index('.mp3') + len('.mp3')]  # Remove file version and trailing path
+                files_link_mapping[title[5:]] = file_url
+            except KeyError:
+                logger.critical('File does not have a link : ' + title)
+
     # Method level constants
     max_title_list_length = 50
     file_title_prefix_length = len('%7CFile%3A')  # url encoded file title prefix '|File:'
     max_header_length = 1960  # max header length as found by trial and error
 
-    files_link_mapping = {}
-    futures = []
     empty_api_length = len(requests.Request('get', url=API_PATH, params=get_params_for_files_api([])).prepare().url)
 
-    # To add retry in case of Status 429 : Too many requests
-    with FuturesSession() as session:
-        retries = 5
-        status_forcelist = [429]
-        retry = Retry(
-            total=retries,
-            read=retries,
-            connect=retries,
-            respect_retry_after_header=True,
-            status_forcelist=status_forcelist,
-        )
+    files_batch_list = []
+    current_title_length = 0
 
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
+    for file in files_list:
+        file_name_len = file_title_prefix_length + len(file)
+        # If header size overflows or the number of files reaches the limit specified by MediaWiki
+        if file_name_len + current_title_length >= max_header_length - empty_api_length or \
+                len(files_batch_list) >= max_title_list_length:
+            # Issue a request for current batch of files
+            update_files_link_mapping(files_batch_list)
 
-        files_batch_list = []
-        current_title_length = 0
+            # Reset files tracking variables
+            files_batch_list = []
+            current_title_length = 0
 
-        for file in files_list:
-            file_name_len = file_title_prefix_length + len(file)
-            # If header size overflows or the number of files reaches the limit specified by MediaWiki
-            if file_name_len + current_title_length >= max_header_length - empty_api_length or \
-                    len(files_batch_list) >= max_title_list_length:
-                # Issue a request for current batch of files
-                futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
+        files_batch_list.append(file)
+        current_title_length += file_name_len
 
-                # Reset files tracking variables
-                files_batch_list = []
-                current_title_length = 0
-
-            files_batch_list.append(file)
-            current_title_length += file_name_len
-
-        if files_batch_list:
-            futures.append(session.get(url=API_PATH, params=get_params_for_files_api(files_batch_list)))
-
-        for future in as_completed(futures):
-            json_response = future.result().json()
-
-            # Even though response code maybe 200, the response may contain query execution error, hence another level of retries
-            if 'error' in json_response:
-                current_retry = 1
-                while current_retry < retries and 'error' in json_response:
-                    time.sleep(5)
-                    json_response = requests.get(future.result().url).json()
-
-                if current_retry == retries and 'error' in json_response:
-                    logger.critical('MediaWiki API failed, max retries exceeded exiting ## last response : %s ## url : %s', current_retry, future.result().url,
-                                    json_response)
-                    return
-                else:
-                    logger.warn('MediaWiki API failed %s times ## url : %s', current_retry, future.result().url)
-
-            query = json_response['query']
-            pages = query['pages']
-
-            for _, page in pages.items():
-                title = page['title']
-                try:
-                    imageinfo = page['imageinfo'][0]
-                    file_url = imageinfo['url'][:imageinfo['url'].index('.mp3') + len('.mp3')]  # Remove file version and trailing path
-                    files_link_mapping[title[5:]] = file_url
-                except KeyError:
-                    logger.critical('File does not have a link : ' + title)
+    if files_batch_list:
+        update_files_link_mapping(files_batch_list)
 
     return files_link_mapping
 
@@ -305,7 +274,7 @@ def populate_chat_wheel_voice_lines():
     """
     logger.info('Populating chat wheel responses')
 
-    ti_chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Chat_Wheel', params={'action': 'raw'}).text
+    ti_chat_wheel_source = get_page_source('Chat_Wheel')
     ti_chat_wheel_regex = re.compile(TI_SECTION_CHAT_WHEEL_REGEX, re.DOTALL | re.IGNORECASE)
 
     for match in ti_chat_wheel_regex.finditer(ti_chat_wheel_source):
@@ -315,7 +284,7 @@ def populate_chat_wheel_voice_lines():
 
         db_api.add_hero_and_responses(hero_name=event, response_link_list=response_link_list)
 
-    aghs_lab_chat_wheel_source = requests.get(url=URL_DOMAIN + '/' + 'Aghanim\'s_Labyrinth_Battle_Pass', params={'action': 'raw'}).text
+    aghs_lab_chat_wheel_source = get_page_source('Aghanim\'s_Labyrinth_Battle_Pass')
     aghs_lab_chat_wheel_regex = re.compile(AGHS_LAB_SECTION_CHAT_WHEEL_REGEX, re.DOTALL | re.IGNORECASE)
 
     for match in aghs_lab_chat_wheel_regex.finditer(aghs_lab_chat_wheel_source):
@@ -330,7 +299,7 @@ def populate_supporters_club_voice_lines():
     """
     logger.info('Populating supporters club voice lines')
 
-    supporters_club_source = requests.get(url=URL_DOMAIN + '/' + 'Supporters_Club', params={'action': 'raw'}).text
+    supporters_club_source = get_page_source('Supporters_Club')
 
     supporters_club_regex = re.compile(SUPPORTERS_CLUB_TEAM_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
 
@@ -349,7 +318,7 @@ def populate_ti_talent_voice_lines():
     """
     logger.info('Populating TI10 Talent voice lines')
 
-    compendium_source = requests.get(url=URL_DOMAIN + '/' + 'The_International_2021_Compendium', params={'action': 'raw'}).text
+    compendium_source = get_page_source('The_International_2021_Compendium')
 
     talent_section_regex = re.compile(TI_TALENT_SECTION_REGEX, re.DOTALL | re.IGNORECASE)
     responses_source = talent_section_regex.search(compendium_source)['source']

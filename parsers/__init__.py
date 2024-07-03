@@ -2,5 +2,6 @@
 
 from parsers.css_parser import *
 from parsers.wiki_parser import *
+from parsers.parser_config import *
 
-__all__ = ['css_parser', 'wiki_parser']
+__all__ = ['css_parser', 'wiki_parser', 'parser_config']

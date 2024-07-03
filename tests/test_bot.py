@@ -3,9 +3,7 @@
 
 import unittest
 
-import config
-from bot import account
-from bot import worker
+from bot import account, worker, bot_config
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -33,4 +31,4 @@ class BotWorkerTest(unittest.TestCase):
         """Method used to test the Reddit instance returned by get_account()
         """
         reddit = account.get_account()
-        self.assertEqual(reddit.user.me(), config.USERNAME)
+        self.assertEqual(reddit.user.me(), bot_config.USERNAME)

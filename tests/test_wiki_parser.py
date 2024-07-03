@@ -3,8 +3,7 @@
 
 import unittest
 
-from config import RESPONSES_CATEGORY
-from parsers import wiki_parser
+from parsers import wiki_parser, parser_config
 
 __author__ = 'Jonarzz'
 __maintainer__ = 'MePsyDuck'
@@ -19,7 +18,7 @@ class WikiParserTest(unittest.TestCase):
         """Method testing pages_to_pages_for_category parse method from wiki_parser module.
         The method checks if the requested response is consists of pages as expected.
         """
-        pages = wiki_parser.pages_for_category(RESPONSES_CATEGORY)
+        pages = wiki_parser.pages_for_category(parser_config.RESPONSES_CATEGORY)
 
         self.assertTrue(len(pages) > 150)
         self.assertTrue('Abaddon/Responses' in pages)
