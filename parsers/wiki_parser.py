@@ -154,8 +154,7 @@ def create_responses_text_and_link_list(responses_source):
                 link = file_and_link_dict[file]
                 responses_list.append((original_text, processed_text, link))
             except KeyError:
-                # Files with no links to mp3 files. Happens to broken files and files undergoing migration.
-                logger.warn(f'{file} has no link')
+                pass
 
     return responses_list
 
@@ -171,7 +170,7 @@ def parse_response(og_text):
 
     regexps_empty_sub = [r'<!--.*?-->',  # Remove comments
                          r'{{resp\|(r|u|\d+|d\|\d+|rem)}}',  # Remove response rarity
-                         r'{{hero icon\|[a-z-_() \']+\|\d+px}}',  # Remove hero icon
+                         r'{{hero icon(\|[a-z0-9-_() \'=]+)+}}',  # Remove hero icon
                          r'{{item( icon)?\|[a-z0-9() \']+\|\d+px}}',  # Remove item icon
                          r'{{I\|([a-z.!-\'?,()/ ]+)}}',  # Replace items
                          r'\[\[File:[a-z0-9.,!\'() ]+\|\d+px(\|link=[a-z,!\'() ]+)?(\|class=[a-z]+)?]]',  # Remove Files
@@ -235,6 +234,7 @@ def links_for_files(files_list):
                            :imageinfo['url'].index('.mp3') + len('.mp3')]  # Remove file version and trailing path
                 files_link_mapping[title[5:]] = file_url
             except KeyError:
+                # Files with no links to mp3 files. Happens to broken files and files undergoing migration.
                 logger.critical('File does not have a link : ' + title)
 
     # Method level constants

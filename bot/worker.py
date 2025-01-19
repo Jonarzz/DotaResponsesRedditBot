@@ -99,7 +99,8 @@ def process_replyable(reddit, replyable):
 
     logger.info("Found new replyable: " + replyable.fullname)
 
-    processed_text = process_text(replyable.body if isinstance(replyable, Comment) else replyable.title)
+    original_text = replyable.body if isinstance(replyable, Comment) else replyable.title
+    processed_text = process_text(original_text)
 
     # TODO make use of assignment expression for all below
     if is_excluded_response(processed_text):
@@ -108,11 +109,11 @@ def process_replyable(reddit, replyable):
         add_custom_reply(replyable, processed_text)
     elif (response_info := is_hero_specific_response(processed_text)) is not None:
         add_hero_specific_reply(replyable, response_info)
-    elif (response_info := is_flair_specific_response(replyable, processed_text)) is not None:
+    elif (response_info := is_flair_specific_response(replyable, processed_text, original_text)) is not None:
         add_flair_specific_reply(replyable, response_info)
     elif (response_info := is_update_request(reddit, replyable, processed_text)) is not None:
         update_reply(replyable, response_info)
-    elif (response_info := is_hero_response(processed_text)) is not None:
+    elif (response_info := is_hero_response(processed_text, original_text)) is not None:
         add_regular_reply(replyable, response_info)
 
 
@@ -212,23 +213,24 @@ def add_hero_specific_reply(replyable, response_info):
     create_and_add_reply(replyable=replyable, response_url=response_info.link, hero_id=response_info.hero_id)
 
 
-def is_flair_specific_response(replyable, text):
+def is_flair_specific_response(replyable, processed_text, original_text):
     """Method that checks if response for hero in author's flair and text exists.
 
     :param replyable: The comment/submission on reddit
-    :param text: The processed body/title text
+    :param processed_text: The processed body/title text
+    :param original_text: The original body/title text
     :return: ResponseInfo containing hero_id and link for response if the response for author's flair's hero was found, otherwise None
     """
     hero_id = db_api.get_hero_id_by_flair_css(flair_css=replyable.author_flair_css_class)
     if hero_id:
-        link, _ = db_api.get_link_for_response(processed_text=text, hero_ids=hero_id)
+        link, _ = db_api.get_link_for_response(processed_text=processed_text, original_text=original_text, hero_ids=list(hero_id))
         if link:
             return ResponseInfo(hero_id=hero_id, link=link)
     return None
 
 
 def add_flair_specific_reply(replyable, response_info):
-    """Method to add a author's flair specific reply to the comment/submission.
+    """Method to add an author's flair specific reply to the comment/submission.
 
     :param replyable: The comment/submission on reddit
     :param response_info: ResponseInfo containing hero_id and link for response
@@ -359,16 +361,17 @@ def update_reply(replyable, response_info):
     logger.info("Updated Reply: " + replyable.fullname)
 
 
-def is_hero_response(text):
+def is_hero_response(processed_text, original_text):
     """Method to create response for given replyable.
     In case of multiple matches, it used to sort responses in descending order of heroes and get the first one,
     but now it's random.
 
-    :param text: The processed body/title text
+    :param processed_text: The processed body/title text
+    :param original_text: The original body/title text
     :return: ResponseInfo containing hero_id and link for response if this is a valid update request, otherwise None
     """
 
-    link, hero_id = db_api.get_link_for_response(processed_text=text)
+    link, hero_id = db_api.get_link_for_response(processed_text=processed_text, original_text=original_text)
 
     if link and hero_id:
         return ResponseInfo(hero_id=hero_id, link=link)

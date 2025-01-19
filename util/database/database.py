@@ -36,31 +36,36 @@ class DatabaseAPI:
 
     # Responses table queries
     @db_session
-    def get_link_for_response(self, processed_text, hero_ids=None):
-        """Method that returns the link for the processed response text and given optional hero_id. If multiple matching
-        entries are found, returns a random result.
+    def get_link_for_response(self, processed_text, original_text=None, hero_ids=None):
+        """
+        Returns the link for the response text and given optional hero_id.
+        Looks for matches of original text first; if none are found, it checks the processed text.
+        If multiple matches exist, it returns a random result.
 
         :param processed_text: The plain processed response text.
+        :param original_text: The original response text.
         :param hero_ids: The hero's id(s). Optional.
-       :return The link to the response, hero_id, or else None, None if no matching response is found.
+        :return: The link to the response, hero_id, or None, None if no matching response is found.
         """
-        if hero_ids:
-            # Raise Issue PonyORM not supporting IN for single value
-            if isinstance(hero_ids, list):
-                responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id in hero_ids)
-            else:
-                responses = Responses.select(lambda r: r.processed_text == processed_text and r.hero.id == hero_ids)
-        else:
-            responses = Responses.select(lambda r: r.processed_text == processed_text)
 
-        if responses.count() == 1:
-            response = responses.first()
+        def query_responses(field, value):
+            """Helper function to query responses based on a text field."""
+            return (
+                Responses.select(lambda r: getattr(r, field) == value and r.hero.id in hero_ids)
+                if hero_ids
+                else Responses.select(lambda r: getattr(r, field) == value)
+            )
+
+        # Try original_text first, then processed_text if no results
+        responses = query_responses("original_text", original_text) if original_text else None
+        if not responses or responses.count() == 0:
+            responses = query_responses("processed_text", processed_text)
+
+        if responses and responses.count() > 0:
+            response = responses.first() if responses.count() == 1 else random.choice(list(responses))
             return response.response_link, response.hero.id
-        elif responses.count() > 1:
-            response = random.choice(list(responses))
-            return response.response_link, response.hero.id
-        else:
-            return None, None
+
+        return None, None
 
     # RedditCache table queries
     @db_session
@@ -203,7 +208,7 @@ class DatabaseAPI:
     def add_hero_and_responses(self, hero_name, response_link_list):
         """Method to add hero and it's responses to the db.
 
-        :param hero_name: Hero name who's responses will be inserted
+        :param hero_name: Hero name whose responses will be inserted
         :param response_link_list: List with tuples in the form of (original_text, text, link)
         """
         h = Heroes(hero_name=hero_name, processed_name=get_processed_hero_name(hero_name), img_path=None,
